@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: field-service-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/fieldservice}
+    username: ${DATABASE_USERNAME:fieldservice}
+    password: ${DATABASE_PASSWORD:fieldservice}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 2000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        generate_statistics: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8180/realms/fieldservice}
+          audiences: ${JWT_AUDIENCE:field-service-api}
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    com.fieldservice: INFO
+    org.springframework.security: WARN
