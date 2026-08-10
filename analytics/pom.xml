@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.fieldservice</groupId>
+        <artifactId>field-service-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>analytics</artifactId>
+    <name>Field Service Platform - Analytics</name>
+    <description>Analytics domain module. Exposes a public api package; entities, repositories,
+        and service internals are kept under the internal package.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>platform</artifactId>
+        </dependency>
+    </dependencies>
+</project>

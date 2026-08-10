@@ -1,0 +1,53 @@
+##
+## Field Service Platform — Production Profile Configuration
+##
+## Loaded when spring.profiles.active contains 'prod'.
+## Overlay this profile on top of api or worker for production deployments:
+##   spring.profiles.active=api,prod  (API deployable)
+##   spring.profiles.active=worker,prod  (Worker deployable)
+##
+
+##
+## Actuator — production hardens the endpoint set further.
+## Env, heapdump, loggers, and threaddump are explicitly disabled so they
+## return 404 (not 401 or 403) — no information disclosure even to authenticated clients.
+##
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true
+    prometheus:
+      enabled: true
+    # Explicitly disable sensitive endpoints — test asserts these return 404
+    env:
+      enabled: false
+    heapdump:
+      enabled: false
+    loggers:
+      enabled: false
+    threaddump:
+      enabled: false
+
+##
+## Logging — production log level.
+## JSON format is provided by logback-spring.xml (active for all profiles).
+##
+logging:
+  level:
+    root: WARN
+    com.fieldservice: INFO
+
+##
+## JPA — stricter settings for production
+##
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false

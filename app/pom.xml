@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.fieldservice</groupId>
+        <artifactId>field-service-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>app</artifactId>
+    <name>Field Service Platform - Application Bootstrap</name>
+    <description>Single deployable Spring Boot application. The ONLY module that depends on all
+        other modules. Profile api starts the HTTP server; profile worker starts the async
+        processor. Both are activated from the same fat jar.</description>
+
+    <!-- Override parent to enable the JaCoCo coverage gate in this module -->
+    <properties>
+        <jacoco.check.skip>false</jacoco.check.skip>
+    </properties>
+
+    <dependencies>
+        <!-- ------------------------------------------------------------------ -->
+        <!-- Domain modules — only app may depend on all modules                 -->
+        <!-- ------------------------------------------------------------------ -->
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>platform</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>identity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>workorder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>dispatch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>workforce</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>inventory</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>catalog</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>sla</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>analytics</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>portal</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>aigateway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>notification</artifactId>
+        </dependency>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- Spring Boot starters                                                 -->
+        <!-- ------------------------------------------------------------------ -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- Observability                                                        -->
+        <!-- ------------------------------------------------------------------ -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- Database driver (runtime)                                            -->
+        <!-- ------------------------------------------------------------------ -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- Structured JSON logging                                              -->
+        <!-- ------------------------------------------------------------------ -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+        </dependency>
+
+        <!-- ------------------------------------------------------------------ -->
+        <!-- Test dependencies                                                    -->
+        <!-- ------------------------------------------------------------------ -->
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>test-fixtures</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Creates the executable fat jar; must only be in the app module -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>com.fieldservice.app.FieldServiceApplication</mainClass>
+                    <!-- Exclude duplicate classes from Logback classic pulled transitively -->
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <!-- Failsafe for integration tests (*IT.java pattern) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

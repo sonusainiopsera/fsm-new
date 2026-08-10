@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Field Service Platform — Logback Spring Configuration
+
+  Outputs structured JSON to stdout using the Logstash Logback Encoder.
+  The traceId field is injected into the MDC by TraceIdFilter (api profile)
+  and appears in every log line emitted while handling an HTTP request.
+
+  Fields included in every JSON log entry:
+    - @timestamp     (ISO-8601)
+    - level          (INFO, WARN, ERROR, etc.)
+    - logger_name    (fully qualified class name)
+    - thread_name    (virtual thread or platform thread name)
+    - message
+    - traceId        (from MDC — set by TraceIdFilter for api; may be empty for worker)
+    - actor          (from MDC — set by downstream auth/audit logic)
+    - resource       (from MDC — set by downstream handler logic)
+    - stack_trace    (error logs only)
+-->
+<configuration>
+
+    <!-- Logstash JSON appender — used in all profiles -->
+    <appender name="JSON_STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- Custom field names -->
+            <fieldNames>
+                <timestamp>@timestamp</timestamp>
+                <version>[ignore]</version>
+                <levelValue>[ignore]</levelValue>
+            </fieldNames>
+            <!-- Include MDC fields as top-level JSON fields -->
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>actor</includeMdcKeyName>
+            <includeMdcKeyName>resource</includeMdcKeyName>
+            <!-- Short class names for readability -->
+            <shortenedLoggerNameLength>36</shortenedLoggerNameLength>
+            <!-- Mask sensitive patterns — passwords, tokens, secrets -->
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <maxDepthPerCause>20</maxDepthPerCause>
+                <maxLength>4096</maxLength>
+                <rootCauseFirst>true</rootCauseFirst>
+            </throwableConverter>
+        </encoder>
+    </appender>
+
+    <!--
+      Plain text appender for local development / IDE console where JSON is hard to read.
+      Activate by setting LOGBACK_APPENDER=PLAIN or using the 'dev' spring profile.
+    -->
+    <appender name="PLAIN_STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [traceId=%X{traceId}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Use JSON in non-local environments; PLAIN for local dev profile -->
+    <springProfile name="!dev">
+        <root level="INFO">
+            <appender-ref ref="JSON_STDOUT"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="dev">
+        <root level="DEBUG">
+            <appender-ref ref="PLAIN_STDOUT"/>
+        </root>
+        <logger name="com.fieldservice" level="DEBUG"/>
+    </springProfile>
+
+    <!-- Reduce noise from framework internals -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate.SQL" level="WARN"/>
+    <logger name="org.hibernate.type.descriptor.sql" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="org.testcontainers" level="INFO"/>
+
+</configuration>
