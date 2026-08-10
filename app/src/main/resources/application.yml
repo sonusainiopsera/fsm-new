@@ -1,0 +1,69 @@
+##
+## Field Service Platform — Default Application Configuration
+##
+## Active profile MUST be one of: api, worker (or both for local development).
+## No-profile startup is rejected by ProfileValidator at application context refresh.
+##
+
+spring:
+  application:
+    name: field-service-platform
+
+  # Virtual threads — Java 21 feature; enables blocking-style programming at scale.
+  # With ~800 concurrent SSE streams each parks a virtual thread rather than a
+  # platform thread, keeping memory proportional to request count.
+  threads:
+    virtual:
+      enabled: true
+
+  # Jackson defaults
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: true
+
+  # JPA / DataSource base settings (datasource URL / credentials come from
+  # environment variables or Testcontainers @ServiceConnection in tests)
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        default_schema: public
+
+##
+## Actuator — expose ONLY health and prometheus.
+## All other endpoints (env, heapdump, loggers, threaddump, etc.) are disabled.
+##
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+##
+## Logging — JSON encoder is configured in logback-spring.xml.
+## Root level can be overridden per environment.
+##
+logging:
+  level:
+    root: INFO
+    com.fieldservice: INFO

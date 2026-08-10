@@ -1,0 +1,37 @@
+##
+## Field Service Platform — API Profile Configuration
+##
+## Loaded in addition to application.yml when spring.profiles.active contains 'api'.
+## This profile starts the HTTP server and registers web/MVC beans.
+## Schedulers and outbox pollers are ABSENT in this profile.
+##
+
+server:
+  port: ${SERVER_PORT:8080}
+  # Forward headers for reverse-proxy / load-balancer deployments
+  forward-headers-strategy: native
+  shutdown: graceful
+  tomcat:
+    connection-timeout: 5s
+    keep-alive-timeout: 20s
+    threads:
+      max: 200
+      min-spare: 10
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+##
+## Actuator management port for the api role.
+## When MANAGEMENT_SERVER_PORT env var is not set, management endpoints are served on
+## the same port as the business server (no separate management HTTP server starts).
+## Set MANAGEMENT_SERVER_PORT (or management.server.port system property) to a
+## different value in production for network-level separation.
+##
+## Example: MANAGEMENT_SERVER_PORT=8081 java -jar app.jar --spring.profiles.active=api
+##
+
+logging:
+  level:
+    com.fieldservice: INFO

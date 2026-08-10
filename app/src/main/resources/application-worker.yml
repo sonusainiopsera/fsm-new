@@ -1,0 +1,42 @@
+##
+## Field Service Platform — Worker Profile Configuration
+##
+## Loaded in addition to application.yml when spring.profiles.active contains 'worker'.
+## This profile registers schedulers and outbox pollers.
+##
+## KEY PROPERTY: web-application-type=none ensures no business HTTP connector starts.
+## The management port still starts (Actuator health) for health scraping by
+## infrastructure components (load balancer, k8s liveness probe etc.).
+##
+
+spring:
+  main:
+    # No business HTTP connector — management port only for health scraping.
+    # This is the blast-radius separation between api and worker deployables.
+    web-application-type: none
+
+##
+## Management port for the worker role.
+## Must differ from any api instance's business port to avoid collision when
+## api and worker are co-located (local development with both profiles active).
+##
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+
+##
+## Outbox poller settings (used by WorkerAsyncConfiguration.OutboxPoller)
+##
+fieldservice:
+  worker:
+    outbox:
+      poll-interval-ms: 500
+      batch-size: 100
+
+logging:
+  level:
+    com.fieldservice: INFO

@@ -1,0 +1,25 @@
+##
+## Test-specific overrides applied to all tests that do NOT explicitly
+## activate the prod profile.
+##
+spring:
+  jpa:
+    # Allow schema creation for tests — Testcontainers provides a fresh database
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+  # Disable banner in tests for cleaner output
+  main:
+    banner-mode: off
+
+management:
+  # Use the same port as the application in tests to simplify URL construction
+  server:
+    port: -1
+
+logging:
+  level:
+    root: WARN
+    com.fieldservice: DEBUG
+    org.testcontainers: INFO
