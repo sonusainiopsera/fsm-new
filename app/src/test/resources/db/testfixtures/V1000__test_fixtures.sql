@@ -1,0 +1,12 @@
+-- Test fixtures for integration tests
+-- Extends V4 seed data with work orders + assignments scoped for WO-009 probe matrix.
+-- High version number (V1000) avoids clashing with any production migrations.
+--
+-- UUIDs use recognisable fixed patterns so tests can reference them as constants.
+--
+-- Customer / site / asset IDs are already seeded by V4__seed_reference_data.sql.
+-- These fixtures only add the work orders and assignment records needed by tests
+-- (V4 already inserts the same WOs, so this file is intentionally a no-op duplicate check).
+-- The V4 data is sufficient for the probe-matrix tests; this file is kept as a placeholder.
+
+-- (no additional inserts required — V4__seed_reference_data.sql provides all test data)

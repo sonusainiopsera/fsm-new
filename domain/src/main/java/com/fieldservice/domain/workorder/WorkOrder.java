@@ -2,16 +2,16 @@ package com.fieldservice.domain.workorder;
 
 import com.fieldservice.domain.site.Site;
 import com.fieldservice.platform.persistence.ScopedEntity;
+import com.fieldservice.platform.util.UuidV7;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "work_orders")
+@Table(name = "work_order")
 public class WorkOrder implements ScopedEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, length = 300)
@@ -46,6 +46,7 @@ public class WorkOrder implements ScopedEntity {
     protected WorkOrder() {}
 
     public WorkOrder(String title, Site site, String priority) {
+        this.id = UuidV7.generate();
         this.title = title;
         this.site = site;
         this.priority = priority;

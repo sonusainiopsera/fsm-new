@@ -1,37 +1,38 @@
 package com.fieldservice.domain.site;
 
 import com.fieldservice.platform.persistence.ScopedEntity;
+import com.fieldservice.platform.util.UuidV7;
 import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "sites")
+@Table(name = "site")
 public class Site implements ScopedEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, length = 200)
     private String name;
 
-    @Column(name = "customer_account_id", nullable = false)
-    private UUID customerAccountId;
+    @Column(name = "customer_id", nullable = false)
+    private UUID customerId;
 
     @Column(length = 500)
     private String address;
 
     protected Site() {}
 
-    public Site(String name, UUID customerAccountId, String address) {
+    public Site(String name, UUID customerId, String address) {
+        this.id = UuidV7.generate();
         this.name = name;
-        this.customerAccountId = customerAccountId;
+        this.customerId = customerId;
         this.address = address;
     }
 
     public UUID getId() { return id; }
     public String getName() { return name; }
-    public UUID getCustomerAccountId() { return customerAccountId; }
+    public UUID getCustomerId() { return customerId; }
     public String getAddress() { return address; }
 
     public void setName(String name) { this.name = name; }

@@ -2,16 +2,16 @@ package com.fieldservice.domain.assignment;
 
 import com.fieldservice.domain.workorder.WorkOrder;
 import com.fieldservice.platform.persistence.ScopedEntity;
+import com.fieldservice.platform.util.UuidV7;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "assignments")
+@Table(name = "assignment")
 public class Assignment implements ScopedEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -27,9 +27,13 @@ public class Assignment implements ScopedEntity {
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
+    @Version
+    private Long version;
+
     protected Assignment() {}
 
     public Assignment(WorkOrder workOrder, String technicianId) {
+        this.id = UuidV7.generate();
         this.workOrder = workOrder;
         this.technicianId = technicianId;
         this.assignedAt = Instant.now();

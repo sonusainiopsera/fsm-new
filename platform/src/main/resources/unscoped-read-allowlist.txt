@@ -7,3 +7,4 @@
 #
 # --- APPROVED ENTRIES ---
 com.fieldservice.domain.analytics.AnalyticsRepository
+com.fieldservice.domain.sla.SlaPolicyRepository
