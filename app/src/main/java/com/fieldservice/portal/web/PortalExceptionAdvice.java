@@ -2,6 +2,7 @@ package com.fieldservice.portal.web;
 
 import com.fieldservice.platform.api.ErrorEnvelope;
 import com.fieldservice.portal.access.ScopeUnavailableException;
+import com.fieldservice.portal.service.PortalHistoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -79,6 +80,22 @@ public class PortalExceptionAdvice {
         return new ErrorEnvelope(
                 ErrorEnvelope.Code.FORBIDDEN,
                 ACCESS_DENIED_MESSAGE,
+                List.of(),
+                traceId(),
+                Instant.now()
+        );
+    }
+
+    /**
+     * Invalid date range parameters (inverted or too wide) return 400 with an actionable message.
+     */
+    @ExceptionHandler(PortalHistoryService.DateRangeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorEnvelope handleDateRangeException(PortalHistoryService.DateRangeException ex) {
+        log.debug("portal.date_range_error: {}", ex.getMessage());
+        return new ErrorEnvelope(
+                ErrorEnvelope.Code.VALIDATION_FAILED,
+                ex.getMessage(),
                 List.of(),
                 traceId(),
                 Instant.now()

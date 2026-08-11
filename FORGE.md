@@ -434,3 +434,10 @@
 - **Files:** 8 (+1203/-0)
 - **Duration:** 1039ss
 - **Approach:** N/A
+
+## WO-172: User Story: WO-172 - Paginated customer service history API
+- **Status:** completed
+- **Commit:** `852dee8`
+- **Files:** 8 (+1353/-0)
+- **Duration:** 1093ss
+- **Approach:** Implemented GET /api/v1/portal/service-requests as a scoped, paginated history endpoint using EntityManager JPQL projection queries (bypasses SpecificationPageService which requires ScopedEntity types). CustomerAccessScope.resolveAccountId() enforces account-level isolation in the WHERE clause. SortAllowList validates all client sort fields before any query is built (JPQL injection defence). Size is clamped to MAX_SIZE=50 by the platform PageQuery constructor. Pages beyond threshold 20 skip the COUNT query and return keyset-style metadata. The PortalHistoryRow DTO projects only customer-approved fields; assetLabel is always null (asset_id not mapped on WorkOrder entity). A composite index on work_order(site_id, created_at DESC, id) supports the common filtered+sorted access path.
