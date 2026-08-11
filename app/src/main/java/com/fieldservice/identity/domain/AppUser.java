@@ -1,6 +1,8 @@
 package com.fieldservice.identity.domain;
 
 import com.fieldservice.platform.util.UuidV7;
+import com.fieldservice.privacy.api.ClassificationTier;
+import com.fieldservice.privacy.api.DataClassification;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,6 +25,7 @@ import java.util.UUID;
  * <p>Credential fields are classified Restricted: password_hash is annotated {@code @NotAudited}
  * so it never appears in audit tables, event payloads, or log output.
  */
+@DataClassification(value = ClassificationTier.CONFIDENTIAL, module = "identity")
 @Audited
 @Entity
 @Table(name = "app_user")
@@ -35,6 +38,7 @@ public class AppUser {
     private String email;
 
     /** BCrypt hash or future algorithm-prefixed hash. Nullable for federated users. Restricted. */
+    @DataClassification(value = ClassificationTier.RESTRICTED, module = "identity")
     @NotAudited
     @Column(name = "password_hash", length = 72)
     private String passwordHash;

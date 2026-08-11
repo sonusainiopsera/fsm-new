@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.fieldservice</groupId>
+    <artifactId>field-service-api</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>privacy</artifactId>
+  <name>privacy</name>
+  <description>Data classification registry and privacy metadata — GDPR/ISO27001 compliance module</description>
+
+  <dependencies>
+    <!-- Platform primitives: security, persistence, UuidV7, DomainEventPublisher -->
+    <dependency>
+      <groupId>com.fieldservice</groupId>
+      <artifactId>platform</artifactId>
+    </dependency>
+
+    <!-- Hibernate Envers — immutable audit trail for classification changes -->
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-envers</artifactId>
+    </dependency>
+
+    <!-- Spring Cache abstraction — @EnableCaching, @Cacheable, @CacheEvict -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+
+    <!-- Test -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

@@ -1,6 +1,8 @@
 package com.fieldservice.technician.domain;
 
 import com.fieldservice.platform.util.UuidV7;
+import com.fieldservice.privacy.api.ClassificationTier;
+import com.fieldservice.privacy.api.DataClassification;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,6 +12,7 @@ import jakarta.persistence.Version;
 import java.time.Instant;
 import java.util.UUID;
 
+@DataClassification(value = ClassificationTier.CONFIDENTIAL, module = "technician")
 @Entity
 @Table(name = "technician")
 public class Technician {
@@ -20,9 +23,11 @@ public class Technician {
     @Column(name = "user_id", nullable = false, unique = true)
     private UUID userId;
 
+    @DataClassification(value = ClassificationTier.CONFIDENTIAL, module = "technician")
     @Column(name = "full_name", nullable = false, length = 255)
     private String fullName;
 
+    @DataClassification(value = ClassificationTier.CONFIDENTIAL, module = "technician")
     @Column(length = 50)
     private String phone;
 

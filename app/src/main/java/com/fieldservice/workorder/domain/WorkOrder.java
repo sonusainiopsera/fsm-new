@@ -2,6 +2,8 @@ package com.fieldservice.workorder.domain;
 
 import com.fieldservice.platform.persistence.ScopedEntity;
 import com.fieldservice.platform.util.UuidV7;
+import com.fieldservice.privacy.api.ClassificationTier;
+import com.fieldservice.privacy.api.DataClassification;
 import com.fieldservice.site.domain.Site;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,6 +37,7 @@ import java.util.UUID;
  * {@code @ManyToOne}) to keep the TECHNICIAN scope predicate a simple equality check
  * without an additional join.
  */
+@DataClassification(value = ClassificationTier.INTERNAL, module = "workorder")
 @Audited
 @Entity
 @Table(name = "work_order")

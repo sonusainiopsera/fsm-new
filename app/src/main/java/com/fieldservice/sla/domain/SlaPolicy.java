@@ -1,6 +1,8 @@
 package com.fieldservice.sla.domain;
 
 import com.fieldservice.platform.util.UuidV7;
+import com.fieldservice.privacy.api.ClassificationTier;
+import com.fieldservice.privacy.api.DataClassification;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+@DataClassification(value = ClassificationTier.PUBLIC, module = "sla")
 @Audited
 @Entity
 @Table(name = "sla_policy")

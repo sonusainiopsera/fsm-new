@@ -21,6 +21,12 @@
       <artifactId>platform</artifactId>
     </dependency>
 
+    <!-- Privacy module: classification registry, @DataClassification annotation -->
+    <dependency>
+      <groupId>com.fieldservice</groupId>
+      <artifactId>privacy</artifactId>
+    </dependency>
+
     <!-- Web -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

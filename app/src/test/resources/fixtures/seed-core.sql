@@ -231,3 +231,14 @@ VALUES
      'Seed Alpha Site Store',  'WAREHOUSE', NULL,
      '00000000-0000-7013-8000-000000000001')
 ON CONFLICT (id) DO NOTHING;
+
+
+-- ---- Classification fixture rows (test-only, fully anonymised) ---------------
+-- UUID prefix: 00000000-0000-7025-9000-XXXXXXXXXXXX (distinct from V25 migration rows)
+INSERT INTO data_classification (id, module, entity_name, field_name, tier, lawful_basis_note, handling_notes)
+VALUES
+    ('00000000-0000-7025-9000-000000000001', 'test', 'TestRestrictedEntity',  'secret',    'RESTRICTED',  'Test restricted',  'Test handling'),
+    ('00000000-0000-7025-9000-000000000002', 'test', 'TestConfidentialEntity', null,       'CONFIDENTIAL','Test confidential','Test handling'),
+    ('00000000-0000-7025-9000-000000000003', 'test', 'TestInternalEntity',     null,       'INTERNAL',    'Test internal',    'Test handling'),
+    ('00000000-0000-7025-9000-000000000004', 'test', 'TestPublicEntity',       null,       'PUBLIC',      'Test public',      'Test handling')
+ON CONFLICT DO NOTHING;
