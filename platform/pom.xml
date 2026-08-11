@@ -45,6 +45,17 @@
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-envers</artifactId>
     </dependency>
+    <!-- Micrometer: MeterRegistry for outbox publish counter -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+    <!-- Jackson JSR-310 for Instant serialisation in outbox payloads -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+
     <!-- Test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

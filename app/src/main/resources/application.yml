@@ -59,6 +59,8 @@ app:
     purge-batch-size: 500
     purge-job-enabled: true
     purge-interval-ms: 900000
+  outbox:
+    max-payload-bytes: 65536
 
 ai:
   copilot:

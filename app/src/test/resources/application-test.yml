@@ -40,6 +40,8 @@ app:
     lease-duration: 5s
     max-body-bytes: 262144
     purge-job-enabled: false
+  outbox:
+    max-payload-bytes: 65536
 
 ai:
   copilot:

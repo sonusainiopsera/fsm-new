@@ -84,3 +84,10 @@
 - **Files:** 45 (+4074/-18)
 - **Duration:** 1051ss
 - **Approach:** Built the complete WO-183 component primitive library in field-service-web. Each of the 11 primitives lives in its own directory with a co-located CSS Module (var(--token) only) and JSDoc-typed props. DensityContext provides comfortable/compact switching consumed by DataTable, Chip, and FormField. StateSurface unifies all five named UI states behind one parameterised component. DataTable uses a ResizeObserver-based responsive hook (useResponsiveTableMode) to collapse below 768px container width. Modal and DetailDrawer share the same focus-trap pattern with triggerRef focus restoration. ToastProvider uses useReducer to enforce at-most-one per variant for non-danger toasts. Chip carries colour+text+icon for every enum value (BR-34). ScorePresentation uses only --color-neutral-* tokens (BR-33). Mock transport supports configurable latency, error-code injection, and staleness. Catalogue route wired into App.jsx behind a 'catalogue' view state.
+
+## WO-004: User Story: WO-004 - Transactional outbox with atomic state, revision and event write
+- **Status:** completed
+- **Commit:** `a87accd`
+- **Files:** 20 (+1165/-1)
+- **Duration:** 902ss
+- **Approach:** Flyway V11 creates outbox_event with a jsonb payload, retry/diagnostic columns, and a drain-optimised partial index (idx_outbox_event_drain on created_at WHERE published_at IS NULL). DomainEvent record and DomainEventPublisher interface live in platform.api (public API surface). JpaDomainEventPublisher in platform.outbox uses Propagation.MANDATORY to guarantee publishing can never open its own transaction. The serialisation pipeline runs PiiRedaction (reflective @Restricted fail-fast + @Confidential masking), serialises via a dedicated ObjectMapper with JavaTimeModule, enforces a 64KB size bound, persists OutboxEvent via EntityManager, increments a Micrometer counter tagged by eventType, and emits a structured log line. ErrorCode.PAYLOAD_TOO_LARGE and GlobalExceptionHandler mapping added. OutboxAutoConfiguration registers OutboxProperties via @EnableConfigurationProperties.

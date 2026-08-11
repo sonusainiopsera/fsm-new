@@ -14,6 +14,7 @@ import com.fieldservice.platform.api.exception.InvalidSortException;
 import com.fieldservice.platform.api.exception.NotFoundException;
 import com.fieldservice.platform.api.exception.AiCapExceededException;
 import com.fieldservice.platform.api.exception.AiUnavailableException;
+import com.fieldservice.platform.api.exception.PayloadTooLargeException;
 import com.fieldservice.platform.api.exception.ProviderDegradedException;
 import com.fieldservice.platform.api.exception.RateLimitedException;
 import com.fieldservice.platform.security.ScopedAccessDeniedException;
@@ -275,6 +276,18 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.SERVICE_UNAVAILABLE,
                 ApiErrorResponse.of(ErrorCode.PROVIDER_DEGRADED,
                         "A required service is currently unavailable. Please retry later.", traceId));
+    }
+
+    // ---- 500 Payload Too Large ------------------------------------------------
+
+    @ExceptionHandler(PayloadTooLargeException.class)
+    public ResponseEntity<ApiErrorResponse> handlePayloadTooLarge(PayloadTooLargeException ex) {
+        String traceId = resolveTraceId();
+        log.error("outbox_payload_too_large actual_bytes={} max_bytes={} trace_id={}",
+                ex.getActualBytes(), ex.getMaxBytes(), traceId);
+        return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                ApiErrorResponse.of(ErrorCode.PAYLOAD_TOO_LARGE,
+                        "Event payload exceeds the maximum allowed size.", traceId));
     }
 
     // ---- 500 Fallback ----------------------------------------------------------
