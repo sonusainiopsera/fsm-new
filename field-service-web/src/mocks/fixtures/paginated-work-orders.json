@@ -1,0 +1,24 @@
+{
+  "data": [
+    { "id": "wo-page1-001", "title": "HVAC repair — page 1 row 1", "state": "ASSIGNED", "priority": "HIGH" },
+    { "id": "wo-page1-002", "title": "Boiler service — page 1 row 2", "state": "IN_PROGRESS", "priority": "MEDIUM" },
+    { "id": "wo-page1-003", "title": "Chiller check — page 1 row 3", "state": "ON_HOLD", "priority": "LOW" },
+    { "id": "wo-page1-004", "title": "Filter replacement — page 1 row 4", "state": "NEW", "priority": "LOW" },
+    { "id": "wo-page1-005", "title": "Annual service — page 1 row 5", "state": "ASSIGNED", "priority": "MEDIUM" }
+  ],
+  "page": {
+    "totalElements": 12,
+    "totalPages": 3,
+    "page": 0,
+    "size": 5,
+    "hasNext": true,
+    "hasPrev": false
+  },
+  "links": {
+    "self": "/api/v1/work-orders?page=0&size=5",
+    "next": "/api/v1/work-orders?page=1&size=5",
+    "prev": null,
+    "first": "/api/v1/work-orders?page=0&size=5",
+    "last": "/api/v1/work-orders?page=2&size=5"
+  }
+}

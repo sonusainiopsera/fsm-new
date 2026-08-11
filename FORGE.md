@@ -217,3 +217,10 @@
 - **Files:** 21 (+1744/-1)
 - **Duration:** 1031ss
 - **Approach:** N/A
+
+## WO-186: User Story: WO-186 - Shared data layer with error mapping, refresh, and SSE ticket
+- **Status:** completed
+- **Commit:** `5b4efad`
+- **Files:** 24 (+3073/-27)
+- **Duration:** 969ss
+- **Approach:** Built the single TanStack Query 5.x data layer in src/api/. Token store uses module-scope variable only (no web storage). Single-flight refresh in http.js uses a module-scoped Promise guard so concurrent 401s produce exactly one refresh call. All 4xx statuses have retryable=false (A10 constraint). ETag/304 conditional polling in useConditionalQuery.js returns undefined on 304 so TanStack Query preserves cached data with no re-render. SSE client fetches a single-use stream ticket via POST (bearer token in header) and passes it as a query parameter to EventSource — access token never appears in a URL. Jittered exponential backoff governs reconnects with fresh ticket each time. eventKeyMap.js maps SSE event types to query key prefix arrays for targeted invalidation. generate-api-client.mjs produces JSDoc typedefs and endpoint accessors from the OpenAPI spec and supports --check for CI drift detection.

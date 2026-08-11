@@ -19,22 +19,13 @@
  * then, 'comfortable' is the initial default for all surfaces.
  */
 import { useState } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { AppearanceProvider } from '../appearance/AppearanceProvider.jsx'
 import { DensityProvider } from '../density/DensityContext.js'
 import { ToastProvider } from '../components/Toast/ToastProvider.jsx'
 import { AuthContext } from './AuthContext.js'
 import { AppRouter } from './router.jsx'
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 30_000,
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-})
+import { queryClient } from '../api/queryClient.js'
 
 const INITIAL_AUTH = {
   accessToken: null,
