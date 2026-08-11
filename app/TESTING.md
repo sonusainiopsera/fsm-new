@@ -128,3 +128,57 @@ These are enforced by `FixtureHygieneTest.java`.
 # All fixture tests
 ./mvnw -pl app test -Dtest="com.fieldservice.fixtures.**"
 ```
+
+## Analytics Module (WO-161)
+
+The analytics substrate uses a separate fixture file and requires Redis for full cache tests.
+
+### Fixture: V111__analytics_fixtures.sql
+
+Located at `app/src/test/resources/db/fixtures/V111__analytics_fixtures.sql`. Seeds:
+- 60 historical work orders (80% completed, 20% cancelled) for completion rate queries
+- 5 open work orders for backlog count
+- 12 completed work orders with `resolution_due_at` for SLA compliance (10 compliant, 2 breached)
+- 3 pre-seeded `kpi_projection` rows (maturity=SEEDED) for fast assertion without waiting for refresh cycles
+
+### Running Analytics Tests
+
+```bash
+# Unit tests (no Spring, no containers) — debounce, idempotency
+mvn -pl app test -Dtest="MetricDebounceRegistryTest,KpiIdempotencyTest"
+
+# Integration tests (PostgreSQL + Redis Testcontainers)
+mvn -pl app test -Dtest="com.fieldservice.analytics.internal.KpiAnalyticsIT"
+
+# ArchUnit boundary tests
+mvn -pl app test -Dtest="AnalyticsBoundaryTest"
+
+# Full suite
+mvn -pl app verify
+```
+
+### Replica Datasource in Tests
+
+In test environments `app.analytics.replica-url` is NOT set, so `replicaDataSource` falls back
+to the primary Testcontainers datasource. This is expected and logged at WARN level.
+Tests assert the `replicaDataSource` bean is present and queryable. In production, set:
+
+```yaml
+app:
+  analytics:
+    replica-url: jdbc:postgresql://replica.internal:5432/fieldservice
+    replica:
+      username: ${DB_ANALYTICS_USERNAME}
+      password: ${DB_ANALYTICS_PASSWORD}
+      pool-size: 5
+```
+
+### Staleness Budget
+
+The substrate is designed to meet the 60-second p95 freshness requirement:
+- Debounce window: 15 seconds
+- Cache TTL: 30 seconds
+- Replica lag budget: ≤15 seconds
+
+Total worst-case staleness: 15 + 30 + 15 = 60 seconds. The `data_as_of` timestamp
+on every projection allows consumers to measure actual staleness and surface it to users.

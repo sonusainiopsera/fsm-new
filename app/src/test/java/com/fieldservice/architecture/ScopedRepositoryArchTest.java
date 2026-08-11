@@ -49,7 +49,10 @@ class ScopedRepositoryArchTest {
                     + "HoldReasonRepository|WorkOrderHoldRepository|"
                     // WO-149: work_order_part ledger is not a scoped entity; access is controlled
                     // at the service layer which already enforces work-order ownership
-                    + "WorkOrderPartRepository";
+                    + "WorkOrderPartRepository|"
+                    // WO-161: analytics KPI projections are aggregate read-model rows with no
+                    // per-user row scope; access is controlled at the API layer by role only
+                    + "KpiProjectionRepository";
 
     /**
      * Production rule: domain JPA repositories that are not in the non-scoped allow-list
