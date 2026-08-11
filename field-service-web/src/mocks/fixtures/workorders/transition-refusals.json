@@ -1,0 +1,34 @@
+{
+  "illegal_transition": {
+    "status": 409,
+    "body": {
+      "code": "WORK_ORDER_ILLEGAL_TRANSITION",
+      "message": "The requested transition is not legal from the current state.",
+      "traceId": "trace-409-illegal"
+    }
+  },
+  "version_conflict": {
+    "status": 409,
+    "body": {
+      "code": "WORK_ORDER_VERSION_CONFLICT",
+      "message": "The work order was modified by another user. Please reload and try again.",
+      "traceId": "trace-409-version"
+    }
+  },
+  "guard_refused": {
+    "status": 422,
+    "body": {
+      "code": "WORK_ORDER_GUARD_REFUSED",
+      "message": "Labour time must be recorded before completing this work order.",
+      "traceId": "trace-422-guard"
+    }
+  },
+  "forbidden": {
+    "status": 403,
+    "body": {
+      "code": "FORBIDDEN",
+      "message": "Access denied.",
+      "traceId": "trace-403"
+    }
+  }
+}
