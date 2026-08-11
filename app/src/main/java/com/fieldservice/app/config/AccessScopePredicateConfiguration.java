@@ -1,5 +1,6 @@
 package com.fieldservice.app.config;
 
+import com.fieldservice.asset.domain.Asset;
 import com.fieldservice.customer.domain.CustomerAccount;
 import com.fieldservice.inventory.domain.Part;
 import com.fieldservice.inventory.domain.StockLocation;
@@ -43,6 +44,7 @@ public class AccessScopePredicateConfiguration {
             WorkOrder.class,
             Site.class,
             CustomerAccount.class,
+            Asset.class,
             Part.class,
             StockLocation.class
     );
