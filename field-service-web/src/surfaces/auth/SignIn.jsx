@@ -1,10 +1,5 @@
 /**
- * @fileoverview Sign-in surface.
- * Placeholder — WO-auth will implement the full sign-in flow with BCrypt
- * verification, lockout feedback, and post-auth redirect restore.
+ * @fileoverview Sign-in surface — delegates to the features/auth implementation.
+ * The surface module exists as the router target; all logic lives in features/auth.
  */
-import { EmptyState } from '../../components/index.js'
-
-export default function SignIn() {
-  return <EmptyState message="Sign in — coming soon." />
-}
+export { default } from '../../features/auth/SignInPage.jsx'

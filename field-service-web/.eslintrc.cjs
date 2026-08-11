@@ -55,5 +55,21 @@ module.exports = {
         'no-console': 'off',
       },
     },
+    // AC-3: Access token must live in JS memory only — ban Web Storage in auth code.
+    // Any attempt to persist tokens via localStorage/sessionStorage is a security violation.
+    {
+      files: ['src/features/auth/**', 'src/surfaces/auth/**'],
+      rules: {
+        'no-restricted-properties': [
+          'error',
+          { object: 'localStorage', property: 'setItem', message: 'Access tokens must not be persisted. Use tokenStore (in-memory) only.' },
+          { object: 'localStorage', property: 'getItem', message: 'Access tokens must not be read from storage. Use tokenStore (in-memory) only.' },
+          { object: 'sessionStorage', property: 'setItem', message: 'Access tokens must not be persisted. Use tokenStore (in-memory) only.' },
+          { object: 'sessionStorage', property: 'getItem', message: 'Access tokens must not be read from storage. Use tokenStore (in-memory) only.' },
+          { object: 'window', property: 'localStorage', message: 'Access tokens must not be persisted. Use tokenStore (in-memory) only.' },
+          { object: 'window', property: 'sessionStorage', message: 'Access tokens must not be persisted. Use tokenStore (in-memory) only.' },
+        ],
+      },
+    },
   ],
 }
