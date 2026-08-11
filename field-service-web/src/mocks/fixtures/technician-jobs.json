@@ -1,0 +1,6 @@
+{
+  "jobs": [
+    { "id": "wo-002", "title": "Electrical Panel Inspection", "priority": "high", "state": "in_progress", "site": "Central Plaza", "address": "100 Main St, Suite 4", "notes": "Access card required. Contact front desk on arrival.", "partsNeeded": ["Breaker 20A", "Junction Box"], "estimatedHours": 2.5 },
+    { "id": "wo-003", "title": "Plumbing Leak - Floor 2", "priority": "medium", "state": "en_route", "site": "Eastside Office", "address": "42 East Ave, Floor 2", "notes": "Shut off valve located in room 2A.", "partsNeeded": ["Pipe fitting 1/2 inch"], "estimatedHours": 1.5 }
+  ]
+}

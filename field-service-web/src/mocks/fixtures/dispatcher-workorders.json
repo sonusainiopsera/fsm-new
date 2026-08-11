@@ -1,0 +1,9 @@
+{
+  "workOrders": [
+    { "id": "wo-001", "title": "HVAC Repair - Unit 3B", "priority": "critical", "state": "assigned", "site": "Northgate Mall", "assignedTo": "Tech A", "scheduledAt": "2026-08-11T09:00:00Z", "slaDeadline": "2026-08-11T17:00:00Z" },
+    { "id": "wo-002", "title": "Electrical Panel Inspection", "priority": "high", "state": "in_progress", "site": "Central Plaza", "assignedTo": "Tech B", "scheduledAt": "2026-08-11T08:00:00Z", "slaDeadline": "2026-08-11T14:00:00Z" },
+    { "id": "wo-003", "title": "Plumbing Leak - Floor 2", "priority": "medium", "state": "en_route", "site": "Eastside Office", "assignedTo": "Tech C", "scheduledAt": "2026-08-11T10:30:00Z", "slaDeadline": "2026-08-11T20:00:00Z" },
+    { "id": "wo-004", "title": "Fire Suppression Test", "priority": "low", "state": "new", "site": "Warehouse B", "assignedTo": null, "scheduledAt": null, "slaDeadline": "2026-08-12T17:00:00Z" },
+    { "id": "wo-005", "title": "Generator Maintenance", "priority": "high", "state": "on_hold", "site": "Data Centre 1", "assignedTo": "Tech D", "scheduledAt": "2026-08-11T07:00:00Z", "slaDeadline": "2026-08-11T19:00:00Z" }
+  ]
+}

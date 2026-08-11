@@ -1,0 +1,38 @@
+{
+  "kpis": [
+    {
+      "id": "sla-compliance",
+      "label": "SLA Compliance",
+      "value": "94.2",
+      "unit": "%",
+      "delta": 2.1,
+      "target": 100,
+      "currentRaw": 94.2,
+      "sparkline": [
+        { "ts": 1720000000, "value": 91.0 },
+        { "ts": 1720086400, "value": 92.5 },
+        { "ts": 1720172800, "value": 90.8 },
+        { "ts": 1720259200, "value": 93.1 },
+        { "ts": 1720345600, "value": 94.2 }
+      ]
+    },
+    {
+      "id": "open-workorders",
+      "label": "Open Work Orders",
+      "value": "47",
+      "delta": -5.3,
+      "target": null,
+      "sparkline": null
+    },
+    {
+      "id": "avg-resolution",
+      "label": "Avg. Resolution Time",
+      "value": "3.4",
+      "unit": "hrs",
+      "delta": -8.2,
+      "target": 4,
+      "currentRaw": 3.4,
+      "sparkline": null
+    }
+  ]
+}

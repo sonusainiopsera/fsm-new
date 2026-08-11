@@ -1,0 +1,91 @@
+/* Button — token-only styling */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--token-space-2);
+  padding: var(--token-space-2) var(--token-space-4);
+  font-family: var(--token-family-base);
+  font-size: var(--token-fs-14);
+  font-weight: 500;
+  line-height: var(--token-lh-body);
+  border-radius: var(--token-radius-control);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--token-duration-micro) var(--token-easing-standard),
+              border-color var(--token-duration-micro) var(--token-easing-standard),
+              color var(--token-duration-micro) var(--token-easing-standard);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--token-border-focus);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.btn[data-touch-target='true'] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* primary */
+.btn[data-variant='primary'] {
+  background: var(--token-accent-600);
+  color: var(--token-text-on-accent);
+  border-color: var(--token-accent-600);
+}
+
+.btn[data-variant='primary']:hover:not(:disabled) {
+  background: var(--token-accent-700);
+  border-color: var(--token-accent-700);
+}
+
+/* secondary */
+.btn[data-variant='secondary'] {
+  background: var(--token-surface-card);
+  color: var(--token-accent-600);
+  border-color: var(--token-accent-600);
+}
+
+.btn[data-variant='secondary']:hover:not(:disabled) {
+  background: var(--token-accent-50);
+}
+
+/* tertiary */
+.btn[data-variant='tertiary'] {
+  background: transparent;
+  color: var(--token-text-primary);
+  border-color: var(--token-border-default);
+}
+
+.btn[data-variant='tertiary']:hover:not(:disabled) {
+  border-color: var(--token-neutral-400);
+}
+
+/* ghost */
+.btn[data-variant='ghost'] {
+  background: transparent;
+  color: var(--token-text-secondary);
+  border-color: transparent;
+}
+
+.btn[data-variant='ghost']:hover:not(:disabled) {
+  background: var(--token-neutral-100);
+}
+
+/* destructive */
+.btn[data-variant='destructive'] {
+  background: var(--token-danger-default);
+  color: var(--token-text-on-accent);
+  border-color: var(--token-danger-default);
+}
+
+.btn[data-variant='destructive']:hover:not(:disabled) {
+  background: var(--token-danger-emphasis);
+  border-color: var(--token-danger-emphasis);
+}

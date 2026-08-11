@@ -77,3 +77,10 @@
 - **Files:** 33 (+1780/-0)
 - **Duration:** 1255ss
 - **Approach:** Built the AI gateway as a two-layer module: a public api package (AiGatewayPort interface + provider-agnostic request/response records + typed exceptions) and a package-private internal package (HttpAiProviderAdapter wrapped with Resilience4j TimeLimiter/CircuitBreaker/Bulkhead/Retry, EgressAllowList SSRF protection, EnvironmentSecretsProvider, RedisUsageCapService with Redis INCR+EXPIRE, AiGatewayMetrics, FeatureFlagGuardAdapter). The config class AiGatewayResilienceConfig (profile !test) wires the full chain; the test profile registers FakeAiGatewayAdapter instead. Redis autoconfiguration is excluded from the test profile. The feature flag ai.copilot.enabled defaults to false so the platform ships with zero AI network calls.
+
+## WO-183: User Story: WO-183 - Shared component primitive library with named UI states
+- **Status:** completed
+- **Commit:** `a747655`
+- **Files:** 36 (+3022/-10)
+- **Duration:** 897ss
+- **Approach:** Implemented the frozen Phase 2 primitive inventory as a flat component tree under field-service-web/src/components/. Each primitive uses var(--token-*) exclusively for styling — enforced by the existing no-hardcoded-visual-literals ESLint rule. DensityContext (comfortable/compact) is a React context consumed by DataTable, Chip, and FormField. Modal and DetailDrawer share the same focus-trap pattern (Tab cycle, Escape, scrim click, trigger-restore on close). StateSurface drives all five named state exports from a single implementation. ToastProvider maintains separate polite/assertive DOM regions and throttles non-danger toasts to 1 visible. ScorePresentation is fully monochrome (BR-33). Chips carry icon+text+color for greyscale support (BR-34). The mock transport is fixture-backed with configurable latency, error-code injection, and staleness. The catalogue route is wired into main.jsx behind VITE_CATALOGUE=true and a build:catalogue npm script was added for CI smoke-checking.

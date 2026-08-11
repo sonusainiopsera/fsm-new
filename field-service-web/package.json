@@ -18,8 +18,9 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "prebuild": "node scripts/generate-token-contract.mjs",
-    "build:ci": "npm run stylelint && npm run lint && npm run typecheck && npm run test:coverage && npm run build",
-    "build:node": "npm run stylelint && npm run lint && npm run typecheck && npm run test:coverage && npm run build"
+    "build:catalogue": "VITE_CATALOGUE=true vite build --outDir dist-catalogue",
+    "build:ci": "npm run stylelint && npm run lint && npm run typecheck && npm run test:coverage && npm run build && npm run build:catalogue",
+    "build:node": "npm run stylelint && npm run lint && npm run typecheck && npm run test:coverage && npm run build && npm run build:catalogue"
   },
   "dependencies": {
     "react": "^18.3.1",
