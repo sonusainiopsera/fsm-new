@@ -2,7 +2,12 @@ package com.fieldservice.workorder.lifecycle;
 
 import com.fieldservice.domain.workorder.WorkOrderState;
 import com.fieldservice.platform.security.Role;
+import com.fieldservice.workorder.lifecycle.guards.CertificationCurrencyGuard;
+import com.fieldservice.workorder.lifecycle.guards.HoldReasonRequiredGuard;
+import com.fieldservice.workorder.lifecycle.guards.LabourTimeRecordedGuard;
+import com.fieldservice.workorder.lifecycle.guards.PartsReconciledGuard;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -46,14 +51,18 @@ public final class WorkOrderTransitionTable {
             Collections.unmodifiableMap(Map.ofEntries(
 
                     // ── Happy path ─────────────────────────────────────────────
-                    row(NEW,         ASSIGN,   ASSIGNED,    roles(Role.DISPATCHER, Role.ADMIN)),
+                    row(NEW,         ASSIGN,   ASSIGNED,    roles(Role.DISPATCHER, Role.ADMIN),
+                            CertificationCurrencyGuard.GUARD_ID),
                     row(ASSIGNED,    DEPART,   EN_ROUTE,    roles(Role.TECHNICIAN, Role.DISPATCHER, Role.ADMIN)),
                     row(ASSIGNED,    START,    IN_PROGRESS, roles(Role.TECHNICIAN, Role.DISPATCHER, Role.ADMIN)),
                     row(EN_ROUTE,    START,    IN_PROGRESS, roles(Role.TECHNICIAN, Role.DISPATCHER, Role.ADMIN)),
-                    row(IN_PROGRESS, HOLD,     ON_HOLD,     roles(Role.TECHNICIAN, Role.DISPATCHER, Role.ADMIN)),
+                    row(IN_PROGRESS, HOLD,     ON_HOLD,     roles(Role.TECHNICIAN, Role.DISPATCHER, Role.ADMIN),
+                            HoldReasonRequiredGuard.GUARD_ID),
                     row(ON_HOLD,     RESUME,   IN_PROGRESS, roles(Role.TECHNICIAN, Role.DISPATCHER, Role.ADMIN)),
-                    row(IN_PROGRESS, COMPLETE, COMPLETED,   roles(Role.TECHNICIAN, Role.DISPATCHER, Role.ADMIN)),
-                    row(COMPLETED,   CLOSE,    CLOSED,      roles(Role.DISPATCHER, Role.ADMIN)),
+                    row(IN_PROGRESS, COMPLETE, COMPLETED,   roles(Role.TECHNICIAN, Role.DISPATCHER, Role.ADMIN),
+                            LabourTimeRecordedGuard.GUARD_ID),
+                    row(COMPLETED,   CLOSE,    CLOSED,      roles(Role.DISPATCHER, Role.ADMIN),
+                            PartsReconciledGuard.GUARD_ID),
 
                     // ── Cancellation (per ADR-0007) ─────────────────────────────
                     row(NEW,         CANCEL,   CANCELLED,   roles(Role.DISPATCHER, Role.ADMIN)),
@@ -93,13 +102,24 @@ public final class WorkOrderTransitionTable {
             WorkOrderState from,
             WorkOrderEvent event,
             WorkOrderState to,
-            Set<String> roles) {
+            Set<String> roles,
+            String... guardIds) {
         return Map.entry(
                 new TransitionKey(from, event),
-                new TransitionDescriptor(to, roles, List.of()));
+                new TransitionDescriptor(to, roles, Arrays.asList(guardIds)));
     }
 
     private static Set<String> roles(String... roleValues) {
         return Set.of(roleValues);
+    }
+
+    /**
+     * Returns the set of all guard identifiers referenced anywhere in the table.
+     * Used by the startup validator in {@link WorkOrderTransitionServiceImpl}.
+     */
+    public static Set<String> allReferencedGuardIds() {
+        return TABLE.values().stream()
+                .flatMap(d -> d.guardIds().stream())
+                .collect(Collectors.toUnmodifiableSet());
     }
 }

@@ -14,6 +14,7 @@ import com.fieldservice.workorder.GuardRefusedException;
 import com.fieldservice.workorder.IllegalWorkOrderTransitionException;
 import com.fieldservice.workorder.WorkOrderTransitionService;
 import com.fieldservice.workorder.WorkOrderVersionConflictException;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,24 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
                 .collect(Collectors.toMap(TransitionGuard::guardId, Function.identity()));
     }
 
+    /**
+     * Validates at startup that every guard identifier referenced in the transition table
+     * has a registered {@link TransitionGuard} bean. A missing implementation fails the
+     * context so a mis-configured guard degrades to startup failure, never a silent permit.
+     */
+    @PostConstruct
+    void validateGuardCompleteness() {
+        Set<String> missing = WorkOrderTransitionTable.allReferencedGuardIds().stream()
+                .filter(id -> !guardsByName.containsKey(id))
+                .collect(Collectors.toUnmodifiableSet());
+        if (!missing.isEmpty()) {
+            throw new IllegalStateException(
+                    "WorkOrderTransitionServiceImpl: the following guard identifiers are referenced " +
+                    "in the transition table but have no registered TransitionGuard bean: " + missing +
+                    ". Register a @Component implementing TransitionGuard for each missing identifier.");
+        }
+    }
+
     // ── Legacy entry-point (test helpers, background jobs) ──────────────────────
 
     @Override
@@ -113,7 +132,8 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
 
     @Override
     public TransitionResult applyTransition(UUID workOrderId, WorkOrderEvent event,
-                                            int expectedVersion, @Nullable String reason) {
+                                            int expectedVersion, @Nullable String reason,
+                                            @Nullable String holdReasonCode) {
 
         // 1. Load via scope (absent == out-of-scope; maps to 403 by non-disclosure contract)
         WorkOrder workOrder = scopedQueryExecutor.findById(WorkOrder.class, workOrderId, workOrderRepository);
@@ -141,7 +161,8 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
         checkRole(descriptor.requiredRoles());
 
         // 5. Guard evaluation — fail-closed: any exception is treated as a refusal
-        evaluateGuardsStrict(workOrder, event, descriptor.guardIds());
+        TransitionContext context = new TransitionContext(holdReasonCode, Instant.now());
+        evaluateGuardsStrict(workOrder, event, descriptor.guardIds(), context);
 
         // 6. Apply state and flush (catches concurrent-update optimistic lock)
         workOrder.setState(descriptor.toState());
@@ -166,7 +187,8 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
     // ── Guards ──────────────────────────────────────────────────────────────────
 
     /** Used by the HTTP entry-point. Any exception from a guard is treated as a refusal. */
-    private void evaluateGuardsStrict(WorkOrder workOrder, WorkOrderEvent event, List<String> guardIds) {
+    private void evaluateGuardsStrict(WorkOrder workOrder, WorkOrderEvent event,
+                                       List<String> guardIds, TransitionContext context) {
         for (String guardId : guardIds) {
             TransitionGuard guard = guardsByName.get(guardId);
             if (guard == null) {
@@ -174,7 +196,7 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
             }
             GuardResult result;
             try {
-                result = guard.evaluate(workOrder, event);
+                result = guard.evaluate(workOrder, event, context);
             } catch (Exception ex) {
                 log.warn("guard.exception: guardId={}, workOrderId={}", guardId, workOrder.getId(), ex);
                 throw new GuardRefusedException(guardId, "GUARD_EXCEPTION", "Guard evaluation failed.");
@@ -189,12 +211,13 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
 
     /** Used by the legacy entry-point. Preserves the original behaviour of throwing IllegalStateException. */
     private void evaluateGuardsLenient(WorkOrder workOrder, WorkOrderEvent event, List<String> guardIds) {
+        TransitionContext context = TransitionContext.of(null);
         for (String guardId : guardIds) {
             TransitionGuard guard = guardsByName.get(guardId);
             if (guard == null) {
                 continue;
             }
-            GuardResult result = guard.evaluate(workOrder, event);
+            GuardResult result = guard.evaluate(workOrder, event, context);
             switch (result) {
                 case GuardResult.Satisfied ignored -> { /* proceed */ }
                 case GuardResult.Refused refused ->

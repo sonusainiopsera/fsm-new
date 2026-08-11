@@ -39,7 +39,11 @@ class ScopedRepositoryArchTest {
     private static final String NON_SCOPED_REPOSITORIES_PATTERN =
             "AppUserRepository|PartRepository|StockLocationRepository|"
                     + "IdempotencyKeyRepository|RoleAssignmentRepository|"
-                    + "RefreshTokenRepository|RefreshTokenFamilyRepository";
+                    + "RefreshTokenRepository|RefreshTokenFamilyRepository|"
+                    // WO-125: guard backing tables are not scoped entities; access controlled at the
+                    // service layer (guards run inside an already-scoped work order transaction)
+                    + "LabourTimeRecordRepository|WorkOrderCompetencyRepository|"
+                    + "WorkOrderPartConsumptionRepository|TechnicianCertificationRepository";
 
     /**
      * Production rule: domain JPA repositories that are not in the non-scoped allow-list

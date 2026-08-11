@@ -189,3 +189,10 @@
 - **Files:** 12 (+1310/-1)
 - **Duration:** 734ss
 - **Approach:** Implemented single-use IP-bound SSE stream tickets as a 3-layer design: StreamTicketStore interface (Redis via Lua atomic GET+DEL, InMemory test fallback), StreamTicketService (256-bit SecureRandom issuance, atomic redemption with IP/jti/account validation, Micrometer counters), and StreamTicketAuthenticationFilter (OncePerRequestFilter scoped to /api/v1/streams/**, rejects ticket param on non-stream paths). POST /api/v1/auth/stream-ticket added to AuthController with @PreAuthorize(isAuthenticated()) and 503 fail-closed on store unavailability. SecurityFilterChainConfig registers the filter before UsernamePasswordAuthenticationFilter. The ticket value is never persisted — only its SHA-256 hex digest appears in Redis as the key.
+
+## WO-125: User Story: WO-125 - Business precondition guards for lifecycle transitions
+- **Status:** completed
+- **Commit:** `566149e`
+- **Files:** 30 (+1568/-18)
+- **Duration:** 1107ss
+- **Approach:** N/A

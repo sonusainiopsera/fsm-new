@@ -62,7 +62,8 @@ public class WorkOrderTransitionController {
                 id,
                 request.event(),
                 request.expectedVersion(),
-                request.reason());
+                request.reason(),
+                request.holdReasonCode());
 
         TransitionResponse response = new TransitionResponse(
                 result.workOrder().getId(),

@@ -40,6 +40,8 @@ public interface WorkOrderTransitionService {
      * @param event           the requested lifecycle event
      * @param expectedVersion version the client observed; must match the persisted value
      * @param reason          optional free-text reason supplied by the caller
+     * @param holdReasonCode  controlled hold reason code; required for HOLD events by the
+     *                        {@code hold-reason-required} guard, ignored for other events
      * @return a {@link TransitionResult} with the updated work order and from-state
      * @throws IllegalWorkOrderTransitionException  if the event is not legal from the current state
      * @throws WorkOrderVersionConflictException    if expectedVersion is stale or a concurrent
@@ -49,7 +51,8 @@ public interface WorkOrderTransitionService {
      */
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
     TransitionResult applyTransition(UUID workOrderId, WorkOrderEvent event,
-                                     int expectedVersion, @Nullable String reason);
+                                     int expectedVersion, @Nullable String reason,
+                                     @Nullable String holdReasonCode);
 
     /** Carries the updated work order and the state it was in before the transition. */
     record TransitionResult(WorkOrder workOrder, WorkOrderState fromState) {}

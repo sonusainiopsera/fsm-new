@@ -55,7 +55,7 @@ class WorkOrderTransitionExceptionMappingTest {
 
     @Test
     void guardRefusal_returns422_withGuardSpecificMessage() throws Exception {
-        when(transitionService.applyTransition(eq(WORK_ORDER_ID), any(), anyInt(), any()))
+        when(transitionService.applyTransition(eq(WORK_ORDER_ID), any(), anyInt(), any(), any()))
                 .thenThrow(new GuardRefusedException(
                         "labour-time-guard",
                         "LABOUR_TIME_MISSING",
@@ -73,7 +73,7 @@ class WorkOrderTransitionExceptionMappingTest {
 
     @Test
     void illegalTransition_returns409_withLegalEventsInMessage() throws Exception {
-        when(transitionService.applyTransition(eq(WORK_ORDER_ID), any(), anyInt(), any()))
+        when(transitionService.applyTransition(eq(WORK_ORDER_ID), any(), anyInt(), any(), any()))
                 .thenThrow(new IllegalWorkOrderTransitionException(
                         NEW, WorkOrderEvent.COMPLETE,
                         Set.of(WorkOrderEvent.ASSIGN, WorkOrderEvent.CANCEL)));
@@ -88,7 +88,7 @@ class WorkOrderTransitionExceptionMappingTest {
 
     @Test
     void versionConflict_returns409_withVersionConflictCode() throws Exception {
-        when(transitionService.applyTransition(eq(WORK_ORDER_ID), any(), anyInt(), any()))
+        when(transitionService.applyTransition(eq(WORK_ORDER_ID), any(), anyInt(), any(), any()))
                 .thenThrow(new WorkOrderVersionConflictException(WORK_ORDER_ID, 0));
 
         mockMvc.perform(post(TRANSITION_URL)
