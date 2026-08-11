@@ -2,6 +2,7 @@ package com.fieldservice.workorder.repository;
 
 import com.fieldservice.platform.persistence.ScopedRepository;
 import com.fieldservice.workorder.domain.WorkOrder;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
@@ -19,4 +20,8 @@ import java.util.UUID;
  */
 @Repository
 public interface WorkOrderRepository extends ScopedRepository<WorkOrder, UUID> {
+
+    /** Generates a human-readable reference via the database sequence. */
+    @Query(value = "SELECT nextval('work_order_ref_seq')", nativeQuery = true)
+    long nextRefSequence();
 }

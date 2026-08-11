@@ -1,8 +1,10 @@
 package com.fieldservice.workorder.application;
 
+import com.fieldservice.asset.domain.Asset;
+import com.fieldservice.asset.repository.AssetRepository;
 import com.fieldservice.platform.api.DomainEvent;
 import com.fieldservice.platform.api.DomainEventPublisher;
-import com.fieldservice.platform.api.exception.NotFoundException;
+import com.fieldservice.platform.api.exception.BusinessGuardException;
 import com.fieldservice.platform.persistence.ScopedQueryExecutor;
 import com.fieldservice.platform.security.AccessScope;
 import com.fieldservice.platform.security.RequestScopedAccessScope;
@@ -12,7 +14,11 @@ import com.fieldservice.site.domain.Site;
 import com.fieldservice.site.repository.SiteRepository;
 import com.fieldservice.sla.SlaDeadlineCalculator;
 import com.fieldservice.sla.SlaDeadlineResult;
+import com.fieldservice.sla.SlaPolicyProvider;
+import com.fieldservice.sla.domain.SlaPolicy;
+import com.fieldservice.workorder.WorkOrderErrorCodes;
 import com.fieldservice.workorder.domain.WorkOrder;
+import com.fieldservice.workorder.domain.WorkOrderPriority;
 import com.fieldservice.workorder.domain.WorkOrderStatus;
 import com.fieldservice.workorder.repository.WorkOrderRepository;
 import com.fieldservice.workorder.web.WorkOrderCreationRequest;
@@ -27,64 +33,117 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 
 /**
- * Handles work order creation: persists the domain row, stamps SLA deadlines,
- * and publishes the outbox event — all within a single transaction.
+ * Handles work order creation: validates referential integrity, resolves the active SLA
+ * policy, derives and persists deadlines, and publishes the outbox event — all within a
+ * single transaction.
+ *
+ * <p>Security: method-level @PreAuthorize; CUSTOMER principals are additionally checked
+ * for portal priority ceiling and site ownership via the scope predicate.
  */
 @Service
 public class WorkOrderCreationService {
 
     private static final Logger log = LoggerFactory.getLogger(WorkOrderCreationService.class);
 
-    private final WorkOrderRepository      workOrderRepository;
-    private final ScopedQueryExecutor      scopedQueryExecutor;
-    private final SiteRepository           siteRepository;
+    /** CUSTOMER portal submissions may not set priority above this ceiling. */
+    static final WorkOrderPriority PORTAL_PRIORITY_CEILING = WorkOrderPriority.HIGH;
+
+    private final WorkOrderRepository    workOrderRepository;
+    private final ScopedQueryExecutor    scopedQueryExecutor;
+    private final SiteRepository         siteRepository;
+    private final AssetRepository        assetRepository;
     private final RequestScopedAccessScope accessScope;
-    private final SlaDeadlineCalculator    slaDeadlineCalculator;
-    private final DomainEventPublisher     eventPublisher;
+    private final SlaDeadlineCalculator  slaDeadlineCalculator;
+    private final SlaPolicyProvider      slaPolicyProvider;
+    private final DomainEventPublisher   eventPublisher;
 
     public WorkOrderCreationService(WorkOrderRepository workOrderRepository,
                                     ScopedQueryExecutor scopedQueryExecutor,
                                     SiteRepository siteRepository,
+                                    AssetRepository assetRepository,
                                     RequestScopedAccessScope accessScope,
                                     SlaDeadlineCalculator slaDeadlineCalculator,
+                                    SlaPolicyProvider slaPolicyProvider,
                                     DomainEventPublisher eventPublisher) {
         this.workOrderRepository   = workOrderRepository;
         this.scopedQueryExecutor   = scopedQueryExecutor;
         this.siteRepository        = siteRepository;
+        this.assetRepository       = assetRepository;
         this.accessScope           = accessScope;
         this.slaDeadlineCalculator = slaDeadlineCalculator;
+        this.slaPolicyProvider     = slaPolicyProvider;
         this.eventPublisher        = eventPublisher;
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'DISPATCHER', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DISPATCHER', 'MANAGER', 'CUSTOMER')")
     @Transactional
     public WorkOrderResponse create(WorkOrderCreationRequest request) {
         AccessScope scope  = accessScope.get();
         Instant     now    = Instant.now();
 
-        // Resolve site through scope predicate (403 if out of scope)
+        // CUSTOMER portal priority ceiling
+        if (scope.roles().contains("CUSTOMER")
+                && request.priority().ordinal() > PORTAL_PRIORITY_CEILING.ordinal()) {
+            throw new BusinessGuardException(
+                    WorkOrderErrorCodes.PORTAL_PRIORITY_DENIED,
+                    "CUSTOMER portal submissions may not exceed priority " + PORTAL_PRIORITY_CEILING.name());
+        }
+
+        // Resolve site through scope predicate (403 if out of scope or not found)
         Site site = scopedQueryExecutor
                 .findById(siteRepository, request.siteId(), scope, Site.class)
                 .orElseThrow(() -> new ScopedAccessDeniedException(
                         "site", "Site not found or outside caller scope"));
 
-        // Stamp SLA deadlines in same transaction — throws SlaPolicyUnavailableException (422) if no policy
-        SlaDeadlineResult sla = slaDeadlineCalculator.calculate(request.priority(), now);
+        // Validate site belongs to the requested customer (AC6)
+        if (!site.getCustomerId().equals(request.customerId())) {
+            throw new WorkOrderReferentialException(
+                    WorkOrderErrorCodes.SITE_CUSTOMER_MISMATCH, "siteId",
+                    "Site " + request.siteId() + " does not belong to customer " + request.customerId());
+        }
 
-        WorkOrderStatus initialState = request.assignedTechnicianId() != null
-                ? WorkOrderStatus.ASSIGNED : WorkOrderStatus.NEW;
+        // Validate asset belongs to the requested site (AC6)
+        if (request.assetId() != null) {
+            Asset asset = scopedQueryExecutor
+                    .findById(assetRepository, request.assetId(), scope, Asset.class)
+                    .orElseThrow(() -> new WorkOrderReferentialException(
+                            WorkOrderErrorCodes.ASSET_SITE_MISMATCH, "assetId",
+                            "Asset " + request.assetId() + " not found or outside caller scope"));
+            if (!asset.getSiteId().equals(request.siteId())) {
+                throw new WorkOrderReferentialException(
+                        WorkOrderErrorCodes.ASSET_SITE_MISMATCH, "assetId",
+                        "Asset " + request.assetId() + " is not located at site " + request.siteId());
+            }
+        }
+
+        // Resolve SLA policy — throws SlaPolicyUnavailableException (→ 422) if none active
+        SlaPolicy policy = slaPolicyProvider.resolve(request.priority().toDbValue(), now)
+                .orElseThrow(() -> {
+                    log.error("sla_policy_unavailable priority={}", request.priority());
+                    return new com.fieldservice.sla.SlaPolicyUnavailableException(request.priority().toDbValue());
+                });
+
+        // Compute deadlines using injected calculator (respects clock-pause adjustments at creation = 0)
+        SlaDeadlineResult sla = slaDeadlineCalculator.calculate(request.priority().toDbValue(), now);
+
+        // Auto-generate human-readable reference from database sequence
+        long seq      = workOrderRepository.nextRefSequence();
+        String reference = String.format("WO-%06d", seq);
 
         WorkOrder workOrder = new WorkOrder(
-                request.reference(),
-                initialState,
-                request.priority(),
+                reference,
+                WorkOrderStatus.NEW,
+                request.priority().toDbValue(),
                 site,
-                request.assignedTechnicianId());
+                null);
 
-        if (request.description() != null) {
-            workOrder.setDescription(request.description());
+        workOrder.setDescription(request.faultDescription());
+        workOrder.applyDeadlines(sla.responseDueAt(), sla.resolutionDueAt(), sla.atRiskAt(),
+                policy.getId());
+
+        if (request.assetId() != null) {
+            workOrder.setAssetId(request.assetId());
         }
-        workOrder.applyDeadlines(sla.responseDueAt(), sla.resolutionDueAt(), sla.atRiskAt());
 
         workOrderRepository.save(workOrder);
 
@@ -101,14 +160,14 @@ public class WorkOrderCreationService {
                         workOrder.getReference(),
                         workOrder.getPriority(),
                         site.getId(),
-                        request.assignedTechnicianId(),
+                        null,
                         sla.responseDueAt(),
                         sla.resolutionDueAt(),
                         sla.atRiskAt())));
 
-        log.info("work_order_created id={} reference={} priority={} site_id={} actor={}",
+        log.info("work_order_created id={} reference={} priority={} site_id={} customer_id={} actor={}",
                 workOrder.getId(), workOrder.getReference(), workOrder.getPriority(),
-                site.getId(), scope.userId());
+                site.getId(), request.customerId(), scope.userId());
 
         return WorkOrderResponse.from(workOrder);
     }

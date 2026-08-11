@@ -64,6 +64,9 @@ public class WorkOrder implements ScopedEntity {
     @Column(name = "assigned_technician_id")
     private UUID assignedTechnicianId;
 
+    @Column(name = "asset_id")
+    private UUID assetId;
+
     @Column(length = 4000)
     private String description;
 
@@ -87,6 +90,9 @@ public class WorkOrder implements ScopedEntity {
 
     @Column(name = "no_parts_required", nullable = false)
     private boolean noPartsRequired = false;
+
+    @Column(name = "applied_sla_policy_id")
+    private UUID appliedSlaPolicyId;
 
     @Version
     private Integer version;
@@ -120,6 +126,7 @@ public class WorkOrder implements ScopedEntity {
     public String          getPriority()            { return priority; }
     public Site            getSite()                { return site; }
     public UUID            getAssignedTechnicianId() { return assignedTechnicianId; }
+    public UUID            getAssetId()              { return assetId; }
     public String          getDescription()         { return description; }
     public Instant         getCreatedAt()            { return createdAt; }
     public int             getCumulativeHoldMinutes(){ return cumulativeHoldMinutes; }
@@ -128,11 +135,23 @@ public class WorkOrder implements ScopedEntity {
     public boolean         isAtRisk()               { return atRisk; }
     public Instant         getAtRiskAt()            { return atRiskAt; }
     public boolean         isNoPartsRequired()      { return noPartsRequired; }
+    public UUID            getAppliedSlaPolicyId()  { return appliedSlaPolicyId; }
     public Integer         getVersion()             { return version; }
 
     public void markNoPartsRequired() { this.noPartsRequired = true; }
 
     public void setDescription(String description) { this.description = description; }
+
+    public void setAssetId(UUID assetId) { this.assetId = assetId; }
+
+    /** Sets SLA deadlines and snapshots the policy id at creation time. */
+    public void applyDeadlines(Instant responseDeadline, Instant resolutionDeadline,
+                               Instant atRiskAt, UUID appliedSlaPolicyId) {
+        this.responseDeadline    = responseDeadline;
+        this.resolutionDeadline  = resolutionDeadline;
+        this.atRiskAt            = atRiskAt;
+        this.appliedSlaPolicyId  = appliedSlaPolicyId;
+    }
 
     /** Sets SLA deadlines when a work order is created from a priority policy. */
     public void applyDeadlines(Instant responseDeadline, Instant resolutionDeadline, Instant atRiskAt) {

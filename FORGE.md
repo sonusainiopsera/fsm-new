@@ -315,3 +315,10 @@
 - **Files:** 34 (+1793/-7)
 - **Duration:** 933ss
 - **Approach:** N/A
+
+## WO-128: User Story: WO-128 - Work order creation with automatic deadline derivation
+- **Status:** completed
+- **Commit:** `61ba666`
+- **Files:** 13 (+708/-42)
+- **Duration:** 762ss
+- **Approach:** Expanded the existing WorkOrderCreationService skeleton to implement full AC-compliant work order creation: replaced the manual-reference, assignee-accepting request DTO with a strict enum-bound record (customerId, siteId, assetId, faultDescription 10-4000, priority enum, optional certifications and parts); auto-generates the human-readable reference from a DB sequence (WO-{seq}); validates site.customerId == request.customerId (422 SITE_CUSTOMER_MISMATCH) and asset.siteId == request.siteId (422 ASSET_SITE_MISMATCH); resolves the active SLA policy via the existing SlaPolicyProvider cache and snapshots its id on the work order (applied_sla_policy_id); always creates state=NEW; adds Location header on 201. Idempotency-Key is handled transparently by the platform IdempotencyFilter. A V29 migration adds the applied_sla_policy_id column and the work_order_ref_seq sequence. CUSTOMER portal submissions are gated by a priority ceiling constant (HIGH) enforced in the service.

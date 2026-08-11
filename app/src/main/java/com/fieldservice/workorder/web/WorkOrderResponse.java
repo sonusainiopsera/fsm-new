@@ -27,7 +27,9 @@ public record WorkOrderResponse(
         Instant holdStartedAt,
         Instant responseDueAt,
         Instant resolutionDueAt,
-        Instant atRiskAt) {
+        Instant atRiskAt,
+        UUID appliedSlaPolicyId,
+        Integer version) {
 
     /** For list responses — hold detail fields are absent. */
     public static WorkOrderResponse from(WorkOrder wo) {
@@ -44,7 +46,9 @@ public record WorkOrderResponse(
                 null,
                 wo.getResponseDeadline(),
                 wo.getResolutionDeadline(),
-                wo.getAtRiskAt());
+                wo.getAtRiskAt(),
+                wo.getAppliedSlaPolicyId(),
+                wo.getVersion());
     }
 
     /** For the single-item detail endpoint — includes the currently-open hold if any. */
@@ -62,6 +66,8 @@ public record WorkOrderResponse(
                 openHold != null ? openHold.getStartedAt()  : null,
                 wo.getResponseDeadline(),
                 wo.getResolutionDeadline(),
-                wo.getAtRiskAt());
+                wo.getAtRiskAt(),
+                wo.getAppliedSlaPolicyId(),
+                wo.getVersion());
     }
 }
