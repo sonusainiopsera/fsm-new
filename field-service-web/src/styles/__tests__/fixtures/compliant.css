@@ -1,0 +1,41 @@
+/* ----------------------------------------------------------------
+   COMPLIANT FIXTURE
+   All values reference design tokens via var(--). Zero violations.
+   ---------------------------------------------------------------- */
+
+.button {
+  color: var(--color-accent-text);
+  background-color: var(--color-accent-base);
+  border-radius: var(--radius-control);
+  padding: var(--space-2) var(--space-4);
+  transition-duration: var(--duration-entry);
+  box-shadow: var(--elevation-1);
+}
+
+.button:hover {
+  background-color: var(--color-accent-emphasis);
+  box-shadow: var(--elevation-2);
+}
+
+.card {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-raised);
+  border-radius: var(--radius-card);
+  padding: var(--space-4) var(--space-6);
+  box-shadow: var(--elevation-1);
+  border-radius: var(--radius-card);
+}
+
+.alert-danger {
+  color: var(--color-danger-text);
+  background-color: var(--color-danger-subtle);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+}
+
+.modal {
+  background-color: var(--color-surface-overlay);
+  border-radius: var(--radius-overlay);
+  box-shadow: var(--elevation-2);
+  transition-duration: var(--duration-overlay);
+}

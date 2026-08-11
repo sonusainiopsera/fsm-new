@@ -1,0 +1,16 @@
+/* ============================================================
+   STYLES AGGREGATOR  —  src/styles/index.css
+   Import order is significant: contract → value sets → base
+   ============================================================ */
+
+/* 1. Vocabulary declaration (token names, no values) */
+@import './tokens.contract.css';
+
+/* 2. Light value set — applied to :root (default) */
+@import './tokens.light.css';
+
+/* 3. Dark value set — applied to [data-appearance="dark"] */
+@import './tokens.dark.css';
+
+/* 4. CSS reset and global defaults */
+@import './base.css';

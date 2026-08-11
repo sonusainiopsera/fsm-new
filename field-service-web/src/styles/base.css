@@ -1,0 +1,98 @@
+/* stylelint-disable */
+/* ============================================================
+   BASE  —  CSS reset, global defaults, utility classes
+   ============================================================ */
+
+/* --- Reset -------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* --- Typography scale defaults ----------------------------- */
+h1 { font-size: var(--fs-2xl); font-weight: var(--fw-bold); line-height: var(--lh-tight); letter-spacing: var(--ls-tight); }
+h2 { font-size: var(--fs-xl); font-weight: var(--fw-semibold); line-height: var(--lh-tight); letter-spacing: var(--ls-tight); }
+h3 { font-size: var(--fs-lg); font-weight: var(--fw-semibold); line-height: var(--lh-tight); letter-spacing: var(--ls-tight); }
+h4 { font-size: var(--fs-base); font-weight: var(--fw-medium); line-height: var(--lh-tight); }
+h5 { font-size: var(--fs-md); font-weight: var(--fw-medium); }
+h6 { font-size: var(--fs-sm); font-weight: var(--fw-medium); }
+
+/* --- Numeric utility --------------------------------------- */
+/* Applies to every numeric cell, KPI value, countdown and score.
+   font-variant-numeric tabular-nums ensures column alignment.    */
+.numeric,
+.tabular-nums {
+  font-variant-numeric: var(--numeric-figures);
+  font-feature-settings: "tnum";
+}
+
+/* --- Layout helpers ---------------------------------------- */
+.content-wrapper {
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* --- Reduced-motion override --------------------------------
+   When the OS requests reduced motion, zero all durations so
+   no layout or information change occurs.                      */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Focus visible ----------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: 2px;
+}

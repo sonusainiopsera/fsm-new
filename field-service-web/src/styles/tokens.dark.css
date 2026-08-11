@@ -1,0 +1,125 @@
+/* stylelint-disable */
+/* ============================================================
+   DARK VALUE SET  —  tokens.dark.css
+   Selector: [data-appearance="dark"]  (dark appearance)
+   Every token declared in tokens.contract.css MUST appear here.
+   Dark surfaces separate by one elevation step via --color-border,
+   not by shadow depth.
+   ============================================================ */
+
+[data-appearance="dark"] {
+  /* ---- Typography (unchanged in dark) ---- */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-md: 0.875rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: 1.875rem;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  --lh-tight: 1.25;
+  --lh-body: 1.5;
+  --lh-relaxed: 1.625;
+
+  --ls-tight: -0.015em;
+  --ls-normal: 0em;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+  --font-brand: var(--font-sans);
+
+  --numeric-figures: tabular-nums;
+
+  /* ---- Spacing (unchanged in dark) ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --content-max-width: 90rem;
+  --gutter: 1.5rem;
+
+  /* ---- Radius (unchanged in dark) ---- */
+  --radius-control: 0.375rem;
+  --radius-card: 0.625rem;
+  --radius-overlay: 0.875rem;
+  --radius-pill: 624.9375rem;
+
+  /* ---- Elevation (reduced shadow; hairline border carries structure) ---- */
+  --elevation-1: 0 1px 3px 0 rgb(0 0 0 / 0.30);
+  --elevation-2: 0 4px 8px 0 rgb(0 0 0 / 0.50);
+  --color-border: #343a40;
+  --scrim: rgb(0 0 0 / 0.70);
+
+  /* ---- Motion (unchanged in dark) ---- */
+  --duration-micro: 120ms;
+  --duration-entry: 180ms;
+  --duration-overlay: 240ms;
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Neutral ramp (absolute values, unchanged in dark) ---- */
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f8f9fa;
+  --color-neutral-100: #f1f3f5;
+  --color-neutral-200: #e9ecef;
+  --color-neutral-300: #dee2e6;
+  --color-neutral-400: #ced4da;
+  --color-neutral-500: #adb5bd;
+  --color-neutral-600: #868e96;
+  --color-neutral-700: #495057;
+  --color-neutral-800: #343a40;
+  --color-neutral-900: #212529;
+  --color-neutral-950: #101214;
+
+  /* ---- Surface & Text (inverted for dark) ---- */
+  --color-surface-base: #101214;
+  --color-surface-raised: #1a1d20;
+  --color-surface-overlay: #212529;
+  --color-text-primary: #f1f3f5;
+  --color-text-secondary: #868e96;
+  --color-text-disabled: #495057;
+  --color-text-on-accent: #ffffff;
+
+  /* ---- Accent — lightened for dark-mode contrast (Q13 PLACEHOLDER) ---- */
+  --color-accent-subtle: #1e3a5f;
+  --color-accent-muted: #2563ab;
+  --color-accent-base: #4a9eff;
+  --color-accent-emphasis: #74b8ff;
+  --color-accent-text: #101214;
+
+  /* ---- Semantic: info (lighter values for dark) ---- */
+  --color-info-subtle: #1e3a5f;
+  --color-info-muted: #1d4ed8;
+  --color-info-base: #60a5fa;
+  --color-info-emphasis: #93c5fd;
+  --color-info-text: #bfdbfe;
+
+  /* ---- Semantic: success ---- */
+  --color-success-subtle: #052e16;
+  --color-success-muted: #15803d;
+  --color-success-base: #4ade80;
+  --color-success-emphasis: #86efac;
+  --color-success-text: #bbf7d0;
+
+  /* ---- Semantic: warning ---- */
+  --color-warning-subtle: #422006;
+  --color-warning-muted: #b45309;
+  --color-warning-base: #fbbf24;
+  --color-warning-emphasis: #fcd34d;
+  --color-warning-text: #fde68a;
+
+  /* ---- Semantic: danger ---- */
+  --color-danger-subtle: #450a0a;
+  --color-danger-muted: #b91c1c;
+  --color-danger-base: #f87171;
+  --color-danger-emphasis: #fca5a5;
+  --color-danger-text: #fecaca;
+}

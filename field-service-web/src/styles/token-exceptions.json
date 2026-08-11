@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12",
+  "description": "Justified exceptions to the no-hardcoded-visual-literals lint rule. Every entry requires a reason and a date. Exceptions scoped to a specific file path only; never global.",
+  "exceptions": []
+}

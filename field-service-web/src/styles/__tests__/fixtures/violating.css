@@ -1,0 +1,19 @@
+/* ----------------------------------------------------------------
+   VIOLATING FIXTURE
+   Contains deliberate violations for lint-gate test assertions.
+   One violation per category. The lint gate MUST reject this file.
+   ---------------------------------------------------------------- */
+
+.button-bad {
+  /* Violation 1: hardcoded hex colour */
+  color: #1a73e8;
+
+  /* Violation 2: hardcoded px border-radius */
+  border-radius: 6px;
+
+  /* Violation 3: hardcoded px padding (spacing) */
+  padding: 8px 16px;
+
+  /* Violation 4: hardcoded ms transition-duration */
+  transition-duration: 120ms;
+}

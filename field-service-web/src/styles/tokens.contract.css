@@ -1,0 +1,195 @@
+/* ============================================================
+   DESIGN TOKEN CONTRACT  —  field-service-web
+   ============================================================
+   This file declares the complete token vocabulary.
+   It is the single source of truth for token names.
+
+   VALUES are supplied by:
+     Light appearance → tokens.light.css  (:root)
+     Dark appearance  → tokens.dark.css   ([data-appearance="dark"])
+
+   GENERATION: tokens.contract.json is generated from this file
+   by scripts/generate-token-contract.mjs (run as npm run generate-tokens).
+
+   Q13 PLACEHOLDER VALUES: Tokens marked Q13 depend on brand ratification
+   (accent hue, typeface family, logo lockup). They ship with sensible
+   defaults and MUST be updated once Q13 is resolved without a rebuild.
+   ============================================================ */
+
+/* stylelint-disable */
+
+/* ----------------------------------------------------------------
+   TYPOGRAPHY
+   Scale: 12 / 13 / 14 / 16 / 20 / 24 / 30 px
+   Line-height: 1.5 body default
+   Letter-spacing: tightened at 20 px and above (--ls-tight)
+   Tabular figures: --numeric-figures applied via .numeric utility
+   ---------------------------------------------------------------- */
+:root {
+  --fs-xs: ;               /* 12 px — caption, badge label, helper text */
+  --fs-sm: ;               /* 13 px — secondary body, compact table cell */
+  --fs-md: ;               /* 14 px — primary body, form control */
+  --fs-base: ;             /* 16 px — section heading, card title */
+  --fs-lg: ;               /* 20 px — page sub-heading; use --ls-tight */
+  --fs-xl: ;               /* 24 px — page heading; use --ls-tight */
+  --fs-2xl: ;              /* 30 px — hero figure, KPI value; use --ls-tight */
+
+  --fw-regular: ;          /* 400 */
+  --fw-medium: ;           /* 500 */
+  --fw-semibold: ;         /* 600 */
+  --fw-bold: ;             /* 700 */
+
+  --lh-tight: ;            /* 1.25 — headings, badges */
+  --lh-body: ;             /* 1.5  — body copy default */
+  --lh-relaxed: ;          /* 1.625 — long-form help text */
+
+  --ls-tight: ;            /* -0.015 em — required for --fs-lg and above */
+  --ls-normal: ;           /* 0 em */
+
+  /* Q13: placeholder typeface family — replace after brand ratification */
+  --font-sans: ;           /* System font stack (fastest first paint) */
+  --font-mono: ;           /* Monospace stack for code, IDs */
+  --font-brand: ;          /* Q13 PLACEHOLDER — ratified licensed typeface */
+
+  /* Tabular figures token — applied by the .numeric utility class */
+  --numeric-figures: ;     /* tabular-nums — aligns numeric columns */
+}
+
+/* ----------------------------------------------------------------
+   SPACING
+   Base unit: 4 px
+   Rhythm: 4 / 8 / 12 / 16 / 24 / 32 px
+   Layout: 1440 px content cap, 24 px gutters
+   ---------------------------------------------------------------- */
+:root {
+  --space-1: ;             /* 4 px */
+  --space-2: ;             /* 8 px */
+  --space-3: ;             /* 12 px */
+  --space-4: ;             /* 16 px */
+  --space-6: ;             /* 24 px */
+  --space-8: ;             /* 32 px */
+
+  --content-max-width: ;   /* 1440 px — content column cap */
+  --gutter: ;              /* 24 px — horizontal page margin */
+}
+
+/* ----------------------------------------------------------------
+   RADIUS
+   Controls: 6 px  |  Cards: 10 px  |  Overlays: 14 px  |  Pill
+   Rule: do not mix radius tokens within a single component.
+   ---------------------------------------------------------------- */
+:root {
+  --radius-control: ;      /* 6 px — inputs, buttons, badges */
+  --radius-card: ;         /* 10 px — cards, panels */
+  --radius-overlay: ;      /* 14 px — modals, drawers, tooltips */
+  --radius-pill: ;         /* 9999 px — avatars, full-round chips */
+}
+
+/* ----------------------------------------------------------------
+   ELEVATION
+   At most TWO elevation levels system-wide.
+   Structural separation uses --color-border (hairline), not shadow.
+   Dark mode primarily uses --color-border; shadows reduced.
+   ---------------------------------------------------------------- */
+:root {
+  --elevation-1: ;         /* Level 1 — cards, dropdowns */
+  --elevation-2: ;         /* Level 2 — modals, popovers */
+  --color-border: ;        /* 1 px hairline — structural separation */
+  --scrim: ;               /* overlay backdrop for modals/drawers */
+}
+
+/* ----------------------------------------------------------------
+   MOTION
+   Durations: 120 ms micro / 180 ms entry / 240 ms overlay
+   Ceiling: NOTHING exceeds 300 ms.
+   Easing: exactly one standard curve.
+   Reduced-motion: override durations to 0ms in prefers-reduced-motion.
+   ---------------------------------------------------------------- */
+:root {
+  --duration-micro: ;      /* 120 ms — hover, focus ring, toggle */
+  --duration-entry: ;      /* 180 ms — element entering the viewport */
+  --duration-overlay: ;    /* 240 ms — panel, drawer, modal */
+  --easing-standard: ;     /* cubic-bezier(0.4, 0, 0.2, 1) — standard curve */
+}
+
+/* ----------------------------------------------------------------
+   COLOUR — NEUTRAL
+   Enterprise greyscale ramp (12 steps).
+   Raw ramp values do not change between appearances.
+   Use semantic surface/text tokens in components — not raw neutrals.
+   ---------------------------------------------------------------- */
+:root {
+  --color-neutral-0: ;     /* #ffffff */
+  --color-neutral-50: ;    /* #f8f9fa */
+  --color-neutral-100: ;   /* #f1f3f5 */
+  --color-neutral-200: ;   /* #e9ecef */
+  --color-neutral-300: ;   /* #dee2e6 */
+  --color-neutral-400: ;   /* #ced4da */
+  --color-neutral-500: ;   /* #adb5bd */
+  --color-neutral-600: ;   /* #868e96 */
+  --color-neutral-700: ;   /* #495057 */
+  --color-neutral-800: ;   /* #343a40 */
+  --color-neutral-900: ;   /* #212529 */
+  --color-neutral-950: ;   /* #101214 — near-black graphite base */
+}
+
+/* ----------------------------------------------------------------
+   COLOUR — SURFACE & TEXT
+   These semantic tokens invert between light and dark appearances.
+   Always reference these in components; never use raw neutrals.
+   ---------------------------------------------------------------- */
+:root {
+  --color-surface-base: ;    /* Page background */
+  --color-surface-raised: ;  /* Card, panel, table row background */
+  --color-surface-overlay: ; /* Modal, popover, tooltip background */
+
+  --color-text-primary: ;    /* Primary body copy */
+  --color-text-secondary: ;  /* Subdued text, metadata */
+  --color-text-disabled: ;   /* Disabled state */
+  --color-text-on-accent: ;  /* Text rendered on accent-coloured background */
+}
+
+/* ----------------------------------------------------------------
+   COLOUR — ACCENT (ONE FAMILY)
+   Q13: Hue is a placeholder pending brand ratification.
+   Ratification = value change only; no component rebuild required.
+   ---------------------------------------------------------------- */
+:root {
+  --color-accent-subtle: ;   /* Q13 PLACEHOLDER — lightest tint */
+  --color-accent-muted: ;    /* Q13 PLACEHOLDER — mid tone */
+  --color-accent-base: ;     /* Q13 PLACEHOLDER — primary action color */
+  --color-accent-emphasis: ; /* Q13 PLACEHOLDER — hover / pressed state */
+  --color-accent-text: ;     /* Q13 PLACEHOLDER — on-accent text (contrast) */
+}
+
+/* ----------------------------------------------------------------
+   COLOUR — SEMANTIC (EXACTLY FOUR FAMILIES)
+   Informational · Success · Warning · Danger
+   No fifth semantic family may be added without updating the contract.
+   No gradient values permitted.
+   ---------------------------------------------------------------- */
+:root {
+  --color-info-subtle: ;
+  --color-info-muted: ;
+  --color-info-base: ;
+  --color-info-emphasis: ;
+  --color-info-text: ;
+
+  --color-success-subtle: ;
+  --color-success-muted: ;
+  --color-success-base: ;
+  --color-success-emphasis: ;
+  --color-success-text: ;
+
+  --color-warning-subtle: ;
+  --color-warning-muted: ;
+  --color-warning-base: ;
+  --color-warning-emphasis: ;
+  --color-warning-text: ;
+
+  --color-danger-subtle: ;
+  --color-danger-muted: ;
+  --color-danger-base: ;
+  --color-danger-emphasis: ;
+  --color-danger-text: ;
+}
