@@ -1,0 +1,32 @@
+.claude/
+CLAUDE.md
+
+# Maven
+target/
+*.jar
+*.war
+*.ear
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Spring Boot
+spring.log

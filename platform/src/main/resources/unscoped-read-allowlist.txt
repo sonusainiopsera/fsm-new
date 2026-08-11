@@ -1,0 +1,10 @@
+# Allow-list for @UnscopedRead usages.
+#
+# Every method or type annotated with @UnscopedRead must appear here.
+# The UnscopedReadEnumerationTest fails if any usage is found that is not in this list,
+# ensuring the exception surface cannot grow silently.
+#
+# Format: fully qualified class name + "#" + method name (or class name alone for type-level annotations)
+# Example: com.fieldservice.analytics.KpiQueryService#computeGlobalBacklogCount
+#
+# Current allow-list (populated as analytics read model is built):

@@ -1,0 +1,142 @@
+spring:
+  application:
+    name: field-service-api
+
+  # Java 21 virtual threads — enables blocking-style code with high concurrency
+  threads:
+    virtual:
+      enabled: true
+
+  # Fail fast on missing properties rather than silently using defaults
+  config:
+    import: optional:file:.env[.properties]
+
+  # Stateless JWT — no server-side session
+  session:
+    store-type: none
+
+  # JPA configuration
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        default_schema: public
+        # Log slow queries for performance monitoring
+        session:
+          events:
+            log:
+              LOG_QUERIES_SLOWER_THAN_MS: 1000
+
+  # Flyway migrations
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    locations: classpath:db/migration
+    validate-on-migrate: true
+
+  # Jackson — strict mode prevents mass-assignment attacks
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+  # OAuth2 Resource Server — configured from environment
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # JWKS URI for token signature verification (configured per-environment)
+          jwks-uri: ${JWKS_URI:http://localhost:8080/.well-known/jwks.json}
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
+
+# Actuator — health and info only exposed by default
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+# Logging
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} traceId=%X{traceId} - %msg%n"
+  level:
+    root: INFO
+    com.fieldservice: INFO
+    org.springframework.security: INFO
+    # Enable SQL logging for development — disable in production
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql: WARN
+
+---
+# API profile — HTTP API deployable
+spring:
+  config:
+    activate:
+      on-profile: api
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fieldservice}
+    username: ${DB_USERNAME:fieldservice}
+    password: ${DB_PASSWORD:fieldservice}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+server:
+  port: ${SERVER_PORT:8080}
+  compression:
+    enabled: true
+  http2:
+    enabled: true
+
+---
+# Worker profile — async worker deployable
+spring:
+  config:
+    activate:
+      on-profile: worker
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fieldservice}
+    username: ${DB_USERNAME:fieldservice}
+    password: ${DB_PASSWORD:fieldservice}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+---
+# Test profile — used by integration tests with Testcontainers
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  flyway:
+    locations: classpath:db/migration,classpath:db/fixtures
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        # Show SQL in test output for predicate assertion tests
+        format_sql: true
+    show-sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE

@@ -1,0 +1,24 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # In tests, we use MockMvc with @WithMockUser and JwtRequestPostProcessor
+          # or a mock JWK set; override this with a no-op issuer for test contexts.
+          jwks-uri: http://localhost:0/.well-known/jwks.json
+          issuer-uri: http://localhost:0
+
+  flyway:
+    locations: classpath:db/migration,classpath:db/fixtures
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
