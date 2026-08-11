@@ -79,8 +79,25 @@ ai:
     # Estimated cost per token in USD; used for ai_gateway_estimated_cost_total metric
     cost-per-token: ${AI_PROVIDER_COST_PER_TOKEN:0.00002}
 
+# SpringDoc OpenAPI — expose the JSON contract; disable the interactive UI in all profiles
+# (enable swagger-ui per-deployment by setting SPRINGDOC_SWAGGER_UI_ENABLED=true in non-production)
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:true}
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:false}
+  default-produces-media-type: application/json
+  # Exclude Actuator endpoints from the generated spec
+  paths-to-exclude: /actuator/**
+
 # Pagination defaults — override in production with a strong random secret
 app:
+  api:
+    # Published API version — set at deployment time; defaults to snapshot for local dev
+    version: ${API_VERSION:0.1.0-SNAPSHOT}
+    # Public base URL for the server entry in the OpenAPI document
+    base-url: ${API_PUBLIC_BASE_URL:http://localhost:8080}
   pagination:
     cursor:
       secret: ${APP_PAGINATION_CURSOR_SECRET:dev-cursor-secret-change-in-prod!!}

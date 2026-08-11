@@ -140,6 +140,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+
+        <!-- SpringDoc OpenAPI — generates and serves the OpenAPI 3 contract -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.6</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -152,6 +159,31 @@
                         <profile>api</profile>
                     </profiles>
                 </configuration>
+            </plugin>
+            <!-- Copy generated OpenAPI spec to target/openapi/ as a build artifact -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-openapi-artifact</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/openapi</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/openapi</directory>
+                                    <includes>
+                                        <include>field-service-api.json</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
