@@ -63,3 +63,10 @@
 - **Files:** 14 (+848/-1)
 - **Duration:** 910ss
 - **Approach:** DDL-first approach: authored three Flyway migrations (V8 for identity table extensions and new tables, V9 for role_assignment_aud, V10 for grants), then derived JPA entities from the schema. AppUser was extended with nullable password_hash, display_name, and external_subject. AppRole enum enforces the five-role vocabulary alongside the DB CHECK constraint. RoleAssignment is @Audited with ON DELETE RESTRICT FK. RefreshTokenFamily and RefreshToken use ON DELETE CASCADE. All entities use UUIDv7 PKs. audit table extensions (display_name, external_subject columns) added to app_user_aud in V8 so ddl-auto=validate succeeds. Test fixtures provide one user per role, one inactive, and one no-role user. 21-method integration test covers all acceptance criteria.
+
+## WO-123: User Story: WO-123 - Declarative work order lifecycle transition table
+- **Status:** completed
+- **Commit:** `61229b0`
+- **Files:** 17 (+1335/-0)
+- **Duration:** 814ss
+- **Approach:** Vocabulary-first implementation: declared WorkOrderState (already existed) and WorkOrderEvent enums, then encoded all lifecycle rules as a single 13-entry unmodifiable Map in WorkOrderTransitionTable (package-private, final). Extracted a public WorkOrderTransitionPort interface so the table implementation stays package-private while tests can hold a typed reference. WorkOrderTransitionService is the sole public service entry point; it enforces role authorization from the TransitionDescriptor.requiredRoles before applying state. ADR-0007 records the decision permitting EN_ROUTE→CANCELLED and ON_HOLD→CANCELLED. Tests cover the full 8x8 matrix (parameterized), ArchUnit fitness check (no external setState calls), and a Testcontainers integration test walking the full happy path with Envers revision assertions.
