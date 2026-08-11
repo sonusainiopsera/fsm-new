@@ -82,6 +82,9 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
     @Column(name = "sla_deadline")
     private Instant slaDeadline;
 
+    @Column(name = "cumulative_hold_minutes", nullable = false)
+    private int cumulativeHoldMinutes = 0;
+
     protected WorkOrder() {
     }
 
@@ -157,5 +160,15 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
 
     public void setSlaDeadline(Instant slaDeadline) {
         this.slaDeadline = slaDeadline;
+    }
+
+    public int getCumulativeHoldMinutes() {
+        return cumulativeHoldMinutes;
+    }
+
+    public void addHoldMinutes(int minutes) {
+        if (minutes > 0) {
+            this.cumulativeHoldMinutes += minutes;
+        }
     }
 }

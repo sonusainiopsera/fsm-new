@@ -1,6 +1,8 @@
 package com.fieldservice.workorder.lifecycle;
 
 import com.fieldservice.domain.workorder.WorkOrder;
+import com.fieldservice.domain.workorder.WorkOrderHold;
+import com.fieldservice.domain.workorder.WorkOrderHoldRepository;
 import com.fieldservice.domain.workorder.WorkOrderRepository;
 import com.fieldservice.domain.workorder.WorkOrderState;
 import com.fieldservice.outbox.payload.WorkOrderStateChangedPayload;
@@ -14,6 +16,7 @@ import com.fieldservice.workorder.GuardRefusedException;
 import com.fieldservice.workorder.IllegalWorkOrderTransitionException;
 import com.fieldservice.workorder.WorkOrderTransitionService;
 import com.fieldservice.workorder.WorkOrderVersionConflictException;
+import com.fieldservice.workorder.holds.HoldReasonService;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
@@ -28,11 +31,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -66,23 +71,29 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
 
     private final EntityManager entityManager;
     private final WorkOrderRepository workOrderRepository;
+    private final WorkOrderHoldRepository workOrderHoldRepository;
     private final ScopedQueryExecutor scopedQueryExecutor;
     private final AccessScopeResolver scopeResolver;
     private final DomainEventPublisher eventPublisher;
+    private final HoldReasonService holdReasonService;
     private final Map<String, TransitionGuard> guardsByName;
 
     public WorkOrderTransitionServiceImpl(
             EntityManager entityManager,
             WorkOrderRepository workOrderRepository,
+            WorkOrderHoldRepository workOrderHoldRepository,
             ScopedQueryExecutor scopedQueryExecutor,
             AccessScopeResolver scopeResolver,
             DomainEventPublisher eventPublisher,
+            HoldReasonService holdReasonService,
             List<TransitionGuard> guards) {
         this.entityManager = entityManager;
         this.workOrderRepository = workOrderRepository;
+        this.workOrderHoldRepository = workOrderHoldRepository;
         this.scopedQueryExecutor = scopedQueryExecutor;
         this.scopeResolver = scopeResolver;
         this.eventPublisher = eventPublisher;
+        this.holdReasonService = holdReasonService;
         this.guardsByName = guards.stream()
                 .collect(Collectors.toMap(TransitionGuard::guardId, Function.identity()));
     }
@@ -160,12 +171,22 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
         // 4. Role check
         checkRole(descriptor.requiredRoles());
 
+        // 5a. Vocabulary validation (HOLD transitions only) — throws 400 before guards run
+        if (event == WorkOrderEvent.HOLD && holdReasonCode != null) {
+            holdReasonService.validate(holdReasonCode);
+        }
+
         // 5. Guard evaluation — fail-closed: any exception is treated as a refusal
-        TransitionContext context = new TransitionContext(holdReasonCode, Instant.now());
+        Instant transitionInstant = Instant.now();
+        TransitionContext context = new TransitionContext(holdReasonCode, transitionInstant);
         evaluateGuardsStrict(workOrder, event, descriptor.guardIds(), context);
 
         // 6. Apply state and flush (catches concurrent-update optimistic lock)
         workOrder.setState(descriptor.toState());
+
+        // 6a. Hold interval management (inside the transaction so audit and hold data cannot diverge)
+        handleHoldInterval(workOrder, fromState, event, actor, holdReasonCode, reason, transitionInstant);
+
         WorkOrder saved;
         try {
             saved = workOrderRepository.save(workOrder);
@@ -182,6 +203,58 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
                 actor, workOrderId, fromState, event, descriptor.toState(), saved.getVersion());
 
         return new TransitionResult(saved, fromState);
+    }
+
+    // ── Hold interval management ─────────────────────────────────────────────────
+
+    /**
+     * Manages hold interval records when HOLD, RESUME, or a dangling-close event fires.
+     *
+     * <p>HOLD: inserts a new open hold record.
+     * RESUME / state change away from ON_HOLD: closes any open hold and accumulates minutes.
+     *
+     * <p>All DB writes are inside the caller's transaction so hold data and work order
+     * audit records cannot diverge.
+     */
+    private void handleHoldInterval(WorkOrder workOrder, WorkOrderState fromState,
+                                    WorkOrderEvent event, @Nullable UUID actor,
+                                    @Nullable String holdReasonCode, @Nullable String note,
+                                    Instant transitionInstant) {
+        if (event == WorkOrderEvent.HOLD) {
+            WorkOrderHold hold = new WorkOrderHold();
+            hold.setWorkOrderId(workOrder.getId());
+            hold.setReasonCode(holdReasonCode);
+            hold.setNote(note);
+            hold.setStartedAt(transitionInstant);
+            hold.setStartedBy(actor);
+            workOrderHoldRepository.save(hold);
+
+        } else if (fromState == WorkOrderState.ON_HOLD) {
+            Optional<WorkOrderHold> openHold =
+                    workOrderHoldRepository.findByWorkOrderIdAndEndedAtIsNull(workOrder.getId());
+            openHold.ifPresent(hold -> {
+                hold.setEndedAt(transitionInstant);
+                hold.setEndedBy(actor);
+                workOrderHoldRepository.save(hold);
+
+                long elapsedMinutes = computeHoldMinutes(hold.getStartedAt(), transitionInstant);
+                workOrder.addHoldMinutes((int) elapsedMinutes);
+            });
+        }
+    }
+
+    /**
+     * Computes elapsed hold minutes, rounding sub-minute holds up to 1 so cumulative
+     * totals are never negative and sub-minute holds are not silently discarded.
+     * An ended_at earlier than started_at (clock skew) is treated as zero.
+     */
+    public static long computeHoldMinutes(Instant startedAt, Instant endedAt) {
+        long seconds = Duration.between(startedAt, endedAt).getSeconds();
+        if (seconds <= 0) {
+            return 0L;
+        }
+        // Ceiling division: any partial minute counts as 1
+        return (seconds + 59) / 60;
     }
 
     // ── Guards ──────────────────────────────────────────────────────────────────

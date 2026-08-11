@@ -1,6 +1,8 @@
 package com.fieldservice.workorder.api;
 
 import com.fieldservice.domain.workorder.WorkOrder;
+import com.fieldservice.domain.workorder.WorkOrderHold;
+import com.fieldservice.domain.workorder.WorkOrderHoldRepository;
 import com.fieldservice.domain.workorder.WorkOrderRepository;
 import com.fieldservice.platform.persistence.ScopedQueryExecutor;
 import com.fieldservice.workorder.api.dto.WorkOrderSummaryResponse;
@@ -30,11 +32,14 @@ public class WorkOrderController {
 
     private final ScopedQueryExecutor scopedQueryExecutor;
     private final WorkOrderRepository workOrderRepository;
+    private final WorkOrderHoldRepository workOrderHoldRepository;
 
     public WorkOrderController(ScopedQueryExecutor scopedQueryExecutor,
-                               WorkOrderRepository workOrderRepository) {
+                               WorkOrderRepository workOrderRepository,
+                               WorkOrderHoldRepository workOrderHoldRepository) {
         this.scopedQueryExecutor = scopedQueryExecutor;
         this.workOrderRepository = workOrderRepository;
+        this.workOrderHoldRepository = workOrderHoldRepository;
     }
 
     @Operation(
@@ -44,10 +49,13 @@ public class WorkOrderController {
     @GetMapping("/{id}")
     public ResponseEntity<WorkOrderSummaryResponse> getWorkOrder(@PathVariable UUID id) {
         WorkOrder wo = scopedQueryExecutor.findById(WorkOrder.class, id, workOrderRepository);
-        return ResponseEntity.ok(toSummary(wo));
+        WorkOrderHold openHold = workOrderHoldRepository
+                .findByWorkOrderIdAndEndedAtIsNull(wo.getId())
+                .orElse(null);
+        return ResponseEntity.ok(toSummary(wo, openHold));
     }
 
-    private static WorkOrderSummaryResponse toSummary(WorkOrder wo) {
+    private static WorkOrderSummaryResponse toSummary(WorkOrder wo, WorkOrderHold openHold) {
         return new WorkOrderSummaryResponse(
                 wo.getId(),
                 wo.getState(),
@@ -58,6 +66,9 @@ public class WorkOrderController {
                 wo.getAssignedTechnicianId(),
                 wo.getVersion(),
                 wo.getCreatedAt(),
-                wo.getUpdatedAt());
+                wo.getUpdatedAt(),
+                wo.getCumulativeHoldMinutes(),
+                openHold != null ? openHold.getReasonCode() : null,
+                openHold != null ? openHold.getStartedAt() : null);
     }
 }

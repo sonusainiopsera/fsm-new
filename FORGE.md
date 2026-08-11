@@ -196,3 +196,10 @@
 - **Files:** 30 (+1568/-18)
 - **Duration:** 1107ss
 - **Approach:** N/A
+
+## WO-126: User Story: WO-126 - Controlled hold reason vocabulary and resume handling
+- **Status:** completed
+- **Commit:** `aa9d575`
+- **Files:** 19 (+1035/-7)
+- **Duration:** 1041ss
+- **Approach:** Modelled holds as intervals in an Envers-audited work_order_hold table backed by a hold_reason controlled vocabulary. A Redis short-TTL cache (5 min, DB fallback on miss) serves the vocabulary via HoldReasonService. Vocabulary validation throws InvalidHoldReasonCodeException (HTTP 400 field error) before guard evaluation. HOLD transition inserts an open hold record inside the existing write transaction; RESUME and any transition away from ON_HOLD closes it and accumulates ceiling-rounded minutes on work_order.cumulative_hold_minutes. A partial unique index on work_order_hold(work_order_id) WHERE ended_at IS NULL enforces at most one open hold. GET /api/v1/work-orders/hold-reasons returns active reasons in the standard PagedResponse envelope.

@@ -2,6 +2,7 @@ package com.fieldservice.workorder.api.dto;
 
 import com.fieldservice.domain.workorder.WorkOrderPriority;
 import com.fieldservice.domain.workorder.WorkOrderState;
+import org.springframework.lang.Nullable;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -19,5 +20,8 @@ public record WorkOrderSummaryResponse(
         UUID assignedTechnicianId,
         int version,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        int cumulativeHoldMinutes,
+        @Nullable String currentHoldReasonCode,
+        @Nullable Instant holdStartedAt
 ) {}

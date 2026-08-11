@@ -43,7 +43,10 @@ class ScopedRepositoryArchTest {
                     // WO-125: guard backing tables are not scoped entities; access controlled at the
                     // service layer (guards run inside an already-scoped work order transaction)
                     + "LabourTimeRecordRepository|WorkOrderCompetencyRepository|"
-                    + "WorkOrderPartConsumptionRepository|TechnicianCertificationRepository";
+                    + "WorkOrderPartConsumptionRepository|TechnicianCertificationRepository|"
+                    // WO-126: hold reference data and interval tables are not scoped entities;
+                    // hold operations run inside an already-scoped work order transaction
+                    + "HoldReasonRepository|WorkOrderHoldRepository";
 
     /**
      * Production rule: domain JPA repositories that are not in the non-scoped allow-list

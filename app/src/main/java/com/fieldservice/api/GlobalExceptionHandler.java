@@ -18,6 +18,7 @@ import com.fieldservice.platform.security.ScopedAccessDeniedException;
 import com.fieldservice.workorder.GuardRefusedException;
 import com.fieldservice.workorder.IllegalWorkOrderTransitionException;
 import com.fieldservice.workorder.WorkOrderVersionConflictException;
+import com.fieldservice.workorder.holds.InvalidHoldReasonCodeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -222,6 +223,18 @@ public class GlobalExceptionHandler {
                                 + "'. Legal events: " + ex.getLegalEvents(),
                         tid,
                         Instant.now()));
+    }
+
+    @ExceptionHandler(InvalidHoldReasonCodeException.class)
+    public ResponseEntity<ErrorEnvelope> handleInvalidHoldReasonCode(
+            InvalidHoldReasonCodeException ex,
+            HttpServletRequest request) {
+
+        log.info("Invalid hold reason code: code={}, traceId={}, path={}",
+                ex.getCode(), traceId(), request.getRequestURI());
+        List<FieldError> fieldErrors = List.of(
+                new FieldError("holdReasonCode", "Unknown or inactive hold reason code."));
+        return validationResponse(fieldErrors);
     }
 
     @ExceptionHandler(GuardRefusedException.class)
