@@ -1,0 +1,121 @@
+# RBAC Method-Security Matrix (WO-114)
+# Single source of truth for role-to-operation authorization.
+# This file drives the RbacMatrixTest parameterized integration test.
+# reviewer: security-team  date: 2026-08-11
+#
+# Roles: ADMIN, DISPATCHER, MANAGER, TECHNICIAN, CUSTOMER
+# Notation: allow | deny
+#
+# Representative endpoint used for HTTP-level matrix test (MockMvc).
+# Each entry maps to a Spring MockMvc call; the `endpoint` and `method` fields
+# are used by RbacMatrixTest to construct the request.
+
+operations:
+
+  # ─── Work Order Transitions ─────────────────────────────────────────────────
+
+  - id: workorder.transition
+    description: "Apply a lifecycle event to a work order (POST /api/v1/work-orders/{id}/transitions)"
+    serviceClass: "com.fieldservice.workorder.WorkOrderTransitionService"
+    serviceMethod: "applyTransition"
+    httpMethod: POST
+    endpoint: "/api/v1/work-orders/{id}/transitions"
+    roles:
+      ADMIN:       allow
+      DISPATCHER:  allow
+      MANAGER:     deny
+      TECHNICIAN:  allow
+      CUSTOMER:    deny
+    rationale: "State mutations are limited to operational roles; MANAGER is read-only; CUSTOMER has no lifecycle authority."
+
+  # ─── Work Order Revisions (audit history) ────────────────────────────────────
+
+  - id: workorder.revisions.list
+    description: "List paginated audit revisions for a work order (GET /api/v1/work-orders/{id}/revisions)"
+    serviceClass: "com.fieldservice.audit.RevisionQueryService"
+    serviceMethod: "getWorkOrderRevisions"
+    httpMethod: GET
+    endpoint: "/api/v1/work-orders/{id}/revisions"
+    roles:
+      ADMIN:       allow
+      DISPATCHER:  allow
+      MANAGER:     allow
+      TECHNICIAN:  deny
+      CUSTOMER:    deny
+    rationale: "Audit history is operational-team-only; TECHNICIAN and CUSTOMER scopes don't include historical change data."
+
+  # ─── Work Order Read ─────────────────────────────────────────────────────────
+
+  - id: workorder.read
+    description: "Read a single work order (GET /api/v1/work-orders/{id})"
+    serviceClass: "com.fieldservice.workorder.api.WorkOrderController"
+    serviceMethod: "getWorkOrder"
+    httpMethod: GET
+    endpoint: "/api/v1/work-orders/{id}"
+    roles:
+      ADMIN:       allow
+      DISPATCHER:  allow
+      MANAGER:     allow
+      TECHNICIAN:  allow
+      CUSTOMER:    allow
+    rationale: "All authenticated roles may read work orders within their scope; row-scope predicate enforces row visibility."
+
+  # ─── Inventory / Parts ───────────────────────────────────────────────────────
+
+  - id: inventory.parts.list
+    description: "List parts catalog (GET /api/v1/inventory/parts)"
+    serviceClass: "com.fieldservice.inventory.application.StockQueryServiceImpl"
+    serviceMethod: "listParts"
+    httpMethod: GET
+    endpoint: "/api/v1/inventory/parts"
+    roles:
+      ADMIN:       allow
+      DISPATCHER:  allow
+      MANAGER:     allow
+      TECHNICIAN:  allow
+      CUSTOMER:    deny
+    rationale: "Parts catalog is internal operational data; CUSTOMER has no parts visibility."
+
+  - id: inventory.stock.list
+    description: "List stock levels (GET /api/v1/inventory/stock)"
+    serviceClass: "com.fieldservice.inventory.application.StockQueryServiceImpl"
+    serviceMethod: "listStock"
+    httpMethod: GET
+    endpoint: "/api/v1/inventory/stock"
+    roles:
+      ADMIN:       allow
+      DISPATCHER:  allow
+      MANAGER:     allow
+      TECHNICIAN:  allow
+      CUSTOMER:    deny
+    rationale: "Stock levels are internal operational data; CUSTOMER has no inventory visibility."
+
+  # ─── User Preferences ────────────────────────────────────────────────────────
+
+  - id: user.preferences.read
+    description: "Read own appearance preferences (GET /api/v1/users/me/preferences)"
+    serviceClass: "com.fieldservice.identity.application.UserPreferencesService"
+    serviceMethod: "getPreferences"
+    httpMethod: GET
+    endpoint: "/api/v1/users/me/preferences"
+    roles:
+      ADMIN:       allow
+      DISPATCHER:  allow
+      MANAGER:     allow
+      TECHNICIAN:  allow
+      CUSTOMER:    allow
+    rationale: "Appearance preference is user-scoped; all authenticated principals may read their own preference."
+
+  - id: user.preferences.update
+    description: "Update own appearance preferences (PUT /api/v1/users/me/preferences)"
+    serviceClass: "com.fieldservice.identity.application.UserPreferencesService"
+    serviceMethod: "updatePreferences"
+    httpMethod: PUT
+    endpoint: "/api/v1/users/me/preferences"
+    roles:
+      ADMIN:       allow
+      DISPATCHER:  allow
+      MANAGER:     allow
+      TECHNICIAN:  allow
+      CUSTOMER:    allow
+    rationale: "Each user may update their own preference; self-scope enforced via AccessScopeResolver (no IDOR)."

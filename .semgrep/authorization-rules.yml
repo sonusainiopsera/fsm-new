@@ -1,0 +1,79 @@
+rules:
+  # ─── WO-114: Require @PreAuthorize on public service methods ─────────────────
+  #
+  # Mirrors the EPIC-01 ArchUnit rule so the gate exists outside the JVM test
+  # run. The pipeline scan step runs: semgrep --config .semgrep/ src/
+  #
+  # Rule: every public, non-static, non-constructor method in a @Service or
+  # @Component class in the com.fieldservice domain packages must carry
+  # @PreAuthorize, @PostAuthorize, @Secured, or @PermitAll.
+  #
+  # Infrastructure services (LoginService, RefreshTokenService, OutboxDrainService,
+  # IdempotencyKeyService, SpecificationPageService) are excluded via path patterns
+  # because they operate outside the authenticated request lifecycle.
+
+  - id: service-method-missing-authorization-annotation
+    languages: [java]
+    severity: ERROR
+    message: >
+      Public service method '$METHOD' in '$CLASS' is missing an authorization annotation
+      (@PreAuthorize, @PostAuthorize, or @Secured). Every publicly reachable service method
+      must declare an explicit authorization expression per the RBAC matrix in
+      docs/security/rbac-matrix.md. Add @PreAuthorize with the correct role expression,
+      or annotate with @PreAuthorize("denyAll()") if the method is not user-facing.
+    metadata:
+      category: security
+      cwe: "CWE-285: Improper Authorization"
+      owasp: "A01:2021 - Broken Access Control"
+      confidence: HIGH
+      references:
+        - docs/security/rbac-matrix.md
+    pattern-not-inside: |
+      @PreAuthorize(...) public ...(...) { ... }
+    pattern-not-inside: |
+      @PostAuthorize(...) public ...(...) { ... }
+    pattern-not-inside: |
+      @Secured(...) public ...(...) { ... }
+    pattern: |
+      @Service
+      class $CLASS {
+        ...
+        public $RETURN_TYPE $METHOD(...) { ... }
+        ...
+      }
+    paths:
+      include:
+        - "src/main/java/com/fieldservice/workorder/**"
+        - "src/main/java/com/fieldservice/audit/**"
+        - "src/main/java/com/fieldservice/identity/application/**"
+        - "src/main/java/com/fieldservice/inventory/**"
+      exclude:
+        - "src/main/java/com/fieldservice/identity/application/LoginService.java"
+        - "src/main/java/com/fieldservice/identity/application/RefreshTokenService.java"
+        - "src/main/java/com/fieldservice/outbox/**"
+        - "src/main/java/com/fieldservice/idempotency/**"
+        - "src/main/java/com/fieldservice/pagination/**"
+        - "**/*Config.java"
+        - "**/*Properties.java"
+
+  - id: controller-missing-service-layer-annotation
+    languages: [java]
+    severity: WARNING
+    message: >
+      Controller method '$METHOD' relies on a controller-level @PreAuthorize.
+      Authorization must also be on the service layer so direct service invocations
+      from event consumers or background jobs cannot bypass it.
+    metadata:
+      category: security
+      confidence: MEDIUM
+    pattern: |
+      @RestController
+      class $CLASS {
+        ...
+        @PreAuthorize(...)
+        public $RETURN_TYPE $METHOD(...) { ... }
+        ...
+      }
+    paths:
+      include:
+        - "src/main/java/com/fieldservice/**/*Controller.java"

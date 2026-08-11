@@ -4,6 +4,7 @@ import com.fieldservice.domain.workorder.WorkOrder;
 import com.fieldservice.domain.workorder.WorkOrderState;
 import com.fieldservice.workorder.lifecycle.WorkOrderEvent;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.UUID;
 
@@ -20,13 +21,20 @@ public interface WorkOrderTransitionService {
      * Apply {@code event} to the work order identified by {@code workOrderId}.
      * Legacy entry-point used by test helpers and background jobs that manage their own
      * scope context.
+     *
+     * <p>Coarse authorization gate: only DISPATCHER, TECHNICIAN, and ADMIN may mutate
+     * work order state. Per-event role checks are enforced inside the implementation.
      */
+    @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
     WorkOrder applyEvent(UUID workOrderId, WorkOrderEvent event);
 
     /**
      * HTTP-facing entry-point: applies {@code event} to the work order with full
      * scope enforcement, version pre-check, guard evaluation, outbox event, and
      * structured logging.
+     *
+     * <p>Coarse authorization gate: only DISPATCHER, TECHNICIAN, and ADMIN may mutate
+     * work order state. Per-event role checks are enforced inside the implementation.
      *
      * @param workOrderId     the ID of the work order to transition
      * @param event           the requested lifecycle event
@@ -39,6 +47,7 @@ public interface WorkOrderTransitionService {
      * @throws GuardRefusedException                if a guard refuses or throws unexpectedly
      * @throws org.springframework.security.access.AccessDeniedException if the caller's role is not permitted
      */
+    @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
     TransitionResult applyTransition(UUID workOrderId, WorkOrderEvent event,
                                      int expectedVersion, @Nullable String reason);
 
