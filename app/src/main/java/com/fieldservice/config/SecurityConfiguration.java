@@ -99,10 +99,12 @@ public class SecurityConfiguration {
         return (request, response, authException) -> {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            String tid = traceId();
+            response.setHeader("X-Trace-Id", tid);
             ErrorEnvelope envelope = new ErrorEnvelope(
                     ErrorEnvelope.Code.UNAUTHENTICATED,
                     "Authentication required.",
-                    traceId(),
+                    tid,
                     Instant.now()
             );
             objectMapper.writeValue(response.getWriter(), envelope);
@@ -119,10 +121,12 @@ public class SecurityConfiguration {
         return (request, response, accessDeniedException) -> {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            String tid = traceId();
+            response.setHeader("X-Trace-Id", tid);
             ErrorEnvelope envelope = new ErrorEnvelope(
-                    ErrorEnvelope.Code.ACCESS_DENIED,
+                    ErrorEnvelope.Code.FORBIDDEN,
                     "Access denied.",
-                    traceId(),
+                    tid,
                     Instant.now()
             );
             objectMapper.writeValue(response.getWriter(), envelope);

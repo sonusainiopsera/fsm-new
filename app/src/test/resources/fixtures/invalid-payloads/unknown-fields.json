@@ -1,0 +1,6 @@
+{
+  "name": "Valid Name",
+  "priority": "LOW",
+  "unknownField": "should-be-rejected",
+  "anotherUnknownField": 42
+}
