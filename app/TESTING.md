@@ -320,3 +320,85 @@ Deliberately non-compliant classes live in `com.fieldservice.architecture.fixtur
 - In test sources only (excluded from production class scanning via `ImportOption.DoNotIncludeTests`)
 - Named `*Fixture` or have an `⚠️ ARCHITECTURE TEST FIXTURE ONLY` header comment
 - Never wired as Spring beans
+
+---
+
+## Access-Control Matrix (WO-203)
+
+The access-control matrix is a data-driven, compile-time table of every protected endpoint
+with the expected HTTP outcome for each role, including unauthenticated. The matrix is the
+single source of truth for role-based access decisions. Adding an endpoint without a matrix
+entry fails the build.
+
+### Matrix location
+
+`src/test/java/com/fieldservice/security/AccessControlMatrix.java`
+
+### Adding a new endpoint
+
+1. Locate your controller method in the controller class.
+2. Add one `MatrixEntry` to `AccessControlMatrix.entries()`:
+
+```java
+entry("my-module.resource.action",
+    "POST", "/api/v1/my-module/resources",
+    () -> "/api/v1/my-module/resources",
+    () -> "{\"field\":\"value\"}",
+    Map.of(
+        "ADMIN",           201,
+        "DISPATCHER",      201,
+        "MANAGER",         403,
+        "TECHNICIAN",      403,
+        "CUSTOMER",        403,
+        "UNAUTHENTICATED", 401
+    ))
+```
+
+3. Run `EndpointCoverageTest` — it will pass once the entry is present.
+4. Run `AccessControlMatrixTest` — it will verify the actual HTTP responses match.
+
+### Roles and expected statuses
+
+| Role | Description | Typical scope |
+|------|-------------|---------------|
+| `ADMIN` | Platform administrator | Full access to all endpoints |
+| `DISPATCHER` | Operations dispatcher | Access to work-order lifecycle operations |
+| `MANAGER` | Operations manager | Read-only access to work orders, full customer/catalog access |
+| `TECHNICIAN` | Field technician | Scoped to assigned work orders only |
+| `CUSTOMER` | Customer portal user | Scoped to own account's work orders and sites |
+| `UNAUTHENTICATED` | No Bearer token | Must receive 401 for all protected endpoints |
+
+### No-disclosure rule
+
+Endpoints that enforce row-level scope (e.g. work orders, sites, assets) must return the
+**same HTTP status** for:
+- An out-of-scope record that exists
+- A record that does not exist
+
+This prevents callers from enumerating records by probing status code differences.
+`AccessControlMatrixTest.forbiddenResponse_isIdentical_forExistingAndNonexistent` verifies this.
+
+### Permit-all justification requirement
+
+Any endpoint declared `permitAll()` in the security filter chain must appear in the matrix
+with a `permitAllJustification` comment. The `EndpointCoverageTest.allPermitAllMatrixEntries_haveExplicitJustification`
+test enforces this. Permit-all paths must be reviewed by the security team before merging.
+
+### Token factory
+
+Tests use `TestTokenMinter.primary()` to mint real RS256 JWTs signed with `TestRsaKeyPair.PRIMARY`.
+The `SecurityFilterChainTestConfig` test configuration wires the matching public key into the
+`JwtDecoder` so tokens traverse the full production validation path. **No stub decoder is used.**
+
+### Running the matrix tests
+
+```bash
+# Full matrix (endpoint × role) — requires Testcontainers
+mvn -pl app test -Dtest="AccessControlMatrixTest"
+
+# Endpoint completeness gate — fails if any endpoint is missing from the matrix
+mvn -pl app test -Dtest="EndpointCoverageTest"
+
+# Both together
+mvn -pl app test -Dtest="AccessControlMatrixTest,EndpointCoverageTest"
+```

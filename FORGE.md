@@ -294,3 +294,10 @@
 - **Files:** 12 (+704/-0)
 - **Duration:** 709ss
 - **Approach:** Extended the existing ArchUnit fitness suite with four new rule classes (LayeredArchitectureTest, ModuleBoundaryTest, InjectionAndCryptoRulesTest, DtoBoundaryTest), five new fixture classes covering each violation type, a configured TextFileBasedViolationStore with a pre-populated freeze entry for WorkOrderController's pre-existing layering violation, and a comprehensive ArchUnit rules section in TESTING.md. All rules use ArchUnit 1.3.0 (already in pom.xml) and the @AnalyzeClasses pattern established by prior WOs.
+
+## WO-203: User Story: WO-203 - Role And Row-Scope Access Control Test Matrix
+- **Status:** completed
+- **Commit:** `2f3e215`
+- **Files:** 4 (+1161/-0)
+- **Duration:** 923ss
+- **Approach:** Created a declarative Java-code matrix (AccessControlMatrix) enumerating all 30+ protected endpoints with expected HTTP status per role (DISPATCHER, TECHNICIAN, MANAGER, CUSTOMER, ADMIN, UNAUTHENTICATED). The matrix is driven by a parameterized integration test (AccessControlMatrixTest) that mints real RS256 JWTs via TestTokenMinter/TestRsaKeyPair and routes them through the production SecurityFilterChainTestConfig JwtDecoder. An EndpointCoverageTest loads the full Spring context via RequestMappingHandlerMapping and fails the build if any endpoint is absent from the matrix. Token-shape negatives, row-scope SQL proofs, and service-layer method-security proofs are already covered by SecurityFilterChainIntegrationTest, ScopedQuerySqlInspectionTest, and MethodSecurityTest respectively; those tests were not duplicated.
