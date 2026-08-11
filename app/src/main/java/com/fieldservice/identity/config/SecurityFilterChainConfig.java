@@ -1,5 +1,6 @@
 package com.fieldservice.identity.config;
 
+import com.fieldservice.identity.token.StreamTicketAuthenticationFilter;
 import com.fieldservice.platform.error.RestAccessDeniedHandler;
 import com.fieldservice.platform.error.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 /**
@@ -37,15 +39,18 @@ public class SecurityFilterChainConfig {
     private final RolesClaimAuthorityConverter rolesConverter;
     private final RestAuthenticationEntryPoint authEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
+    private final StreamTicketAuthenticationFilter streamTicketFilter;
 
     public SecurityFilterChainConfig(JwtDecoder jwtDecoder,
                                      RolesClaimAuthorityConverter rolesConverter,
                                      RestAuthenticationEntryPoint authEntryPoint,
-                                     RestAccessDeniedHandler accessDeniedHandler) {
+                                     RestAccessDeniedHandler accessDeniedHandler,
+                                     StreamTicketAuthenticationFilter streamTicketFilter) {
         this.jwtDecoder = jwtDecoder;
         this.rolesConverter = rolesConverter;
         this.authEntryPoint = authEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.streamTicketFilter = streamTicketFilter;
     }
 
     @Bean
@@ -70,11 +75,14 @@ public class SecurityFilterChainConfig {
                                 .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy
                                         .STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                 )
+                .addFilterBefore(streamTicketFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/prometheus").permitAll()
                         .requestMatchers("/api-docs/**", "/v3/api-docs/**").permitAll()
+                        // Stream paths: authenticated via ticket (handled by StreamTicketAuthenticationFilter)
+                        .requestMatchers("/api/v1/streams/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

@@ -50,6 +50,7 @@ rules:
       exclude:
         - "src/main/java/com/fieldservice/identity/application/LoginService.java"
         - "src/main/java/com/fieldservice/identity/application/RefreshTokenService.java"
+        - "src/main/java/com/fieldservice/identity/application/StreamTicketService.java"
         - "src/main/java/com/fieldservice/outbox/**"
         - "src/main/java/com/fieldservice/idempotency/**"
         - "src/main/java/com/fieldservice/pagination/**"

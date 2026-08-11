@@ -182,3 +182,10 @@
 - **Files:** 8 (+609/-0)
 - **Duration:** 882ss
 - **Approach:** Authored the RBAC matrix as a dual-form artefact: human-readable docs/security/rbac-matrix.md (Phase 1 security gate evidence with reviewer/date) and machine-readable rbac-matrix.yml (7 operations × 5 roles driving parameterized tests). Added @PreAuthorize to WorkOrderTransitionService interface methods so background callers cannot bypass service-layer checks. ArchUnit MethodSecurityTest enforces annotation coverage on all public non-static @Service methods in business packages; a deliberately non-compliant UnannotatedServiceMethod fixture proves the rule fires. Semgrep rule in .semgrep/authorization-rules.yml mirrors the ArchUnit requirement for pipeline enforcement outside the JVM. RbacMatrixTest is a 35-cell parameterized integration test (MockMvc + jwt() post processor against Testcontainers PostgreSQL) that reads rbac-matrix.yml at runtime, asserts 403 for denied combinations and non-403 for allowed ones, and includes a completeness check that every matrix entry references a real class and method.
+
+## WO-115: User Story: WO-115 - Issue single-use IP-bound SSE stream tickets
+- **Status:** completed
+- **Commit:** `079af6e`
+- **Files:** 12 (+1310/-1)
+- **Duration:** 734ss
+- **Approach:** Implemented single-use IP-bound SSE stream tickets as a 3-layer design: StreamTicketStore interface (Redis via Lua atomic GET+DEL, InMemory test fallback), StreamTicketService (256-bit SecureRandom issuance, atomic redemption with IP/jti/account validation, Micrometer counters), and StreamTicketAuthenticationFilter (OncePerRequestFilter scoped to /api/v1/streams/**, rejects ticket param on non-stream paths). POST /api/v1/auth/stream-ticket added to AuthController with @PreAuthorize(isAuthenticated()) and 503 fail-closed on store unavailability. SecurityFilterChainConfig registers the filter before UsernamePasswordAuthenticationFilter. The ticket value is never persisted — only its SHA-256 hex digest appears in Redis as the key.

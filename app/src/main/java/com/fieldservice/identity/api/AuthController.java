@@ -3,9 +3,12 @@ package com.fieldservice.identity.api;
 import com.fieldservice.identity.api.dto.LoginRequest;
 import com.fieldservice.identity.api.dto.LoginResponse;
 import com.fieldservice.identity.api.dto.RefreshResponse;
+import com.fieldservice.identity.api.dto.StreamTicketResponse;
 import com.fieldservice.identity.application.LoginAttemptTracker;
 import com.fieldservice.identity.application.LoginService;
 import com.fieldservice.identity.application.RefreshTokenService;
+import com.fieldservice.identity.application.StreamTicketService;
+import com.fieldservice.identity.token.StreamTicketStore;
 import com.fieldservice.platform.api.ErrorEnvelope;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -44,13 +48,16 @@ public class AuthController {
 
     private final LoginService loginService;
     private final RefreshTokenService refreshTokenService;
+    private final StreamTicketService streamTicketService;
     private final long refreshTokenTtlSeconds;
 
     public AuthController(LoginService loginService,
                           RefreshTokenService refreshTokenService,
+                          StreamTicketService streamTicketService,
                           com.fieldservice.identity.config.AuthProperties authProperties) {
         this.loginService = loginService;
         this.refreshTokenService = refreshTokenService;
+        this.streamTicketService = streamTicketService;
         this.refreshTokenTtlSeconds = authProperties.refreshToken().ttl().getSeconds();
     }
 
@@ -157,6 +164,50 @@ public class AuthController {
         // All failure modes: clear the cookie and return uniform 401
         httpResponse.addHeader(HttpHeaders.SET_COOKIE, buildClearRefreshCookie());
         return reauthResponse(tid);
+    }
+
+    // -----------------------------------------------------------------------
+    // Stream ticket issuance
+    // -----------------------------------------------------------------------
+
+    /**
+     * Exchanges a valid access token for a single-use, IP-bound SSE stream ticket.
+     *
+     * <p>The returned ticket is a 256-bit opaque value with a 60-second TTL. It is bound
+     * to the authenticated user and the client IP observed at issuance, and is consumed
+     * atomically on first use. Replayed or expired tickets are refused with 401.
+     *
+     * <p>The ticket must be passed as the {@code ticket} query parameter when opening the
+     * SSE stream at {@code GET /api/v1/streams/alerts}. It must never be logged, shared,
+     * or reused — the client must request a fresh ticket for each stream connection.
+     *
+     * @return 200 with {@link StreamTicketResponse}; 503 if the ticket store is unavailable
+     */
+    @Operation(
+            operationId = "issueStreamTicket",
+            summary = "Issue a single-use IP-bound SSE stream ticket",
+            description = "Exchanges a valid access token for a 60-second single-use ticket " +
+                    "for the SSE stream endpoint. Ticket values are never logged or persisted.")
+    @PostMapping(value = "/stream-ticket", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> issueStreamTicket(HttpServletRequest httpRequest,
+                                               HttpServletResponse httpResponse) {
+        String tid = traceId();
+        httpResponse.setHeader("X-Trace-Id", tid);
+
+        String clientIp = extractClientIp(httpRequest);
+        try {
+            String ticketValue = streamTicketService.issueTicket(clientIp);
+            return ResponseEntity.ok(new StreamTicketResponse(
+                    ticketValue,
+                    (int) StreamTicketService.TICKET_TTL.getSeconds()));
+        } catch (StreamTicketStore.StoreUnavailableException e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ErrorEnvelope(
+                            ErrorEnvelope.Code.AUTH_DEPENDENCY_UNAVAILABLE,
+                            "Authentication service is temporarily unavailable. Please try again shortly.",
+                            tid, Instant.now()));
+        }
     }
 
     // -----------------------------------------------------------------------
