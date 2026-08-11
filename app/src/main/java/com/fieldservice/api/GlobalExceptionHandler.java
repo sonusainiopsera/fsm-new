@@ -9,6 +9,8 @@ import com.fieldservice.platform.exception.IllegalTransitionException;
 import com.fieldservice.platform.exception.NotFoundException;
 import com.fieldservice.platform.exception.ProviderDegradedException;
 import com.fieldservice.platform.exception.RateLimitedException;
+import com.fieldservice.platform.pagination.InvalidCursorException;
+import com.fieldservice.platform.pagination.InvalidSortException;
 import com.fieldservice.platform.security.ScopedAccessDeniedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -156,6 +158,27 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.BAD_REQUEST,
                 ErrorEnvelope.Code.VALIDATION_FAILED,
                 "Request body is missing or cannot be parsed.");
+    }
+
+    @ExceptionHandler(InvalidSortException.class)
+    public ResponseEntity<ErrorEnvelope> handleInvalidSort(
+            InvalidSortException ex,
+            HttpServletRequest request) {
+
+        log.info("Invalid sort parameter: param={}, traceId={}, path={}",
+                ex.getParameterName(), traceId(), request.getRequestURI());
+        List<FieldError> fieldErrors = List.of(new FieldError(ex.getParameterName(), ex.getMessage()));
+        return validationResponse(fieldErrors);
+    }
+
+    @ExceptionHandler(InvalidCursorException.class)
+    public ResponseEntity<ErrorEnvelope> handleInvalidCursor(
+            InvalidCursorException ex,
+            HttpServletRequest request) {
+
+        log.info("Invalid cursor: traceId={}, path={}", traceId(), request.getRequestURI());
+        List<FieldError> fieldErrors = List.of(new FieldError("cursor", "The supplied cursor is invalid or has expired."));
+        return validationResponse(fieldErrors);
     }
 
     // -------------------------------------------------------------------------

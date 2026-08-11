@@ -61,6 +61,14 @@ spring:
           jwks-uri: ${JWKS_URI:http://localhost:8080/.well-known/jwks.json}
           issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
 
+# Pagination defaults — override in production with a strong random secret
+app:
+  pagination:
+    cursor:
+      secret: ${APP_PAGINATION_CURSOR_SECRET:dev-cursor-secret-change-in-prod!!}
+    keyset:
+      threshold: ${APP_PAGINATION_KEYSET_THRESHOLD:20}
+
 # Actuator — health and info only exposed by default
 management:
   endpoints:

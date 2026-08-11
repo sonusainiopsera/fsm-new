@@ -1,5 +1,6 @@
 package com.fieldservice.security;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -19,12 +20,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *       from {@code classpath:db/fixtures/}.</li>
  *   <li>A stub {@link org.springframework.security.oauth2.jwt.JwtDecoder} via
  *       {@link TestSecurityConfig} so tests do not require a reachable JWKS endpoint.</li>
+ *   <li>An auto-configured {@link org.springframework.test.web.servlet.MockMvc} bean
+ *       available for injection in subclasses.</li>
  * </ul>
- *
- * <p>Uses {@link SpringBootTest.WebEnvironment#NONE} — tests interact with the domain
- * layer directly via injected beans. No HTTP server is started.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(TestSecurityConfig.class)
 @Testcontainers
