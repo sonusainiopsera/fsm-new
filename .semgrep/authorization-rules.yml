@@ -1,0 +1,82 @@
+# Semgrep authorization rules — mirrors the EPIC-01 ArchUnit method-security gate
+# so the annotation requirement is enforced in the pipeline outside the JVM test run.
+#
+# Rule: every public method on a @Service class in the workorder domain package must
+# carry @PreAuthorize (or @Secured) so no service method ships publicly reachable
+# without a ratified authorization expression.
+#
+# The deliberate non-compliant fixture that proves this rule fires is:
+#   app/src/test/java/com/fieldservice/app/arch/fixture/UnprotectedServiceFixture.java
+#
+# Run locally: semgrep --config .semgrep/authorization-rules.yml app/src/
+
+rules:
+  - id: service-method-missing-preauthorize
+    message: >
+      Public method '$METHOD' in '@Service' class '$CLASS' lacks @PreAuthorize or @Secured.
+      Every service-layer method in the workorder domain must carry an authorization expression
+      so alternate caller paths (event consumers, scheduled jobs) cannot bypass the check.
+      See docs/security/rbac-matrix.md for the ratified role matrix.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-862: Missing Authorization"
+      owasp: "A01:2021 - Broken Access Control"
+      references:
+        - docs/security/rbac-matrix.md
+        - app/src/test/java/com/fieldservice/app/arch/MethodSecurityTest.java
+    paths:
+      include:
+        - "app/src/main/java/com/fieldservice/workorder/**"
+    patterns:
+      - pattern: |
+          @Service
+          class $CLASS {
+            ...
+            public $TYPE $METHOD(...) { ... }
+            ...
+          }
+      - pattern-not: |
+          @Service
+          class $CLASS {
+            ...
+            @PreAuthorize(...)
+            public $TYPE $METHOD(...) { ... }
+            ...
+          }
+      - pattern-not: |
+          @Service
+          class $CLASS {
+            ...
+            @Secured(...)
+            public $TYPE $METHOD(...) { ... }
+            ...
+          }
+      - pattern-not-regex: "(WorkOrderTransitionApplicationService|WorkOrderRevisionService).*constructor"
+
+  - id: preauthorize-expression-must-reference-known-role
+    message: >
+      @PreAuthorize expression in '$CLASS.$METHOD' references role '$ROLE' which does not
+      appear in the ratified AppRole enum (ADMIN, DISPATCHER, MANAGER, TECHNICIAN, CUSTOMER).
+      Rename the role constant or update the AppRole enum.
+    languages: [java]
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-863: Incorrect Authorization"
+    paths:
+      include:
+        - "app/src/main/java/com/fieldservice/**"
+    patterns:
+      - pattern: "@PreAuthorize(\"$EXPR\")"
+      - metavariable-regex:
+          metavariable: "$EXPR"
+          regex: ".*hasAnyRole\\('.*'\\).*"
+      - pattern-not: "@PreAuthorize(\"hasAnyRole('ADMIN', 'DISPATCHER', 'MANAGER', 'TECHNICIAN', 'CUSTOMER')\")"
+      - pattern-not: "@PreAuthorize(\"hasAnyRole('ADMIN', 'DISPATCHER', 'MANAGER', 'TECHNICIAN')\")"
+      - pattern-not: "@PreAuthorize(\"hasAnyRole('DISPATCHER', 'ADMIN', 'MANAGER', 'TECHNICIAN')\")"
+      - pattern-not: "@PreAuthorize(\"hasAnyRole('ADMIN', 'MANAGER')\")"
+      - pattern-not: "@PreAuthorize(\"hasAnyRole('DISPATCHER', 'ADMIN')\")"
+      - pattern-not: "@PreAuthorize(\"hasAnyRole('DISPATCHER', 'ADMIN', 'MANAGER', 'TECHNICIAN')\")"
+      - pattern-not: "@PreAuthorize(\"isAuthenticated()\")"

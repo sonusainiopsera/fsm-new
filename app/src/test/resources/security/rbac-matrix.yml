@@ -1,0 +1,74 @@
+# Machine-readable RBAC matrix — single source of truth for RbacMatrixTest.
+# Every row maps one service-layer operation to its role permission set.
+# Changes here must be mirrored in docs/security/rbac-matrix.md and vice versa.
+#
+# permission values: PERMIT | DENY
+# http.testPathParams: concrete UUIDs from fixtures.sql used in integration tests
+
+operations:
+
+  - id: get_work_order_revisions
+    description: "Retrieve the Envers revision history for a work order"
+    serviceClass: "com.fieldservice.workorder.audit.WorkOrderRevisionService"
+    serviceMethod: "getRevisions"
+    http:
+      method: GET
+      path: "/api/v1/work-orders/{workOrderId}/revisions"
+      testPathParams:
+        workOrderId: "eeeeeeee-0000-0000-0000-000000000001"
+    permissions:
+      ADMIN:      PERMIT
+      MANAGER:    PERMIT
+      DISPATCHER: DENY
+      TECHNICIAN: DENY
+      CUSTOMER:   DENY
+    rationale: "Audit trails restricted to ADMIN and MANAGER; field roles must not see change history."
+
+  - id: apply_work_order_transition
+    description: "Apply a lifecycle event to a work order"
+    serviceClass: "com.fieldservice.workorder.application.WorkOrderTransitionApplicationService"
+    serviceMethod: "apply"
+    http:
+      method: POST
+      path: "/api/v1/work-orders/{workOrderId}/transitions"
+      testPathParams:
+        workOrderId: "eeeeeeee-0000-0000-0000-000000000001"
+      testBody: '{"event":"DEPART","expectedVersion":0}'
+    permissions:
+      ADMIN:      PERMIT
+      DISPATCHER: PERMIT
+      MANAGER:    PERMIT
+      TECHNICIAN: PERMIT
+      CUSTOMER:   DENY
+    rationale: "Customers have no lifecycle authority; only internal staff may drive state transitions."
+
+  - id: get_user_preference
+    description: "Read the authenticated user's appearance preference"
+    serviceClass: "com.fieldservice.identity.application.UserPreferencesService"
+    serviceMethod: "getPreference"
+    http:
+      method: GET
+      path: "/api/v1/users/me/preferences"
+    permissions:
+      ADMIN:      PERMIT
+      DISPATCHER: PERMIT
+      MANAGER:    PERMIT
+      TECHNICIAN: PERMIT
+      CUSTOMER:   PERMIT
+    rationale: "Personal appearance setting; every authenticated role may read their own preference."
+
+  - id: update_user_preference
+    description: "Update the authenticated user's appearance preference"
+    serviceClass: "com.fieldservice.identity.application.UserPreferencesService"
+    serviceMethod: "updatePreference"
+    http:
+      method: PUT
+      path: "/api/v1/users/me/preferences"
+      testBody: '{"preference":"DARK"}'
+    permissions:
+      ADMIN:      PERMIT
+      DISPATCHER: PERMIT
+      MANAGER:    PERMIT
+      TECHNICIAN: PERMIT
+      CUSTOMER:   PERMIT
+    rationale: "Personal appearance setting; every authenticated role may update their own preference."

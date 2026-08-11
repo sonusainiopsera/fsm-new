@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.RevisionType;
 import org.hibernate.envers.query.AuditEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ public class WorkOrderRevisionService {
         this.entityManager = entityManager;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Transactional(readOnly = true)
     public PagedRevisionResponse getRevisions(UUID workOrderId, int page, int size) {
         var reader = AuditReaderFactory.get(entityManager);
