@@ -72,3 +72,67 @@ operations:
       TECHNICIAN: PERMIT
       CUSTOMER:   PERMIT
     rationale: "Personal appearance setting; every authenticated role may update their own preference."
+
+  - id: list_work_orders
+    description: "Paginated listing of work orders (row-scoped by caller's access scope)"
+    serviceClass: "com.fieldservice.workorder.application.WorkOrderQueryApplicationService"
+    serviceMethod: "listWorkOrders"
+    http:
+      method: GET
+      path: "/api/v1/work-orders"
+    permissions:
+      ADMIN:      PERMIT
+      DISPATCHER: PERMIT
+      MANAGER:    PERMIT
+      TECHNICIAN: PERMIT
+      CUSTOMER:   PERMIT
+    rationale: "All roles may list work orders; row-level scope predicates restrict what each caller actually sees."
+
+  - id: create_work_order
+    description: "Create a new work order"
+    serviceClass: "com.fieldservice.workorder.application.WorkOrderApplicationService"
+    serviceMethod: "createWorkOrder"
+    http:
+      method: POST
+      path: "/api/v1/work-orders"
+      testBody: '{"reference":"WO-RBAC-001","priority":"MEDIUM","siteId":"bbbbbbbb-0000-0000-0000-000000000001"}'
+    permissions:
+      ADMIN:      PERMIT
+      DISPATCHER: PERMIT
+      MANAGER:    PERMIT
+      TECHNICIAN: DENY
+      CUSTOMER:   DENY
+    rationale: "Only management and dispatch roles may create work orders; field technicians and customers are not authorised to create them."
+
+  - id: list_sla_policies
+    description: "List all SLA policies (admin configuration data)"
+    serviceClass: "com.fieldservice.sla.application.SlaPolicyApplicationService"
+    serviceMethod: "listPolicies"
+    http:
+      method: GET
+      path: "/api/v1/admin/sla-policies"
+    permissions:
+      ADMIN:      PERMIT
+      DISPATCHER: DENY
+      MANAGER:    DENY
+      TECHNICIAN: DENY
+      CUSTOMER:   DENY
+    rationale: "SLA configuration is infrastructure-level data; only ADMIN may read or modify it."
+
+  - id: consume_parts
+    description: "Record parts consumed against a work order"
+    serviceClass: "com.fieldservice.inventory.application.PartsConsumptionApplicationService"
+    serviceMethod: "consumeParts"
+    http:
+      method: POST
+      path: "/api/v1/work-orders/{workOrderId}/parts"
+      testPathParams:
+        workOrderId: "eeeeeeee-0000-0000-0000-000000000001"
+      testBody: '{"partId":"cccccccc-0000-0000-0000-000000000001","quantity":1}'
+    permissions:
+      ADMIN:      PERMIT
+      DISPATCHER: PERMIT
+      MANAGER:    PERMIT
+      TECHNICIAN: PERMIT
+      CUSTOMER:   DENY
+    rationale: "Customers may not record parts usage; this is a field-operations action reserved for internal staff."

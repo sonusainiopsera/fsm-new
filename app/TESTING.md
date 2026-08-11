@@ -408,3 +408,82 @@ Current frozen violations (as of 2026-08-11, backlog BL-2026-001):
 # ArchUnit tests only (fast)
 ./mvnw test -pl app -Dtest="*Test,*FitnessTest" -Dgroups="!integration"
 ```
+
+---
+
+## Access Control Test Matrix
+
+The `com.fieldservice.app.security` package contains a declarative, exhaustive test
+matrix that verifies every protected endpoint against every role at the HTTP layer.
+
+### Overview
+
+| Class | Responsibility |
+|-------|---------------|
+| `AccessControlMatrix` | Single source of truth — 29-entry table mapping each endpoint to its permit-role set |
+| `AccessControlMatrixTest` | Expands `ENTRIES × 6 probes` into 174 parameterized cases; asserts 401/403/permitted |
+| `EndpointCoverageTest` | Enumerates `RequestMappingHandlerMapping`; fails if any non-exempt endpoint lacks a matrix row |
+| `TokenShapeNegativeTest` | Lowercase/unknown role values (valid token, wrong authority) → 403 not 401 |
+| `MassAssignmentTest` | Unknown fields in POST/PUT bodies → 400, no row written |
+| `CrossRoleProbeMatrixTest` | Cross-role HTTP probes: row-scoped visibility, non-disclosure of out-of-scope resources |
+| `RbacMatrixTest` | YAML-driven service-layer bypass proof — `@PreAuthorize` intercepted even without HTTP layer |
+
+### Non-disclosure invariant
+
+A caller whose role is not in `permitRoles` receives **HTTP 403** regardless of whether the
+target resource exists. There is no "404 for non-members" shortcut. This is tested by
+`CrossRoleProbeMatrixTest` for every combination of existing / non-existing resource × role.
+
+### Outcome semantics
+
+| Caller | Expected outcome |
+|--------|-----------------|
+| No JWT present | **401 Unauthorized** |
+| JWT with role not in `permitRoles` | **403 Forbidden** — with `{"code":"FORBIDDEN"}` body |
+| JWT with role in `permitRoles` | **Not 401 and not 403** — any domain-level response is acceptable |
+
+The matrix test uses `status().is(s -> s != 401 && s != 403)` for permitted roles so that
+validation-level 400 responses from empty `{}` bodies still count as passing the auth gate.
+
+### Token-shape negatives
+
+`TokenShapeNegativeTest` complements `SecurityFilterChainIT` (cryptographic negatives).
+It proves that tokens that are cryptographically valid but carry wrong role strings are
+still rejected at the authorisation layer:
+
+- `roles: ["dispatcher"]` (lowercase) → `ROLE_dispatcher` → no match → **403**
+- `roles: ["SUPERUSER"]` (unknown) → `ROLE_SUPERUSER` → no match → **403**
+- `roles: []` (empty list) → no authority → **403**
+
+### Mass-assignment protection
+
+`MassAssignmentTest` proves that Jackson's `FAIL_ON_UNKNOWN_PROPERTIES = true`
+(configured globally in `JacksonConfiguration`) is active end-to-end:
+
+- POST body with unknown field → **400**, no row written (verified with `COUNT(*)`)
+- Error response body must not contain stack traces or internal class names
+
+### How to add a new endpoint
+
+1. Add a row to `AccessControlMatrix.ENTRIES` with the correct:
+   - `method` and `pathPattern` (must match Spring MVC registration exactly)
+   - `concretePath` using fixture UUIDs from `db/fixtures.sql`
+   - `requestBody` (`null` for GET/DELETE; minimal `{}` for POST/PUT)
+   - `permitRoles` set matching the controller's `@PreAuthorize` expression
+2. Optionally add the service-layer operation to `src/test/resources/security/rbac-matrix.yml`.
+3. Run `EndpointCoverageTest` — it will fail if the `pathPattern` doesn't match a registered handler.
+4. If the endpoint is intentionally public (permit-all), add it to `EndpointCoverageTest.EXEMPT_ENDPOINTS`
+   with a dated justification comment.
+
+### Running the access-control suite
+
+```bash
+# Full matrix test (requires H2 in-memory DB — no Docker)
+./mvnw test -pl app -Dtest="AccessControlMatrixTest,EndpointCoverageTest,TokenShapeNegativeTest,MassAssignmentTest"
+
+# Cross-role probe matrix (row-scoped visibility)
+./mvnw test -pl app -Dtest=CrossRoleProbeMatrixTest
+
+# RBAC YAML matrix (service-layer bypass proof)
+./mvnw test -pl app -Dtest=RbacMatrixTest
+```
