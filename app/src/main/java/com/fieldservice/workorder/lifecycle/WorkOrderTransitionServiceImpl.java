@@ -16,6 +16,7 @@ import com.fieldservice.workorder.GuardRefusedException;
 import com.fieldservice.workorder.IllegalWorkOrderTransitionException;
 import com.fieldservice.workorder.WorkOrderTransitionService;
 import com.fieldservice.workorder.WorkOrderVersionConflictException;
+import com.fieldservice.sla.SlaClockPausePort;
 import com.fieldservice.workorder.holds.HoldReasonService;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
@@ -76,6 +77,7 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
     private final AccessScopeResolver scopeResolver;
     private final DomainEventPublisher eventPublisher;
     private final HoldReasonService holdReasonService;
+    private final SlaClockPausePort slaClockPausePort;
     private final Map<String, TransitionGuard> guardsByName;
 
     public WorkOrderTransitionServiceImpl(
@@ -86,6 +88,7 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
             AccessScopeResolver scopeResolver,
             DomainEventPublisher eventPublisher,
             HoldReasonService holdReasonService,
+            SlaClockPausePort slaClockPausePort,
             List<TransitionGuard> guards) {
         this.entityManager = entityManager;
         this.workOrderRepository = workOrderRepository;
@@ -94,6 +97,7 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
         this.scopeResolver = scopeResolver;
         this.eventPublisher = eventPublisher;
         this.holdReasonService = holdReasonService;
+        this.slaClockPausePort = slaClockPausePort;
         this.guardsByName = guards.stream()
                 .collect(Collectors.toMap(TransitionGuard::guardId, Function.identity()));
     }
@@ -229,6 +233,11 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
             hold.setStartedBy(actor);
             workOrderHoldRepository.save(hold);
 
+            // Open SLA clock pause if the hold reason flags the clock as pausing
+            if (holdReasonCode != null && isClockPausingReason(holdReasonCode)) {
+                slaClockPausePort.openPause(workOrder.getId(), holdReasonCode, transitionInstant);
+            }
+
         } else if (fromState == WorkOrderState.ON_HOLD) {
             Optional<WorkOrderHold> openHold =
                     workOrderHoldRepository.findByWorkOrderIdAndEndedAtIsNull(workOrder.getId());
@@ -240,6 +249,23 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
                 long elapsedMinutes = computeHoldMinutes(hold.getStartedAt(), transitionInstant);
                 workOrder.addHoldMinutes((int) elapsedMinutes);
             });
+
+            // Close any open SLA clock pause (idempotent if none exists)
+            slaClockPausePort.closePause(workOrder.getId(), transitionInstant);
+        }
+    }
+
+    /**
+     * Returns true if the hold reason code corresponds to a clock-pausing reason.
+     * Looks up via HoldReasonService (cached). Falls back to false on any error
+     * so SLA clock pause omission never blocks a legitimate transition.
+     */
+    private boolean isClockPausingReason(String code) {
+        try {
+            return holdReasonService.isPausesSLAClock(code);
+        } catch (Exception ex) {
+            log.warn("sla.clock_pause_lookup_failed: code={}", code, ex);
+            return false;
         }
     }
 

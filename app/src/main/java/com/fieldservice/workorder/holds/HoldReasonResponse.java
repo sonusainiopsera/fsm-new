@@ -6,5 +6,6 @@ package com.fieldservice.workorder.holds;
 public record HoldReasonResponse(
         String code,
         String label,
-        int sortOrder
+        int sortOrder,
+        boolean pausesSLAClock
 ) {}

@@ -20,6 +20,7 @@ import com.fieldservice.platform.security.ScopedAccessDeniedException;
 import com.fieldservice.workorder.GuardRefusedException;
 import com.fieldservice.workorder.IllegalWorkOrderTransitionException;
 import com.fieldservice.workorder.WorkOrderVersionConflictException;
+import com.fieldservice.sla.SlaPolicyUnavailableException;
 import com.fieldservice.workorder.holds.InvalidHoldReasonCodeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -352,6 +353,18 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
                 ErrorEnvelope.Code.GUARD_REFUSED,
                 "The operation was refused by a business rule.");
+    }
+
+    @ExceptionHandler(SlaPolicyUnavailableException.class)
+    public ResponseEntity<ErrorEnvelope> handleSlaPolicyUnavailable(
+            SlaPolicyUnavailableException ex,
+            HttpServletRequest request) {
+
+        log.error("sla.policy_unavailable: priority={}, traceId={}, path={}",
+                ex.getPriority(), traceId(), request.getRequestURI());
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                ErrorEnvelope.Code.GUARD_REFUSED,
+                "No active SLA policy found for priority: " + ex.getPriority());
     }
 
     // -------------------------------------------------------------------------

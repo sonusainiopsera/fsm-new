@@ -29,6 +29,9 @@ public class HoldReason {
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
+    @Column(name = "pauses_sla_clock", nullable = false)
+    private boolean pausesSLAClock;
+
     protected HoldReason() {
     }
 
@@ -39,4 +42,6 @@ public class HoldReason {
     public boolean isActive() { return active; }
 
     public int getSortOrder() { return sortOrder; }
+
+    public boolean isPausesSLAClock() { return pausesSLAClock; }
 }

@@ -82,6 +82,15 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
     @Column(name = "sla_deadline")
     private Instant slaDeadline;
 
+    @Column(name = "response_due_at")
+    private Instant responseDueAt;
+
+    @Column(name = "resolution_due_at")
+    private Instant resolutionDueAt;
+
+    @Column(name = "at_risk_at")
+    private Instant atRiskAt;
+
     @Column(name = "cumulative_hold_minutes", nullable = false)
     private int cumulativeHoldMinutes = 0;
 
@@ -171,4 +180,13 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
             this.cumulativeHoldMinutes += minutes;
         }
     }
+
+    public Instant getResponseDueAt() { return responseDueAt; }
+    public void setResponseDueAt(Instant responseDueAt) { this.responseDueAt = responseDueAt; }
+
+    public Instant getResolutionDueAt() { return resolutionDueAt; }
+    public void setResolutionDueAt(Instant resolutionDueAt) { this.resolutionDueAt = resolutionDueAt; }
+
+    public Instant getAtRiskAt() { return atRiskAt; }
+    public void setAtRiskAt(Instant atRiskAt) { this.atRiskAt = atRiskAt; }
 }

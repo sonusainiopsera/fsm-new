@@ -143,6 +143,12 @@ class SchemaShapeTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("sla_clock_pause table exists with partial unique index")
+    void slaClockPause_tableExists() throws Exception {
+        assertTableExists("sla_clock_pause");
+    }
+
+    @Test
     @DisplayName("outbox_event table has event_id as primary key")
     void outboxEvent_tableExists() throws Exception {
         assertTableExists("outbox_event");

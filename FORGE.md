@@ -252,3 +252,10 @@
 - **Files:** 26 (+2695/-37)
 - **Duration:** 1138ss
 - **Approach:** Layered the catalog module on top of the existing Customer/Site/Asset domain entities rather than creating parallel entities. Enhanced the existing entities with new V22 catalog fields and @Audited annotations. The catalog module follows the inventory module pattern: api/ package (CatalogQueryPort + projection records), application/ package (CatalogService with @PreAuthorize, hierarchy guards, cascade deactivation, and outbox), and web/ package (three REST controllers). All reads route through ScopedQueryExecutor for mandatory row-scope enforcement. SortAllowList per entity prevents sort injection. Outbox events (CustomerChanged, SiteChanged, AssetChanged) are published atomically with the domain write via DomainEventPublisher(MANDATORY).
+
+## WO-142: User Story: WO-142 - Runtime-configurable SLA policy and deadline derivation
+- **Status:** completed
+- **Commit:** `1b36804`
+- **Files:** 31 (+1164/-5)
+- **Duration:** 1084ss
+- **Approach:** N/A

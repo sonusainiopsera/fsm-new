@@ -99,9 +99,23 @@ public class HoldReasonService {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Returns true if the hold reason with the given code has {@code pauses_sla_clock = true}.
+     * Uses the cached active set; falls back to false for unknown codes.
+     */
+    @PreAuthorize("isAuthenticated()")
+    public boolean isPausesSLAClock(String code) {
+        return getActiveReasons().stream()
+                .filter(r -> r.code().equals(code))
+                .findFirst()
+                .map(HoldReasonResponse::pausesSLAClock)
+                .orElse(false);
+    }
+
     private List<HoldReasonResponse> loadFromDb() {
         return holdReasonRepository.findByActiveTrueOrderBySortOrderAsc().stream()
-                .map(r -> new HoldReasonResponse(r.getCode(), r.getLabel(), r.getSortOrder()))
+                .map(r -> new HoldReasonResponse(r.getCode(), r.getLabel(), r.getSortOrder(),
+                        r.isPausesSLAClock()))
                 .toList();
     }
 }

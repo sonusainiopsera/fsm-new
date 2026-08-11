@@ -50,6 +50,13 @@ public class SlaPolicy {
     @Column(name = "effective_to")
     private Instant effectiveTo;
 
+    @jakarta.persistence.Version
+    @Column(name = "version", nullable = false)
+    private Integer version;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -79,7 +86,8 @@ public class SlaPolicy {
 
     public Instant getCreatedAt() { return createdAt; }
 
-    public boolean isActive() {
-        return effectiveTo == null;
-    }
+    public Integer getVersion() { return version; }
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 }
