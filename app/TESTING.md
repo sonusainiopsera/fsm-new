@@ -259,3 +259,75 @@ quickly with:
 ```bash
 ./mvnw test jacoco:report -pl app
 ```
+
+---
+
+## Analytics read-model substrate (WO-161)
+
+### Unit tests
+
+Run the debounce registry unit tests without Docker:
+
+```bash
+./mvnw test -pl app -Dtest=MetricDebounceRegistryTest
+```
+
+These tests use a `MutableClock` inner class to control wall-clock time deterministically.
+No Spring context is loaded.
+
+### Integration tests
+
+The substrate integration test uses Testcontainers PostgreSQL 16:
+
+```bash
+./mvnw test -pl app -Dtest=AnalyticsSubstrateIT -Dgroups=integration
+```
+
+Requires Docker. Tests verify:
+- V24 migration applies cleanly and both `kpi_projection` and `processed_event` tables exist.
+- `KpiOutboxConsumer` inserts a `processed_event` row on first delivery.
+- Replaying the same `event_id` is a no-op (idempotency).
+- `MetricDebounceRegistry` receives enqueued metric keys after consumption.
+- `KpiProjectionQuery` returns empty for non-existent projections.
+- A manually inserted projection row is readable through the query port with correct `dataAsOf` and `stalenessSeconds`.
+
+### ArchUnit module boundary tests
+
+```bash
+./mvnw test -pl app -Dtest=ModuleBoundaryTest
+```
+
+These verify that:
+- No code outside `analytics` depends on `analytics.internal`.
+- The `analytics` module does not reach into `workorder.domain`, `workorder.repository`,
+  `inventory.domain`, `inventory.repository`, or `sla.internal`.
+
+### Fixture seed data
+
+`app/src/test/resources/fixtures/seed-analytics.sql` seeds 12 `kpi_projection` rows and
+3 `processed_event` rows for multi-month scenario tests. Load it with `@Sql` in integration
+tests or via the Flyway test-container bootstrapper.
+
+### Replica DataSource
+
+Configure `app.analytics.replica-url` to point the analytics JdbcTemplate at a read replica:
+
+```yaml
+app:
+  analytics:
+    replica-url: jdbc:postgresql://replica-host:5432/fieldservice
+    replica-pool-size: 5
+```
+
+Without this property the analytics queries fall back to the primary DataSource automatically.
+
+### Worker profile
+
+The `AnalyticsWorker` scheduler only activates on the `worker` Spring profile.
+Run it locally with:
+
+```bash
+SPRING_PROFILES_ACTIVE=worker ./mvnw spring-boot:run -pl app
+```
+
+Set `app.analytics.enabled=false` to disable the worker without changing profiles.

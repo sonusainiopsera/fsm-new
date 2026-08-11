@@ -73,6 +73,10 @@ app:
     reconciliation:
       enabled: true
       interval-ms: 60000
+  analytics:
+    enabled: true
+    worker-interval-ms: 1000
+    retention-purge-interval-ms: 3600000
   api:
     public-base-url: ${APP_API_PUBLIC_BASE_URL:http://localhost:8080}
   auth:
