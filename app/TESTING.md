@@ -156,3 +156,106 @@ Run with `./mvnw verify -pl app -Dit.test=FixturePersistenceIT`.
 # Single fixture IT
 ./mvnw verify -pl app -Dit.test=FixturePersistenceIT
 ```
+
+---
+
+## Integration test harness (Testcontainers)
+
+### Quick start
+
+```bash
+# Full build: unit + integration + coverage gate
+./mvnw verify -pl app
+
+# Integration tests only
+./mvnw failsafe:integration-test failsafe:verify -pl app
+```
+
+### Base classes
+
+#### `AbstractIntegrationTest` (`com.fieldservice.support`)
+
+Extend for tests that need the full Spring Boot context against real PostgreSQL 16.
+
+```java
+@Tag("integration")   // inherited — do not repeat
+class MyFeatureIT extends AbstractIntegrationTest {
+    @Autowired MyService myService;
+
+    @Test
+    void feature_works() { ... }
+}
+```
+
+**Provides:** singleton PostgreSQL 16 container (started once per JVM), Flyway production
+migrations (includes V4 reference data), full Spring context, `mockMvc`, `dataSource`,
+`entityManager`, `txManager`, `tx`.
+
+#### `RedisContainerSupport` (`com.fieldservice.support`)
+
+Extend instead of `AbstractIntegrationTest` for tests that exercise Redis-backed
+behaviour (caching, rate limiting, refresh-token denylist). All other tests pay zero
+Redis startup cost.
+
+### Isolation strategies
+
+| Strategy | When to use | How |
+|----------|-------------|-----|
+| **Transactional rollback** | Read-only / read-mostly tests | Annotate class/method with `@Transactional` — Spring rolls back automatically |
+| **Truncating** | Tests that need real commits (outbox, optimistic lock, conditional UPDATE) | Inject `DatabaseCleaner`, call `cleaner.truncateAll()` in `@AfterEach` |
+
+`DatabaseCleaner.truncateAll()` never removes `sla_policy` or `hold_reason` rows.
+Reference data from `V4__seed_reference_data.sql` (`ffffffff-...` UUID space) is
+preserved across truncations because those rows are in mutable tables — take care not
+to truncate and re-seed them if you write tests against that UUID space.
+
+### Assertion helpers
+
+```java
+// Envers revision assertions
+AuditAssertions.assertRevisionCount(dataSource, "work_order_aud", woId, 2);
+AuditAssertions.assertLatestRevisionType(dataSource, "work_order_aud", woId, REV_UPDATE);
+
+// Outbox event assertions
+OutboxAssertions.assertExactlyOne(dataSource, woId, "WORK_ORDER_ASSIGNED");
+OutboxAssertions.assertNone(dataSource, woId);  // verify rollback left no trace
+```
+
+Revision types: `REV_INSERT=0`, `REV_UPDATE=1`, `REV_DELETE=2`.
+
+### Container reuse (local development)
+
+Add to `~/.testcontainers.properties` to reuse containers across runs:
+
+```properties
+testcontainers.reuse.enable=true
+```
+
+CI does not have this file, so containers are always fresh in CI.
+
+### Inspecting the test database
+
+```bash
+docker ps | grep postgres   # find port
+psql -h localhost -p <PORT> -U fsapi -d fsapi_test
+
+# Envers history for a work order
+SELECT aud.*, r.actor_user_id FROM work_order_aud aud
+JOIN "REVINFO" r ON aud."REV" = r."REV"
+WHERE aud.id = '<uuid>';
+```
+
+### Coverage report
+
+JaCoCo merges unit and integration runs into a single report:
+
+```
+app/target/site/jacoco-aggregate/index.html
+```
+
+The build fails when line coverage falls below **80%**. Generate the unit-only report
+quickly with:
+
+```bash
+./mvnw test jacoco:report -pl app
+```
