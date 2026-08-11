@@ -14,6 +14,9 @@ import com.fieldservice.platform.exception.RateLimitedException;
 import com.fieldservice.platform.pagination.InvalidCursorException;
 import com.fieldservice.platform.pagination.InvalidSortException;
 import com.fieldservice.platform.security.ScopedAccessDeniedException;
+import com.fieldservice.workorder.GuardRefusedException;
+import com.fieldservice.workorder.IllegalWorkOrderTransitionException;
+import com.fieldservice.workorder.WorkOrderVersionConflictException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -197,6 +200,49 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.CONFLICT,
                 ErrorEnvelope.Code.ILLEGAL_TRANSITION,
                 "The requested state transition is not allowed.");
+    }
+
+    @ExceptionHandler(IllegalWorkOrderTransitionException.class)
+    public ResponseEntity<ErrorEnvelope> handleIllegalWorkOrderTransition(
+            IllegalWorkOrderTransitionException ex,
+            HttpServletRequest request) {
+
+        log.info("Illegal work order transition: currentState={}, requestedEvent={}, legal={}, traceId={}, path={}",
+                ex.getCurrentState(), ex.getRequestedEvent(), ex.getLegalEvents(), traceId(), request.getRequestURI());
+        String tid = traceId();
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .header(TRACE_HEADER, tid)
+                .body(new ErrorEnvelope(
+                        ErrorEnvelope.Code.WORK_ORDER_ILLEGAL_TRANSITION,
+                        "The requested event '" + ex.getRequestedEvent()
+                                + "' is not legal from state '" + ex.getCurrentState()
+                                + "'. Legal events: " + ex.getLegalEvents(),
+                        tid,
+                        Instant.now()));
+    }
+
+    @ExceptionHandler(GuardRefusedException.class)
+    public ResponseEntity<ErrorEnvelope> handleGuardRefused(
+            GuardRefusedException ex,
+            HttpServletRequest request) {
+
+        log.info("Work order guard refused: guardId={}, code={}, traceId={}, path={}",
+                ex.getGuardId(), ex.getCode(), traceId(), request.getRequestURI());
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                ErrorEnvelope.Code.WORK_ORDER_GUARD_REFUSED,
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(WorkOrderVersionConflictException.class)
+    public ResponseEntity<ErrorEnvelope> handleWorkOrderVersionConflict(
+            WorkOrderVersionConflictException ex,
+            HttpServletRequest request) {
+
+        log.info("Work order version conflict: workOrderId={}, expectedVersion={}, traceId={}, path={}",
+                ex.getWorkOrderId(), ex.getExpectedVersion(), traceId(), request.getRequestURI());
+        return errorResponse(HttpStatus.CONFLICT,
+                ErrorEnvelope.Code.WORK_ORDER_VERSION_CONFLICT,
+                "The work order was modified concurrently. Reload and retry with the current version.");
     }
 
     @ExceptionHandler(ConflictException.class)

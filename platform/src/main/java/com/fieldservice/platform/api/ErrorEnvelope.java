@@ -88,5 +88,14 @@ public record ErrorEnvelope(
 
         /** 503 — authentication attempt store (Redis) is temporarily unavailable. */
         public static final String AUTH_DEPENDENCY_UNAVAILABLE = "AUTH_DEPENDENCY_UNAVAILABLE";
+
+        /** 409 — the requested event is not legal from the work order's current state. */
+        public static final String WORK_ORDER_ILLEGAL_TRANSITION = "WORK_ORDER_ILLEGAL_TRANSITION";
+
+        /** 422 — a business guard refused the work order transition. */
+        public static final String WORK_ORDER_GUARD_REFUSED = "WORK_ORDER_GUARD_REFUSED";
+
+        /** 409 — the supplied expectedVersion is stale or a concurrent commit won the optimistic lock. */
+        public static final String WORK_ORDER_VERSION_CONFLICT = "WORK_ORDER_VERSION_CONFLICT";
     }
 }

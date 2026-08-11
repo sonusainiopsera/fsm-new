@@ -16,6 +16,7 @@ public final class TestJwtFactory {
 
     // Fixed IDs matching test fixtures
     public static final UUID DISPATCHER_USER_ID = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000001");
+    public static final UUID ADMIN_USER_ID      = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000003");
     public static final UUID MANAGER_USER_ID    = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000002");
     public static final UUID TECH_1_USER_ID     = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000011");
     public static final UUID TECH_1_ID          = UUID.fromString("00000000-0000-0000-0000-000000000011");
@@ -41,6 +42,11 @@ public final class TestJwtFactory {
     /** JWT for a MANAGER — permit-all scope. */
     public static Jwt managerJwt() {
         return buildJwt(MANAGER_USER_ID, List.of("MANAGER"), Map.of());
+    }
+
+    /** JWT for an ADMIN — permit-all scope. */
+    public static Jwt adminJwt() {
+        return buildJwt(ADMIN_USER_ID, List.of("ADMIN"), Map.of());
     }
 
     /** JWT for Technician 1 — scoped to their assigned work orders. */

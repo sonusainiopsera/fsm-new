@@ -112,3 +112,10 @@
 - **Files:** 24 (+1518/-136)
 - **Duration:** 1650ss
 - **Approach:** Replaced SecurityConfiguration with SecurityFilterChainConfig in identity/config, added complete OAuth2 resource server chain. Created identity/token package with SigningKeyProvider interface (EphemeralRsaSigningKeyProvider wraps JwtSigningKeyConfig key pair), JtiDenylist (Redis EXISTS fail-closed + in-memory fallback), JwksCache (Redis 600s TTL with Micrometer counters + direct fallback), and DenylistOAuth2TokenValidator. JwtDecoderConfig wires NimbusJwtDecoder from JwksCache with DelegatingOAuth2TokenValidator composing timestamp (60s skew), issuer, audience and denylist validators. Security headers DSL adds HSTS/CSP/nosniff/frame-deny/referrer-policy. RestAuthenticationEntryPoint and RestAccessDeniedHandler render shared ErrorEnvelope. Test infrastructure uses programmatically-generated ephemeral RSA key pair (TestRsaKeyPair) with TestTokenMinter minting all token variants offline.
+
+## WO-124: User Story: WO-124 - Single transition endpoint for work order state changes
+- **Status:** completed
+- **Commit:** `36146c5`
+- **Files:** 13 (+1051/-37)
+- **Duration:** 1200ss
+- **Approach:** Single POST /api/v1/work-orders/{id}/transitions endpoint wired through a new applyTransition() service method. Loads via ScopedQueryExecutor (row-scope enforcement; absent == out-of-scope == 403 non-disclosure). Pre-checks client-supplied expectedVersion before guard evaluation. Guards evaluated fail-closed: any exception becomes GuardRefusedException. JPA flush inside @Transactional catches ObjectOptimisticLockingFailureException and rethrows as WorkOrderVersionConflictException. Outbox event published (MANDATORY propagation) atomically with the state change and Envers revision. Three work-order-specific HTTP error codes added to ErrorEnvelope.Code and wired into GlobalExceptionHandler. Legacy applyEvent() preserved unchanged for backward compatibility with existing lifecycle integration tests.
