@@ -7,6 +7,7 @@ import com.fieldservice.platform.api.FieldError;
 import com.fieldservice.platform.api.exception.BusinessGuardException;
 import com.fieldservice.platform.api.exception.ConflictException;
 import com.fieldservice.platform.api.exception.ForbiddenException;
+import com.fieldservice.platform.api.exception.IdempotencyConflictException;
 import com.fieldservice.platform.api.exception.IllegalTransitionException;
 import com.fieldservice.platform.api.exception.InvalidCursorException;
 import com.fieldservice.platform.api.exception.InvalidSortException;
@@ -165,6 +166,15 @@ public class GlobalExceptionHandler {
     }
 
     // ---- 409 Conflict ----------------------------------------------------------
+
+    @ExceptionHandler(IdempotencyConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleIdempotencyConflict(IdempotencyConflictException ex) {
+        String traceId = resolveTraceId();
+        log.warn("idempotency_conflict trace_id={}", traceId);
+        return errorResponse(HttpStatus.CONFLICT,
+                ApiErrorResponse.of(ErrorCode.IDEMPOTENCY_CONFLICT,
+                        ex.getMessage(), traceId));
+    }
 
     @ExceptionHandler(IllegalTransitionException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalTransition(IllegalTransitionException ex) {

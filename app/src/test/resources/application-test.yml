@@ -34,6 +34,12 @@ app:
   pagination:
     cursor-hmac-key: test-hmac-key-for-unit-tests
     offset-threshold: 20
+  idempotency:
+    enabled: true
+    ttl: 24h
+    lease-duration: 5s
+    max-body-bytes: 262144
+    purge-job-enabled: false
 
 logging:
   level:

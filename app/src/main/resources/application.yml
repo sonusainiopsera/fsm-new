@@ -51,6 +51,14 @@ app:
   pagination:
     cursor-hmac-key: ${APP_PAGINATION_CURSOR_HMAC_KEY:change-me-in-production}
     offset-threshold: 20
+  idempotency:
+    enabled: true
+    ttl: 24h
+    lease-duration: 60s
+    max-body-bytes: 262144
+    purge-batch-size: 500
+    purge-job-enabled: true
+    purge-interval-ms: 900000
 
 management:
   endpoints:

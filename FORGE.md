@@ -49,3 +49,10 @@
 - **Files:** 18 (+1372/-15)
 - **Duration:** 956ss
 - **Approach:** Implemented a paginated response envelope with capped size and keyset fallback. The platform module gains PagedResponse<T> (generic envelope record), PageMeta (with estimated flag for keyset mode), PageLinks (next/prev navigation), PageQuery (size clamped to MAX_SIZE=50), SortAllowList (injection-safe allow-list with id tie-break and fingerprint computation), KeysetCursor (HMAC-SHA256 signed base64url cursor with sort fingerprint), PaginationProperties (@ConfigurationProperties), and PaginationAutoConfiguration (@Bean factory). Two new exceptions (InvalidSortException, InvalidCursorException) are mapped to 400 by GlobalExceptionHandler. WorkOrderController updated to accept page/size/sort/cursor params, auto-switch to keyset links at the configurable threshold (default page 20), and execute keyset queries via JPA Specification with tuple-style WHERE clause (created_at, id) for deterministic ordering.
+
+## WO-008: User Story: WO-008 - Idempotency-Key handling for all mutating endpoints
+- **Status:** completed
+- **Commit:** `e4ad099`
+- **Files:** 18 (+1361/-1)
+- **Duration:** 717ss
+- **Approach:** Implemented platform-wide idempotency as a Spring OncePerRequestFilter backed by a PostgreSQL table. The filter intercepts all mutating requests (POST, PUT, PATCH, DELETE), validates the Idempotency-Key header format (16-128 chars, allow-listed charset), computes a SHA-256 digest of method+path+body without persisting the raw body, and claims a (key, userId, endpoint) slot via INSERT IN_PROGRESS. On duplicate: replays COMPLETED responses with Idempotent-Replayed header, returns 409 IDEMPOTENCY_CONFLICT on hash mismatch, reclaims stale IN_PROGRESS rows after the configured lease, and returns 503 for live concurrent duplicates. Only 2xx responses are stored (bounded to 256 KB); 4xx/5xx release the slot for legitimate retries. A scheduled purge job deletes expired rows. All state transitions use REQUIRES_NEW transactions for cross-replica visibility.
