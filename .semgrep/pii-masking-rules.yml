@@ -1,0 +1,94 @@
+rules:
+  # ─── WO-192: PII logging and serialisation gates ────────────────────────────
+  #
+  # These rules enforce that personal data never reaches a log statement or outbox
+  # payload without passing through the masking layer.
+  #
+  # Pipeline step: semgrep --config .semgrep/ src/
+  # Severity: ERROR — must not merge.
+
+  # Rule 1: Deprecated hash algorithm detection.
+  # Extends the WO-200 ArchUnit rule to the Semgrep gate so violations are caught
+  # during code review without waiting for the JVM test run.
+  - id: forbidden-digest-algorithm
+    languages: [java]
+    severity: ERROR
+    message: >
+      '$METHOD("$ALGO")' is called in '$CLASS'. MD5, SHA-1, and DES are cryptographically
+      broken and forbidden by the platform crypto policy. Use SHA-256 or stronger via
+      MessageDigest.getInstance("SHA-256") — or HMAC-SHA256 via Mac.getInstance("HmacSHA256")
+      for pseudonymisation. See TESTING.md §Semgrep Rules.
+    metadata:
+      category: security
+      cwe: "CWE-327: Use of a Broken or Risky Cryptographic Algorithm"
+      owasp: "A02:2021 - Cryptographic Failures"
+      confidence: HIGH
+    patterns:
+      - pattern: MessageDigest.getInstance("$ALGO")
+      - metavariable-regex:
+          metavariable: $ALGO
+          regex: (?i)(MD5|SHA-?1|SHA1|DES|RC4|RC2|Blowfish)
+    paths:
+      include:
+        - "src/main/java/com/fieldservice/**"
+
+  # Rule 2: Logging a @DataClassification-annotated entity directly.
+  # Prevents developers from passing an entity object to a logger without going
+  # through the masking layer.
+  - id: classified-entity-logged-directly
+    languages: [java]
+    severity: ERROR
+    message: >
+      The logger call in '$CLASS.$METHOD' passes '$ENTITY' which may carry
+      @DataClassification-annotated fields. Log a view/DTO or masked field values instead.
+      Never log an entity directly. See TESTING.md §PII Masking Policy.
+    metadata:
+      category: security
+      cwe: "CWE-532: Insertion of Sensitive Information into Log File"
+      owasp: "A09:2021 - Security Logging and Monitoring Failures"
+      confidence: MEDIUM
+    patterns:
+      - pattern: $LOGGER.$LEVEL(..., $ENTITY, ...)
+      - metavariable-regex:
+          metavariable: $LEVEL
+          regex: (trace|debug|info|warn|error)
+      - metavariable-pattern:
+          metavariable: $ENTITY
+          patterns:
+            - pattern-not: "\"...\""
+            - pattern-not: "(String) ..."
+            - pattern-not: "... + ..."
+    paths:
+      include:
+        - "src/main/java/com/fieldservice/workorder/**"
+        - "src/main/java/com/fieldservice/identity/**"
+        - "src/main/java/com/fieldservice/workforce/**"
+        - "src/main/java/com/fieldservice/portal/**"
+
+  # Rule 3: Outbox payload must not include @Restricted fields.
+  # Complements the runtime RestrictedDataInPayloadException by catching the pattern
+  # statically — ensures a payload record's field list is reviewed before merge.
+  - id: restricted-field-in-outbox-payload
+    languages: [java]
+    severity: ERROR
+    message: >
+      A field annotated @Restricted is present in a class used as an outbox payload in
+      '$CLASS'. PiiRedactionUtility will throw at runtime. Remove the @Restricted field
+      or move it to a separate internal record that is never passed to the outbox.
+      See TESTING.md §Outbox Payload Policy.
+    metadata:
+      category: security
+      cwe: "CWE-312: Cleartext Storage of Sensitive Information"
+      confidence: HIGH
+    patterns:
+      - pattern: |
+          class $CLASS {
+            ...
+            @com.fieldservice.platform.outbox.annotation.Restricted
+            $TYPE $FIELD;
+            ...
+          }
+    paths:
+      include:
+        - "src/main/java/com/fieldservice/**/*Payload.java"
+        - "src/main/java/com/fieldservice/**/*Event.java"

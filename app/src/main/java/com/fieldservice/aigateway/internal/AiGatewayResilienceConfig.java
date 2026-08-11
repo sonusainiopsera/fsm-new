@@ -118,9 +118,14 @@ class AiGatewayResilienceConfig {
                 circuitBreaker, bulkhead, timeLimiter, retry,
                 executor, gatewayMetrics, prov.baseUrl(), prov.costPerToken());
 
+        // WO-192: wrap with PII redaction before the feature-flag guard so prompts
+        // are scrubbed before any logging or outbound call occurs.
+        RedactingAiProviderAdapter redactingAdapter =
+                new RedactingAiProviderAdapter(httpAdapter, new FreeTextScrubber());
+
         return new FeatureFlagGuardAdapter(
                 props.copilot().enabled(),
-                httpAdapter,
+                redactingAdapter,
                 capService.orElse(null));
     }
 

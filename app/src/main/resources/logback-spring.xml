@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logback configuration for the field-service API.
+
+  WO-192: MaskingMessageConverter is wired as the %piiMessage conversion word so every
+  log pattern that uses %piiMessage automatically scrubs email, phone, GPS coordinates,
+  UK postcodes and credential values before they reach any appender.
+
+  The converter is applied to all profiles including TRACE so Restricted data cannot
+  leak through verbose debug output.
+-->
+<configuration>
+
+    <!-- ── WO-192: PII masking converter ─────────────────────────────────── -->
+    <conversionRule conversionWord="piiMessage"
+                    converterClass="com.fieldservice.platform.logging.MaskingMessageConverter"/>
+
+    <!-- ── Console appender with masked output ────────────────────────────── -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} traceId=%X{traceId} - %piiMessage%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ── Spring profile overrides ──────────────────────────────────────── -->
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.fieldservice" level="DEBUG"/>
+        <logger name="org.hibernate.SQL" level="DEBUG"/>
+    </springProfile>
+
+    <springProfile name="!test">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.fieldservice" level="INFO"/>
+        <logger name="org.hibernate.SQL" level="WARN"/>
+        <logger name="org.hibernate.type.descriptor.sql" level="WARN"/>
+    </springProfile>
+
+</configuration>
