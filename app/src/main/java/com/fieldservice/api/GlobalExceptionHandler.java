@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.List;
@@ -167,6 +168,19 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.BAD_REQUEST,
                 ErrorEnvelope.Code.VALIDATION_FAILED,
                 "Request body is missing or cannot be parsed.");
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorEnvelope> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+
+        log.info("Type mismatch for parameter: param={}, value={}, traceId={}, path={}",
+                ex.getName(), ex.getValue(), traceId(), request.getRequestURI());
+        List<FieldError> fieldErrors = List.of(new FieldError(
+                ex.getName(),
+                "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'."));
+        return validationResponse(fieldErrors);
     }
 
     @ExceptionHandler(InvalidSortException.class)

@@ -203,3 +203,10 @@
 - **Files:** 19 (+1035/-7)
 - **Duration:** 1041ss
 - **Approach:** Modelled holds as intervals in an Envers-audited work_order_hold table backed by a hold_reason controlled vocabulary. A Redis short-TTL cache (5 min, DB fallback on miss) serves the vocabulary via HoldReasonService. Vocabulary validation throws InvalidHoldReasonCodeException (HTTP 400 field error) before guard evaluation. HOLD transition inserts an open hold record inside the existing write transaction; RESUME and any transition away from ON_HOLD closes it and accumulates ceiling-rounded minutes on work_order.cumulative_hold_minutes. A partial unique index on work_order_hold(work_order_id) WHERE ended_at IS NULL enforces at most one open hold. GET /api/v1/work-orders/hold-reasons returns active reasons in the standard PagedResponse envelope.
+
+## WO-127: User Story: WO-127 - Paginated work order search with row-scoped access
+- **Status:** completed
+- **Commit:** `b4777ec`
+- **Files:** 10 (+1186/-0)
+- **Duration:** 1017ss
+- **Approach:** Implemented a paginated, row-scoped work order search endpoint at GET /api/v1/work-orders. WorkOrderSearchCriteria captures all optional filters; WorkOrderSearchService composes them into a JPA Specification via buildFilterSpec(), delegates to SpecificationPageService which ANDs the AccessScope predicate (via ScopedQueryExecutor) so out-of-scope rows are never loaded. SortAllowList gates all sort fields and rejects unknowns with 400. WorkOrderBoardRow is a projection DTO; entities are never returned. Page size is clamped to 50 in PageQuery. ETag/If-None-Match conditional GET is handled in the controller. Expand-only migration V20 adds composite and partial indexes. A MethodArgumentTypeMismatchException handler was added to GlobalExceptionHandler to return 400 with field-level errors for invalid enum values in request params.
