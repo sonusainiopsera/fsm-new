@@ -12,6 +12,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -30,20 +32,27 @@ import java.util.UUID;
  *       customer account IDs linked to their principal.</li>
  * </ul>
  */
+@Audited
 @Entity
 @Table(name = "work_order")
 public class WorkOrder extends BaseEntity implements ScopedEntity {
 
+    // UUID FK field is audited — stores site_id in work_order_aud
     @Column(name = "site_id", nullable = false, insertable = false, updatable = false)
     private UUID siteId;
 
+    // @ManyToOne excluded — UUID field above handles the FK column in the audit table
+    @NotAudited
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
     private Site site;
 
+    // UUID FK field is audited — stores customer_id in work_order_aud
     @Column(name = "customer_id", nullable = false, insertable = false, updatable = false)
     private UUID customerId;
 
+    // @ManyToOne excluded — UUID field above handles the FK column in the audit table
+    @NotAudited
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;

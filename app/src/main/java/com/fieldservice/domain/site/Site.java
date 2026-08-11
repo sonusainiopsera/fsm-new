@@ -9,6 +9,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.util.UUID;
 
@@ -18,13 +20,17 @@ import java.util.UUID;
  * <p>Scoped entity: CUSTOMER principals may only read sites belonging to their linked
  * customer accounts. DISPATCHER, ADMIN, and MANAGER see all sites.
  */
+@Audited
 @Entity
 @Table(name = "site")
 public class Site extends BaseEntity implements ScopedEntity {
 
+    // UUID FK field is audited — stores customer_id in site_aud
     @Column(name = "customer_id", nullable = false, insertable = false, updatable = false)
     private UUID customerId;
 
+    // @ManyToOne excluded — UUID field above handles the FK column in the audit table
+    @NotAudited
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;

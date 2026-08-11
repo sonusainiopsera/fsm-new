@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.envers.Audited;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -20,6 +21,7 @@ import java.util.UUID;
  * <p>Note: this table has no {@code version} or {@code updated_at} columns because
  * certifications are immutable once issued; revocation sets {@code is_revoked = true}.
  */
+@Audited
 @Entity
 @Table(name = "technician_certification")
 public class TechnicianCertification {

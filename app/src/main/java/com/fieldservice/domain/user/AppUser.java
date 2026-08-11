@@ -4,6 +4,8 @@ import com.fieldservice.platform.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 /**
  * An authenticated principal that can log in to the platform.
@@ -12,6 +14,7 @@ import jakarta.persistence.Table;
  * The {@code password_hash} column is CONFIDENTIAL: it must never be logged,
  * serialised to JSON, or exported to non-production environments.
  */
+@Audited
 @Entity
 @Table(name = "app_user")
 public class AppUser extends BaseEntity {
@@ -19,6 +22,8 @@ public class AppUser extends BaseEntity {
     @Column(name = "email", nullable = false, length = 320)
     private String email;
 
+    // CONFIDENTIAL — excluded from audit tables per BR-21 and SOC 2 requirements
+    @NotAudited
     @Column(name = "password_hash", nullable = false, length = 72)
     private String passwordHash;
 

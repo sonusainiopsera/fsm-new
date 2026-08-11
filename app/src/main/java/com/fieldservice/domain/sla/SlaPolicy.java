@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -21,6 +22,7 @@ import java.util.UUID;
  * <p>Not a scoped entity: SLA policies are configuration data read by any authenticated
  * principal to derive deadline information.
  */
+@Audited
 @Entity
 @Table(name = "sla_policy")
 public class SlaPolicy {

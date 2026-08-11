@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.envers.Audited;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -31,6 +32,7 @@ import java.util.UUID;
  * {@code updated_at}, so it does not extend {@link com.fieldservice.platform.entity.BaseEntity}.
  * The version column is present for optimistic locking on the is_current flag update.
  */
+@Audited
 @Entity
 @Table(name = "assignment")
 public class Assignment implements ScopedEntity {

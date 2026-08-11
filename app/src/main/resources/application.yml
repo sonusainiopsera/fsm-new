@@ -30,6 +30,12 @@ spring:
           events:
             log:
               LOG_QUERIES_SLOWER_THAN_MS: 1000
+        # Hibernate Envers — audit tables created by Flyway; Hibernate must never create them
+        envers:
+          audit_table_suffix: _aud
+          store_data_at_delete: true
+          default_schema: public
+          do_not_audit_optimistic_locking_field: true
 
   # Flyway migrations
   flyway:

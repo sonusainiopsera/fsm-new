@@ -47,6 +47,12 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- Hibernate Envers — audit revision history -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-envers</artifactId>
+        </dependency>
+
         <!-- Flyway for schema migrations -->
         <dependency>
             <groupId>org.flywaydb</groupId>
