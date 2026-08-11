@@ -1,0 +1,36 @@
+{
+  "persona": "dispatcher",
+  "viewport": { "width": 1440, "height": 900 },
+  "workOrders": [
+    {
+      "id": "wo-11111111-1111-7000-8000-000000000001",
+      "reference": "WO-0001",
+      "state": "new",
+      "priority": "high",
+      "customerName": "Acme Corp",
+      "siteName": "Main Campus",
+      "scheduledAt": "2026-08-12T09:00:00Z",
+      "assignedTechnicianName": null
+    },
+    {
+      "id": "wo-11111111-1111-7000-8000-000000000002",
+      "reference": "WO-0002",
+      "state": "assigned",
+      "priority": "urgent",
+      "customerName": "Beta Ltd",
+      "siteName": "North Office",
+      "scheduledAt": "2026-08-12T10:30:00Z",
+      "assignedTechnicianName": "A. Patel"
+    },
+    {
+      "id": "wo-11111111-1111-7000-8000-000000000003",
+      "reference": "WO-0003",
+      "state": "in_progress",
+      "priority": "normal",
+      "customerName": "Gamma Inc",
+      "siteName": "Warehouse",
+      "scheduledAt": "2026-08-12T08:00:00Z",
+      "assignedTechnicianName": "B. Smith"
+    }
+  ]
+}

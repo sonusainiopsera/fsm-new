@@ -8,6 +8,11 @@
     "node_modules/**"
   ],
   "rules": {
+    "declaration-block-no-duplicate-properties": true,
+    "declaration-property-value-disallowed-list": {
+      "outline": ["none", "0"],
+      "outline-style": ["none"]
+    },
     "declaration-property-value-allowed-list": {
       "color": ["/^var\\(--/", "inherit", "transparent", "currentColor"],
       "background-color": ["/^var\\(--/", "transparent", "none", "inherit"],

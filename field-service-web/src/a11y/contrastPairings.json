@@ -1,0 +1,96 @@
+{
+  "version": "1",
+  "note": "Every foreground/background token pairing used in the product must be declared here. contrast.js FAILS the build if a pairing is used but not listed. Add a new entry when introducing any new visual pairing. 'fg' and 'bg' supply the resolved hex values for each appearance so the helper runs without a browser.",
+  "pairings": [
+    {
+      "id": "body-on-surface-base",
+      "fgToken": "--color-text-primary",
+      "bgToken": "--color-surface-base",
+      "fg": { "light": "#212529", "dark": "#f1f3f5" },
+      "bg": { "light": "#ffffff", "dark": "#101214" },
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "manager", "customer"],
+      "note": "Default body text on page background"
+    },
+    {
+      "id": "technician-body-light",
+      "fgToken": "--color-text-primary",
+      "bgToken": "--color-surface-base",
+      "fg": { "light": "#212529", "dark": "#f1f3f5" },
+      "bg": { "light": "#ffffff", "dark": "#101214" },
+      "minRatio": 7.0,
+      "personas": ["technician"],
+      "note": "Technician body text requires raised 7:1 contrast per spec"
+    },
+    {
+      "id": "body-on-surface-raised",
+      "fgToken": "--color-text-primary",
+      "bgToken": "--color-surface-raised",
+      "fg": { "light": "#212529", "dark": "#f1f3f5" },
+      "bg": { "light": "#f8f9fa", "dark": "#1a1d20" },
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "manager", "customer", "technician"],
+      "note": "Body text on card/sidebar surfaces"
+    },
+    {
+      "id": "accent-text-on-accent",
+      "fgToken": "--color-accent-text",
+      "bgToken": "--color-accent-base",
+      "fg": { "light": "#ffffff", "dark": "#101214" },
+      "bg": { "light": "#1a73e8", "dark": "#4a9eff" },
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "manager", "customer", "technician"],
+      "note": "Text on primary accent button"
+    },
+    {
+      "id": "success-text-on-success-subtle",
+      "fgToken": "--color-success-text",
+      "bgToken": "--color-success-subtle",
+      "fg": { "light": "#14532d", "dark": "#bbf7d0" },
+      "bg": { "light": "#f0fdf4", "dark": "#052e16" },
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "manager", "customer", "technician"],
+      "note": "Success state chip/badge text on background"
+    },
+    {
+      "id": "warning-text-on-warning-subtle",
+      "fgToken": "--color-warning-text",
+      "bgToken": "--color-warning-subtle",
+      "fg": { "light": "#78350f", "dark": "#fde68a" },
+      "bg": { "light": "#fffbeb", "dark": "#422006" },
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "manager", "customer", "technician"],
+      "note": "Warning state chip/badge text on background"
+    },
+    {
+      "id": "danger-text-on-danger-subtle",
+      "fgToken": "--color-danger-text",
+      "bgToken": "--color-danger-subtle",
+      "fg": { "light": "#7f1d1d", "dark": "#fecaca" },
+      "bg": { "light": "#fef2f2", "dark": "#450a0a" },
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "manager", "customer", "technician"],
+      "note": "Danger state chip/badge text on background"
+    },
+    {
+      "id": "info-text-on-info-subtle",
+      "fgToken": "--color-info-text",
+      "bgToken": "--color-info-subtle",
+      "fg": { "light": "#1e3a8a", "dark": "#bfdbfe" },
+      "bg": { "light": "#eff6ff", "dark": "#1e3a5f" },
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "manager", "customer", "technician"],
+      "note": "Info state chip/badge text on background"
+    },
+    {
+      "id": "secondary-on-surface-base",
+      "fgToken": "--color-text-secondary",
+      "bgToken": "--color-surface-base",
+      "fg": { "light": "#868e96", "dark": "#868e96" },
+      "bg": { "light": "#ffffff", "dark": "#101214" },
+      "minRatio": 3.0,
+      "personas": ["dispatcher", "manager", "customer", "technician"],
+      "note": "Secondary/helper text — 3:1 minimum (non-critical, non-text indicator)"
+    }
+  ]
+}

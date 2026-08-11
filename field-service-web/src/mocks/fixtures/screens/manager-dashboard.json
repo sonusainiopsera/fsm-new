@@ -1,0 +1,22 @@
+{
+  "persona": "manager",
+  "viewport": { "width": 1440, "height": 900 },
+  "kpis": [
+    { "label": "Open Work Orders", "value": 47, "delta": -3, "deltaLabel": "vs last week" },
+    { "label": "Completed This Week", "value": 31, "delta": 5, "deltaLabel": "vs last week" },
+    { "label": "SLA Compliance", "value": "94%", "delta": 2, "deltaLabel": "% pts" },
+    { "label": "First-Time Fix Rate", "value": "87%", "delta": -1, "deltaLabel": "% pts" }
+  ],
+  "chartData": {
+    "caption": "Work orders by week",
+    "series": [
+      { "key": "open", "name": "Open" },
+      { "key": "closed", "name": "Closed" }
+    ],
+    "data": [
+      { "label": "Wk 29", "open": 50, "closed": 28 },
+      { "label": "Wk 30", "open": 48, "closed": 32 },
+      { "label": "Wk 31", "open": 47, "closed": 31 }
+    ]
+  }
+}

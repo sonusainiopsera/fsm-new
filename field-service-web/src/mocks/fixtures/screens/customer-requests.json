@@ -1,0 +1,24 @@
+{
+  "persona": "customer",
+  "viewport": { "width": 768, "height": 1024 },
+  "serviceRequests": [
+    {
+      "id": "wo-33333333-3333-7000-8000-000000000001",
+      "reference": "Request 001",
+      "status": "In Progress",
+      "description": "Air conditioning not working in meeting room 3",
+      "submittedAt": "2026-08-10T14:00:00Z",
+      "scheduledAt": "2026-08-12T09:00:00Z",
+      "technicianName": "A. Patel"
+    },
+    {
+      "id": "wo-33333333-3333-7000-8000-000000000002",
+      "reference": "Request 002",
+      "status": "Awaiting Parts",
+      "description": "Broken window latch on second floor",
+      "submittedAt": "2026-08-09T10:00:00Z",
+      "scheduledAt": null,
+      "technicianName": null
+    }
+  ]
+}

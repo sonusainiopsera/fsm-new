@@ -1,0 +1,19 @@
+{
+  "persona": "technician",
+  "viewport": { "width": 360, "height": 780 },
+  "assignedJob": {
+    "id": "wo-22222222-2222-7000-8000-000000000001",
+    "reference": "WO-0042",
+    "state": "assigned",
+    "priority": "high",
+    "description": "Replace faulty circuit breaker in panel B",
+    "customerName": "Acme Corp",
+    "siteName": "Main Campus",
+    "siteAddress": "1 Main St",
+    "scheduledAt": "2026-08-12T09:00:00Z",
+    "parts": [
+      { "partNumber": "CB-100A", "description": "Circuit breaker 100A", "quantity": 1 }
+    ],
+    "notes": "Access through reception. Contact site manager on arrival."
+  }
+}

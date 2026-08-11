@@ -1,0 +1,14 @@
+{
+  "caption": "Work orders by week",
+  "series": [
+    { "key": "open", "name": "Open" },
+    { "key": "closed", "name": "Closed" },
+    { "key": "inProgress", "name": "In Progress" }
+  ],
+  "data": [
+    { "label": "Wk 1", "open": 24, "closed": 18, "inProgress": 7 },
+    { "label": "Wk 2", "open": 21, "closed": 22, "inProgress": 9 },
+    { "label": "Wk 3", "open": 19, "closed": 25, "inProgress": 11 },
+    { "label": "Wk 4", "open": 27, "closed": 20, "inProgress": 8 }
+  ]
+}
