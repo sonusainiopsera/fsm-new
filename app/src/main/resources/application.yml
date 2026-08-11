@@ -47,6 +47,11 @@ spring:
           issuer-uri: ${JWT_ISSUER_URI:https://auth.fieldservice.local}
           jwk-set-uri: ${JWT_JWK_SET_URI:https://auth.fieldservice.local/.well-known/jwks.json}
 
+app:
+  pagination:
+    cursor-hmac-key: ${APP_PAGINATION_CURSOR_HMAC_KEY:change-me-in-production}
+    offset-threshold: 20
+
 management:
   endpoints:
     web:

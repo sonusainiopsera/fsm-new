@@ -30,6 +30,11 @@ spring:
           issuer-uri:
           jwk-set-uri:
 
+app:
+  pagination:
+    cursor-hmac-key: test-hmac-key-for-unit-tests
+    offset-threshold: 20
+
 logging:
   level:
     com.fieldservice: DEBUG

@@ -8,6 +8,8 @@ import com.fieldservice.platform.api.exception.BusinessGuardException;
 import com.fieldservice.platform.api.exception.ConflictException;
 import com.fieldservice.platform.api.exception.ForbiddenException;
 import com.fieldservice.platform.api.exception.IllegalTransitionException;
+import com.fieldservice.platform.api.exception.InvalidCursorException;
+import com.fieldservice.platform.api.exception.InvalidSortException;
 import com.fieldservice.platform.api.exception.NotFoundException;
 import com.fieldservice.platform.api.exception.ProviderDegradedException;
 import com.fieldservice.platform.api.exception.RateLimitedException;
@@ -106,6 +108,28 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.BAD_REQUEST,
                 ApiErrorResponse.withFieldErrors(ErrorCode.VALIDATION_FAILED,
                         "Request could not be parsed.", errors, traceId));
+    }
+
+    @ExceptionHandler(InvalidSortException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSort(InvalidSortException ex) {
+        String traceId = resolveTraceId();
+        log.warn("invalid_sort field={} value={} trace_id={}", ex.getField(), ex.getRejectedValue(), traceId);
+        return errorResponse(HttpStatus.BAD_REQUEST,
+                ApiErrorResponse.withFieldErrors(ErrorCode.VALIDATION_FAILED,
+                        "Invalid sort parameter.",
+                        List.of(new FieldError(ex.getField(), ex.getMessage())),
+                        traceId));
+    }
+
+    @ExceptionHandler(InvalidCursorException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCursor(InvalidCursorException ex) {
+        String traceId = resolveTraceId();
+        log.warn("invalid_cursor reason={} trace_id={}", ex.getMessage(), traceId);
+        return errorResponse(HttpStatus.BAD_REQUEST,
+                ApiErrorResponse.withFieldErrors(ErrorCode.VALIDATION_FAILED,
+                        "Pagination cursor is invalid.",
+                        List.of(new FieldError("cursor", ex.getMessage())),
+                        traceId));
     }
 
     // ---- 401 Unauthenticated ---------------------------------------------------
