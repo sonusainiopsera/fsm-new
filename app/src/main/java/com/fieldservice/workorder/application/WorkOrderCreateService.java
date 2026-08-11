@@ -7,6 +7,7 @@ import com.fieldservice.domain.customer.CustomerRepository;
 import com.fieldservice.domain.site.Site;
 import com.fieldservice.domain.site.SiteRepository;
 import com.fieldservice.domain.workorder.WorkOrder;
+import com.fieldservice.domain.workorder.WorkOrderOrigin;
 import com.fieldservice.domain.workorder.WorkOrderPriority;
 import com.fieldservice.domain.workorder.WorkOrderRepository;
 import com.fieldservice.domain.workorder.WorkOrderState;
@@ -158,6 +159,76 @@ public class WorkOrderCreateService {
         entityManager.flush(); // needed to obtain the generated ID before reference seq call
 
         // Generate human-readable reference using the database sequence
+        String ref = generateReference();
+        saved.setReference(ref);
+        saved = workOrderRepository.save(saved);
+
+        publishCreatedEvent(saved, policy, now);
+
+        return saved;
+    }
+
+    /**
+     * Creates a portal-originated work order with origin=PORTAL.
+     *
+     * <p>This overload is intended exclusively for the portal submission path.
+     * Ownership validation (site belongs to the customer account) is performed
+     * by {@code PortalServiceRequestService} via {@code CustomerAccessScope} before
+     * calling this method — the pre-validated {@code customerId} is trusted here.
+     *
+     * <p>Priority ceiling (MEDIUM) is enforced here in addition to portal-side validation
+     * so no other caller can escalate a portal submission.
+     *
+     * @param req        creation request with pre-validated customerId and portal-capped priority
+     * @param customerId the caller's customer account UUID (resolved via CustomerAccessScope)
+     * @return the persisted {@link WorkOrder} with origin=PORTAL and stamped SLA deadlines
+     * @throws com.fieldservice.sla.SlaPolicyUnavailableException if no active policy for priority
+     */
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public WorkOrder createForPortal(CreateWorkOrderRequest req, UUID customerId) {
+        Instant now = Instant.now();
+
+        WorkOrderPriority priority = WorkOrderPriority.valueOf(req.priority());
+        if (priority.ordinal() > CUSTOMER_PRIORITY_CEILING.ordinal()) {
+            throw new ScopedAccessDeniedException(
+                    "Portal submissions may not exceed priority " + CUSTOMER_PRIORITY_CEILING.name());
+        }
+
+        SlaPolicy policy     = slaPolicyProvider.resolveActivePolicy(req.priority(), now);
+        SlaDeadlines deadlines = slaDeadlineCalculator.calculate(req.priority(), now);
+
+        Customer customer = scopedQueryExecutor.findById(Customer.class, customerId, customerRepository);
+        Site site         = scopedQueryExecutor.findById(Site.class, req.siteId(), siteRepository);
+
+        if (!customerId.equals(site.getCustomerId())) {
+            throw new SiteCustomerMismatchException(req.siteId(), customerId);
+        }
+
+        WorkOrder wo = new WorkOrder();
+        wo.setCustomer(customer);
+        wo.setSite(site);
+        wo.setPriority(priority);
+        wo.setState(WorkOrderState.NEW);
+        wo.setTitle(req.title());
+        wo.setFaultDescription(req.faultDescription());
+        wo.setDescription(req.faultDescription());
+        wo.setResponseDueAt(deadlines.responseDueAt());
+        wo.setResolutionDueAt(deadlines.resolutionDueAt());
+        wo.setAtRiskAt(deadlines.atRiskAt());
+        wo.setSlaDeadline(deadlines.resolutionDueAt());
+        wo.setAppliedSlaPolicyId(policy.id());
+        wo.setOrigin(WorkOrderOrigin.PORTAL);
+
+        if (req.assetId() != null) {
+            Asset asset = scopedQueryExecutor.findById(Asset.class, req.assetId(), assetRepository);
+            if (!req.siteId().equals(asset.getSiteId())) {
+                throw new AssetSiteMismatchException(req.assetId(), req.siteId());
+            }
+        }
+
+        WorkOrder saved = workOrderRepository.save(wo);
+        entityManager.flush();
+
         String ref = generateReference();
         saved.setReference(ref);
         saved = workOrderRepository.save(saved);

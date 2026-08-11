@@ -88,6 +88,26 @@ public final class TestJwtFactory {
         return buildJwt(ADMIN_USER_ID, List.of("PRIVACY_ADMIN"), Map.of());
     }
 
+    // Portal test principals (IDs from V118__portal_fixtures.sql)
+    public static final UUID PORTAL_USER_A_ID = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000016");
+    public static final UUID PORTAL_USER_B_ID = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000017");
+    public static final UUID PORTAL_ORPHAN_ID = UUID.fromString("aaaaaaaa-0000-0000-0000-000000000018");
+
+    /** JWT for portal user A — CUSTOMER role, linked to ACCT_A via portal_account_user (V118). */
+    public static Jwt portalUserAJwt() {
+        return buildJwt(PORTAL_USER_A_ID, List.of("CUSTOMER"), Map.of());
+    }
+
+    /** JWT for portal user B — CUSTOMER role, linked to ACCT_B via portal_account_user (V118). */
+    public static Jwt portalUserBJwt() {
+        return buildJwt(PORTAL_USER_B_ID, List.of("CUSTOMER"), Map.of());
+    }
+
+    /** JWT for the orphan portal user — CUSTOMER role, NO portal_account_user row (V118). */
+    public static Jwt portalOrphanJwt() {
+        return buildJwt(PORTAL_ORPHAN_ID, List.of("CUSTOMER"), Map.of());
+    }
+
     private static Jwt buildJwt(UUID subject, List<String> roles, Map<String, Object> extraClaims) {
         Map<String, Object> allClaims = new java.util.HashMap<>(extraClaims);
         allClaims.put("roles", roles);

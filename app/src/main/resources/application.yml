@@ -159,6 +159,15 @@ app:
       # Time zone for cut-off instant computation
       zone-id: ${PRIVACY_PURGE_ZONE_ID:UTC}
 
+  portal:
+    submission:
+      # Default priority for portal-submitted work orders (customers cannot self-escalate)
+      default-priority: ${PORTAL_SUBMISSION_DEFAULT_PRIORITY:MEDIUM}
+      # Maximum portal submissions per account per rate-limit window
+      rate-limit-max: ${PORTAL_RATE_LIMIT_MAX:10}
+      # Rate-limit window duration in seconds
+      rate-limit-window-seconds: ${PORTAL_RATE_LIMIT_WINDOW_SECONDS:60}
+
   sla:
     sweep:
       # Interval between SLA risk sweep ticks in milliseconds (worker profile only)

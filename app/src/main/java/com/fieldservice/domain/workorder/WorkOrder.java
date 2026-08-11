@@ -108,6 +108,10 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
     @Column(name = "applied_sla_policy_id")
     private UUID appliedSlaPolicyId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "origin", nullable = false, length = 20)
+    private WorkOrderOrigin origin = WorkOrderOrigin.DISPATCHER;
+
     protected WorkOrder() {
     }
 
@@ -218,4 +222,7 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
 
     public UUID getAppliedSlaPolicyId() { return appliedSlaPolicyId; }
     public void setAppliedSlaPolicyId(UUID appliedSlaPolicyId) { this.appliedSlaPolicyId = appliedSlaPolicyId; }
+
+    public WorkOrderOrigin getOrigin() { return origin; }
+    public void setOrigin(WorkOrderOrigin origin) { this.origin = origin; }
 }
