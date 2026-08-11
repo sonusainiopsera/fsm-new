@@ -427,3 +427,10 @@
 - **Files:** 17 (+1108/-0)
 - **Duration:** 762ss
 - **Approach:** Added a portal service-request submission endpoint (POST /api/v1/portal/service-requests) that routes creation through the existing WorkOrderCreateService.createForPortal() method — a new overload that trusts a pre-validated accountId from CustomerAccessScope and bypasses JWT-claim ownership checks (needed because portal JWTs do not carry customerAccountIds claims). The origin attribution feature was added via an expand-only Flyway migration V41 adding work_order.origin NOT NULL DEFAULT 'DISPATCHER' with a CHECK constraint, mirrored in the Envers AUD table. Rate limiting uses a dual-bean strategy: RedisPortalRateLimiter (named bean activated when StringRedisTemplate is available) with in-memory fallback InMemoryPortalRateLimiter activated @ConditionalOnMissingBean. All rate-limit configuration is externalised via PortalSubmissionProperties. The DTO uses @JsonIgnoreProperties(ignoreUnknown=false) so unknown properties (e.g. a customer trying to supply 'priority') immediately return 400.
+
+## WO-171: User Story: WO-171 - Customer job status tracking API with conditional polling
+- **Status:** completed
+- **Commit:** `7b4595d`
+- **Files:** 8 (+1203/-0)
+- **Duration:** 1039ss
+- **Approach:** N/A
