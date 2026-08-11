@@ -238,31 +238,42 @@ class CrossRoleProbeMatrixTest {
     class CustomerNonOwningMatrix {
 
         @Test
-        @DisplayName("Beta-only customer gets 403 for WO-001 (Acme) and for nonexistent id — identical bodies")
-        void out_of_scope_and_nonexistent_produce_identical_403() throws Exception {
-            // Beta-only customer probing an Acme work order
+        @DisplayName("Beta-only customer gets 404 for WO-001 (Acme) — cross-account rule")
+        void out_of_scope_customer_work_order_returns_404() throws Exception {
+            // Beta-only customer probing an Acme work order → 404 (cross-account rule)
             ResultActions outOfScope =
                     withJwt(get("/api/v1/work-orders/{id}", WO_001_ID), customerSingleAccount())
-                            .andExpect(status().isForbidden())
-                            .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+                            .andExpect(status().isNotFound())
+                            .andExpect(jsonPath("$.code").value("NOT_FOUND"));
 
-            // Same customer probing a nonexistent id
-            ResultActions nonExistent =
-                    withJwt(get("/api/v1/work-orders/{id}", NONEXISTENT_ID), customerSingleAccount())
-                            .andExpect(status().isForbidden())
-                            .andExpect(jsonPath("$.code").value("FORBIDDEN"));
-
-            // Both responses must not leak the resource id
+            // Response must not leak the resource id
             assertThat(outOfScope.andReturn().getResponse().getContentAsString())
                     .doesNotContain(WO_001_ID.toString());
-            assertThat(nonExistent.andReturn().getResponse().getContentAsString())
-                    .doesNotContain(NONEXISTENT_ID.toString());
+        }
 
-            // Both must carry exactly the same error code
-            assertThat(outOfScope.andReturn().getResponse().getContentAsString())
-                    .contains("FORBIDDEN");
-            assertThat(nonExistent.andReturn().getResponse().getContentAsString())
-                    .contains("FORBIDDEN");
+        @Test
+        @DisplayName("Beta-only customer gets 404 for nonexistent id — byte-identical to cross-account denial")
+        void nonexistent_and_out_of_scope_produce_identical_404() throws Exception {
+            // Out-of-scope work order
+            String outOfScopeBody =
+                    withJwt(get("/api/v1/work-orders/{id}", WO_001_ID), customerSingleAccount())
+                            .andExpect(status().isNotFound())
+                            .andExpect(jsonPath("$.code").value("NOT_FOUND"))
+                            .andReturn().getResponse().getContentAsString();
+
+            // Nonexistent work order (same customer)
+            String nonExistentBody =
+                    withJwt(get("/api/v1/work-orders/{id}", NONEXISTENT_ID), customerSingleAccount())
+                            .andExpect(status().isNotFound())
+                            .andExpect(jsonPath("$.code").value("NOT_FOUND"))
+                            .andReturn().getResponse().getContentAsString();
+
+            // Both 404 bodies carry the same error code — client cannot distinguish absence from denial
+            assertThat(outOfScopeBody).contains("NOT_FOUND");
+            assertThat(nonExistentBody).contains("NOT_FOUND");
+            // Neither response body must leak the requested identifier
+            assertThat(outOfScopeBody).doesNotContain(WO_001_ID.toString());
+            assertThat(nonExistentBody).doesNotContain(NONEXISTENT_ID.toString());
         }
 
         @Test

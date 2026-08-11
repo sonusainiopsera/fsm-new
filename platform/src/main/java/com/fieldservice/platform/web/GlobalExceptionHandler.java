@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fieldservice.platform.api.ApiErrorResponse;
 import com.fieldservice.platform.api.ErrorCode;
 import com.fieldservice.platform.api.FieldError;
+import io.micrometer.core.instrument.MeterRegistry;
 import com.fieldservice.platform.api.exception.BusinessGuardException;
 import com.fieldservice.platform.api.exception.ConflictException;
 import com.fieldservice.platform.api.exception.ForbiddenException;
@@ -70,6 +71,14 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final String X_TRACE_ID = "X-Trace-Id";
+
+    static final String ACCESS_DENIED_COUNTER = "security.access.denied";
+
+    private final MeterRegistry meterRegistry;
+
+    public GlobalExceptionHandler(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
 
     // ---- 400 Bad Request -------------------------------------------------------
 
@@ -180,6 +189,12 @@ public class GlobalExceptionHandler {
         String resourceType = (ex instanceof ScopedAccessDeniedException sde)
                 ? sde.resourceType() : null;
         logDenial(resourceType, traceId);
+        if (ex instanceof ScopedAccessDeniedException) {
+            meterRegistry.counter(ACCESS_DENIED_COUNTER,
+                    "type",     "SCOPE_DENIAL",
+                    "resource", resourceType != null ? resourceType : "unknown")
+                    .increment();
+        }
         return errorResponse(HttpStatus.FORBIDDEN, ApiErrorResponse.forbidden(traceId));
     }
 

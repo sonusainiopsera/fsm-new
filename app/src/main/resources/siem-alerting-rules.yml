@@ -1,0 +1,73 @@
+# SIEM Alerting Rules — Row-Scope Access Denials
+#
+# These Prometheus/Alertmanager rules monitor the security.scope.denial and
+# security.access.denied Micrometer counters emitted by ScopeDenialTranslator
+# and RestAccessDeniedHandler for anomalous access-denial rates.
+#
+# Rule: fire when the denial rate exceeds a baseline that indicates either a
+# misconfiguration, a brute-force sweep, or a privilege escalation attempt.
+
+groups:
+  - name: fieldservice_scope_denial_alerts
+    rules:
+
+      # -------------------------------------------------------------------
+      # Alert 1 — High cross-account customer denial rate
+      # Fires when a single customer principal generates many cross-account
+      # 404 responses in a short window (possible account-enumeration sweep).
+      # -------------------------------------------------------------------
+      - alert: HighCustomerCrossAccountDenialRate
+        expr: |
+          rate(security_scope_denial_total{role="CUSTOMER", outcome="NOT_FOUND"}[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Elevated customer cross-account denial rate"
+          description: >
+            The rate of CUSTOMER cross-account scope denials (outcome=NOT_FOUND) has
+            exceeded 0.5 per second averaged over 5 minutes for 2 consecutive minutes.
+            This may indicate an account-enumeration sweep. Investigate the actor_id
+            dimension in the scope_denial log stream (trace_id correlation).
+
+      # -------------------------------------------------------------------
+      # Alert 2 — High cross-role denial rate (possible insider enumeration)
+      # Fires when technician or dispatcher denials spike, which may indicate
+      # a compromised low-privilege account attempting lateral movement.
+      # -------------------------------------------------------------------
+      - alert: HighCrossRoleDenialRate
+        expr: |
+          rate(security_scope_denial_total{outcome="FORBIDDEN"}[5m]) > 1
+        for: 2m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Elevated cross-role scope denial rate"
+          description: >
+            The rate of cross-role scope denials (outcome=FORBIDDEN) has exceeded 1 per
+            second averaged over 5 minutes. This may indicate a compromised or mis-issued
+            token attempting to access out-of-scope resources. Correlate actor_id from
+            the scope_denial audit log stream.
+
+      # -------------------------------------------------------------------
+      # Alert 3 — RBAC denial spike (misconfigured client or account takeover)
+      # Fires on a broad spike in ROLE_DENIED events from RestAccessDeniedHandler,
+      # which typically indicates a missing grant, a deployment rollback, or an
+      # attacker replaying a token with insufficient authorities.
+      # -------------------------------------------------------------------
+      - alert: RbacDenialSpike
+        expr: |
+          rate(security_access_denied_total{type="ROLE_DENIED"}[5m]) > 2
+        for: 1m
+        labels:
+          severity: critical
+          team: security
+        annotations:
+          summary: "Spike in RBAC-level access denials"
+          description: >
+            The rate of RBAC access denials has exceeded 2 per second averaged over 5
+            minutes. Check for a recent deployment that changed role assignments, or
+            investigate for a token replay attack. Correlate with X-Trace-Id headers
+            in the denied requests.

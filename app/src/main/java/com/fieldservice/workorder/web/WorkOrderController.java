@@ -9,7 +9,7 @@ import com.fieldservice.platform.pagination.PaginationProperties;
 import com.fieldservice.platform.pagination.SortAllowList;
 import com.fieldservice.platform.persistence.ScopedQueryExecutor;
 import com.fieldservice.platform.security.RequestScopedAccessScope;
-import com.fieldservice.platform.security.ScopedAccessDeniedException;
+import com.fieldservice.platform.security.ScopeDenialTranslator;
 import com.fieldservice.workorder.domain.WorkOrder;
 import com.fieldservice.workorder.repository.WorkOrderRepository;
 import jakarta.persistence.criteria.Predicate;
@@ -44,11 +44,10 @@ import java.util.UUID;
  * keyset mode regardless of the page number.
  *
  * <h3>Non-disclosure</h3>
- * <p>Single-item fetches ({@link #getWorkOrder}) throw
- * {@link ScopedAccessDeniedException} when the work order is not found <em>or</em> is
- * outside the caller's scope, resulting in a uniform HTTP 403 with no existence
- * information in the body. Callers cannot distinguish a missing resource from a forbidden
- * one.
+ * <p>Single-item fetches ({@link #getWorkOrder}) delegate to {@link ScopeDenialTranslator}
+ * to produce either HTTP 403 (cross-role denials) or HTTP 404 (CUSTOMER cross-account
+ * denials). In both cases the response is byte-identical whether the resource exists or
+ * not, so callers cannot distinguish absence from denial.
  */
 @RestController
 @RequestMapping("/api/v1/work-orders")
@@ -59,17 +58,20 @@ public class WorkOrderController {
     private final RequestScopedAccessScope accessScope;
     private final PaginationProperties     paginationProperties;
     private final KeysetCursor             keysetCursor;
+    private final ScopeDenialTranslator    scopeDenialTranslator;
 
     public WorkOrderController(WorkOrderRepository workOrderRepository,
                                ScopedQueryExecutor scopedQueryExecutor,
                                RequestScopedAccessScope accessScope,
                                PaginationProperties paginationProperties,
-                               KeysetCursor keysetCursor) {
+                               KeysetCursor keysetCursor,
+                               ScopeDenialTranslator scopeDenialTranslator) {
         this.workOrderRepository  = workOrderRepository;
         this.scopedQueryExecutor  = scopedQueryExecutor;
         this.accessScope          = accessScope;
         this.paginationProperties = paginationProperties;
         this.keysetCursor         = keysetCursor;
+        this.scopeDenialTranslator = scopeDenialTranslator;
     }
 
     /**
@@ -130,16 +132,30 @@ public class WorkOrderController {
      * @return the work order if it exists within the caller's scope
      * @throws ScopedAccessDeniedException (→ 403) if the id is not found or not in scope
      */
+    /**
+     * Retrieves a single work order by id.
+     *
+     * <p>Returns HTTP 403 for a cross-role denial (a technician requesting another
+     * technician's work order) and HTTP 404 for a cross-account customer denial. In both
+     * cases the response is byte-identical whether the resource exists or not
+     * (non-disclosure design). The denial is audited regardless of the HTTP status emitted.
+     *
+     * @param id the work order identifier
+     * @return the work order if it exists within the caller's scope
+     * @throws com.fieldservice.platform.api.exception.NotFoundException (→ 404) when
+     *         the caller is a CUSTOMER and the work order is outside their account scope
+     * @throws com.fieldservice.platform.security.ScopedAccessDeniedException (→ 403) for all other role denials
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('DISPATCHER', 'ADMIN', 'MANAGER', 'TECHNICIAN', 'CUSTOMER')")
     public ResponseEntity<WorkOrderResponse> getWorkOrder(@PathVariable UUID id) {
 
-        WorkOrder wo = scopedQueryExecutor
-                .findById(workOrderRepository, id, accessScope.get(), WorkOrder.class)
-                .orElseThrow(() -> new ScopedAccessDeniedException(
-                        "work_order", "Resource not found or outside caller scope"));
+        var result = scopedQueryExecutor.findById(workOrderRepository, id, accessScope.get(), WorkOrder.class);
+        if (result.isEmpty()) {
+            scopeDenialTranslator.deny(accessScope.get(), "work_order", id);
+        }
 
-        return ResponseEntity.ok(WorkOrderResponse.from(wo));
+        return ResponseEntity.ok(WorkOrderResponse.from(result.get()));
     }
 
     // ---- Response builders -------------------------------------------------

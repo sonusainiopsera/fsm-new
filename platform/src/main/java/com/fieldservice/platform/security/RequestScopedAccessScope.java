@@ -18,7 +18,7 @@ import org.springframework.web.context.annotation.RequestScope;
  */
 @Component
 @RequestScope
-public class RequestScopedAccessScope {
+public class RequestScopedAccessScope implements CurrentPrincipal {
 
     private final AccessScopeResolver resolver;
     private AccessScope cached;
