@@ -308,3 +308,10 @@
 - **Files:** 7 (+1905/-0)
 - **Duration:** 925ss
 - **Approach:** Built a layered contract conformance suite under com.fieldservice.contract. First extracted all envelope/error/no-internals assertions into a reusable ApiAssertions helper. Then wrote one @Testcontainers IT per P0 endpoint group, each owning an isolated PostgreSQL 16 database with unique withDatabaseName to support parallel execution. TransitionContractIT adds an Envers revision-count assertion (SELECT COUNT(*) FROM work_order_aud) on idempotent replay. PartsConsumptionContractIT adds a stock_ledger row-count assertion on idempotent replay plus a stock_balance unchanged assertion on 422 refusal. WorkOrderContractIT adds a pagination-stability proof using a CountDownLatch background thread that inserts/updates rows during page iteration. OpenApiConformanceTest validates live response payloads against the /api-docs schema using Jackson structural checks. Recommendations and assignment groups are deferred — those HTTP endpoints are blocked by WO-186 which is not yet implemented.
+
+## WO-118: User Story: WO-118 - Workforce module: technician profiles, skills and availability
+- **Status:** completed
+- **Commit:** `7a00874`
+- **Files:** 34 (+1793/-7)
+- **Duration:** 933ss
+- **Approach:** N/A
