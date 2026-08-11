@@ -1,0 +1,47 @@
+{
+  "kpis": [
+    {
+      "key": "slaCompliance",
+      "label": "SLA Compliance",
+      "value": "94.2%",
+      "delta": 1.3,
+      "deltaLabel": "% pts vs last 30d",
+      "target": 95,
+      "current": 94.2,
+      "sparklineData": [88.1, 90.4, 91.2, 93.8, 92.1, 94.0, 94.2]
+    },
+    {
+      "key": "utilization",
+      "label": "Technician Utilization",
+      "value": "78.4%",
+      "delta": -2.1,
+      "deltaLabel": "% pts vs last 30d",
+      "target": 80,
+      "current": 78.4,
+      "sparklineData": [75.0, 76.2, 80.1, 79.8, 77.3, 78.0, 78.4]
+    },
+    {
+      "key": "firstTimeFixRate",
+      "label": "First-Time Fix Rate",
+      "value": "82.5%",
+      "delta": 3.7,
+      "deltaLabel": "% pts vs last 30d",
+      "target": 85,
+      "current": 82.5,
+      "sparklineData": [76.0, 78.1, 79.4, 81.2, 80.8, 82.0, 82.5]
+    },
+    {
+      "key": "backlog",
+      "label": "Open Backlog",
+      "value": 42,
+      "delta": 3,
+      "deltaLabel": "vs yesterday",
+      "sparklineData": [38, 40, 37, 42, 39, 41, 42]
+    }
+  ],
+  "technicianUtilization": [
+    { "id": "t1", "name": "Alex M.", "utilizationPct": 88, "jobsPerDay": 3.2, "firstTimeFixPct": 85 },
+    { "id": "t2", "name": "Sam P.", "utilizationPct": 76, "jobsPerDay": 2.8, "firstTimeFixPct": 79 },
+    { "id": "t3", "name": "Jordan R.", "utilizationPct": 71, "jobsPerDay": 2.5, "firstTimeFixPct": 82 }
+  ]
+}

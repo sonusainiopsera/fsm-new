@@ -1,0 +1,62 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.label {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+}
+
+.required {
+  color: var(--color-danger-base);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  aria-hidden: 'true';
+}
+
+.help {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  margin-top: 0;
+}
+
+.control {
+  position: relative;
+}
+
+.error {
+  font-size: var(--fs-sm);
+  color: var(--color-danger-text);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.errorIcon {
+  flex-shrink: 0;
+}
+
+.errors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Compact density */
+.compact .label {
+  font-size: var(--fs-sm);
+}
+
+.compact .help,
+.compact .error {
+  font-size: var(--fs-xs);
+}

@@ -1,0 +1,111 @@
+.card {
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  box-shadow: none;
+  transition-property: border-color;
+  transition-duration: var(--duration-micro);
+  transition-timing-function: var(--easing-standard);
+}
+
+.card:hover {
+  border-color: var(--color-neutral-400);
+  box-shadow: none;
+}
+
+.label {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: var(--lh-tight);
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.value {
+  font-size: 1.875rem;
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+  font-variant-numeric: var(--numeric-figures);
+  font-feature-settings: "tnum";
+  color: var(--color-text-primary);
+}
+
+.delta {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: var(--numeric-figures);
+}
+
+.delta-positive {
+  color: var(--color-success-text);
+}
+
+.delta-negative {
+  color: var(--color-danger-text);
+}
+
+.delta-neutral {
+  color: var(--color-text-secondary);
+}
+
+.targetRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.targetLabel {
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+}
+
+.track {
+  height: 4px;
+  background-color: var(--color-neutral-200);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background-color: var(--color-accent-base);
+  border-radius: var(--radius-pill);
+  transition-property: width;
+  transition-duration: var(--duration-entry);
+  transition-timing-function: var(--easing-standard);
+}
+
+.fill-exceeded {
+  background-color: var(--color-success-base);
+}
+
+.fill-warning {
+  background-color: var(--color-warning-base);
+}
+
+.sparkline {
+  margin-top: var(--space-1);
+  height: 2rem;
+  color: var(--color-accent-muted);
+}
+
+/* Compact density */
+.compact {
+  padding: var(--space-3);
+  gap: var(--space-1);
+}
+
+.compact .value {
+  font-size: var(--fs-xl);
+}

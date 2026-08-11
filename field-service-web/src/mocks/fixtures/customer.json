@@ -1,0 +1,44 @@
+{
+  "account": {
+    "id": "cust-001",
+    "displayName": "Acme Corp",
+    "siteCount": 3
+  },
+  "activeRequest": {
+    "id": "wo-0001",
+    "reference": "WO-2024-0001",
+    "site": "123 Main St, Springfield",
+    "asset": "HVAC Unit A",
+    "category": "Repair",
+    "state": "in_progress",
+    "submittedAt": "2024-08-11T09:00:00Z",
+    "eta": "2024-08-12T10:00:00Z",
+    "lifeCycleSteps": [
+      { "label": "Submitted", "completed": true, "timestamp": "2024-08-11T09:00:00Z" },
+      { "label": "Assigned", "completed": true, "timestamp": "2024-08-11T10:30:00Z" },
+      { "label": "Technician Travelling", "completed": true, "timestamp": "2024-08-12T07:45:00Z" },
+      { "label": "Work in Progress", "completed": false, "timestamp": null },
+      { "label": "Completed", "completed": false, "timestamp": null }
+    ]
+  },
+  "serviceHistory": [
+    {
+      "id": "wo-0095",
+      "reference": "WO-2024-0095",
+      "date": "2024-07-15",
+      "asset": "Elevator B",
+      "category": "Maintenance",
+      "outcome": "completed",
+      "reportUrl": "/reports/wo-0095.pdf"
+    },
+    {
+      "id": "wo-0067",
+      "reference": "WO-2024-0067",
+      "date": "2024-06-22",
+      "asset": "HVAC Unit A",
+      "category": "Repair",
+      "outcome": "completed",
+      "reportUrl": "/reports/wo-0067.pdf"
+    }
+  ]
+}

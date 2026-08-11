@@ -1,0 +1,47 @@
+{
+  "profile": {
+    "id": "tech-001",
+    "displayName": "Alex M.",
+    "shiftProgress": 0.62,
+    "isOnline": true
+  },
+  "jobs": [
+    {
+      "id": "wo-0001",
+      "reference": "WO-2024-0001",
+      "customer": "Acme Corp",
+      "site": "123 Main St",
+      "asset": "HVAC Unit A",
+      "priority": "urgent",
+      "state": "assigned",
+      "deadline": "2024-08-12T10:00:00Z",
+      "distanceKm": 3.2,
+      "requiresParts": true
+    },
+    {
+      "id": "wo-0005",
+      "reference": "WO-2024-0005",
+      "customer": "Riverside Medical",
+      "site": "789 Pine Rd",
+      "asset": "Fire Suppression Panel",
+      "priority": "high",
+      "state": "in_progress",
+      "deadline": "2024-08-12T15:00:00Z",
+      "distanceKm": 0,
+      "requiresParts": false
+    }
+  ],
+  "activeJob": {
+    "id": "wo-0005",
+    "steps": [
+      { "label": "Assigned", "state": "completed", "timestamp": "2024-08-12T07:30:00Z" },
+      { "label": "En Route", "state": "completed", "timestamp": "2024-08-12T07:45:00Z" },
+      { "label": "In Progress", "state": "current", "timestamp": "2024-08-12T08:15:00Z" },
+      { "label": "Completed", "state": "pending", "timestamp": null }
+    ],
+    "labourMinutes": 35,
+    "parts": [
+      { "partNumber": "FP-2201", "description": "Smoke detector unit", "quantity": 2, "consumed": 1 }
+    ]
+  }
+}

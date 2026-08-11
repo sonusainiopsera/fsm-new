@@ -1,0 +1,79 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.numeral {
+  font-size: 1.875rem;
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: var(--numeric-figures);
+  font-feature-settings: "tnum";
+  color: var(--color-text-primary);
+  line-height: var(--lh-tight);
+  min-width: 3rem;
+  text-align: right;
+}
+
+.track {
+  flex: 1;
+  height: 4px;
+  background-color: var(--color-neutral-200);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background-color: var(--color-neutral-500);
+  border-radius: var(--radius-pill);
+}
+
+.factors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.factorRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.factorLabel {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  min-width: 7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.microTrack {
+  flex: 1;
+  height: 4px;
+  background-color: var(--color-neutral-200);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.microFill {
+  height: 100%;
+  background-color: var(--color-neutral-500);
+  border-radius: var(--radius-pill);
+}
+
+.factorValue {
+  font-size: var(--fs-xs);
+  font-variant-numeric: var(--numeric-figures);
+  color: var(--color-text-secondary);
+  min-width: 2.5rem;
+  text-align: right;
+}

@@ -1,0 +1,83 @@
+.surface {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  color: var(--color-text-disabled);
+}
+
+.title {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+}
+
+.description {
+  font-size: var(--fs-md);
+  color: var(--color-text-secondary);
+  max-width: 28rem;
+}
+
+.retryBtn {
+  margin-top: var(--space-2);
+}
+
+/* Skeleton loading */
+.skeletonRow {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeletonLine {
+  height: 1rem;
+  background-color: var(--color-neutral-200);
+  border-radius: var(--radius-control);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skeletonLine:nth-child(2) {
+  width: 80%;
+}
+
+.skeletonLine:nth-child(3) {
+  width: 60%;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Inline refetch indicator */
+.refetchBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-1) var(--space-3);
+}
+
+.refetchDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--color-accent-base);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

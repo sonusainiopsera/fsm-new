@@ -1,0 +1,96 @@
+.region {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 24rem;
+  width: 100%;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
+  border: 1px solid transparent;
+  background-color: var(--color-surface-overlay);
+  box-shadow: var(--elevation-2);
+  pointer-events: all;
+  animation-name: slideUp;
+  animation-duration: var(--duration-entry);
+  animation-timing-function: var(--easing-standard);
+  animation-fill-mode: both;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(var(--space-4)); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.toastInfo {
+  border-color: var(--color-info-muted);
+  background-color: var(--color-info-subtle);
+}
+
+.toastSuccess {
+  border-color: var(--color-success-muted);
+  background-color: var(--color-success-subtle);
+}
+
+.toastWarning {
+  border-color: var(--color-warning-muted);
+  background-color: var(--color-warning-subtle);
+}
+
+.toastDanger {
+  border-color: var(--color-danger-muted);
+  background-color: var(--color-danger-subtle);
+}
+
+.icon {
+  flex-shrink: 0;
+  font-size: var(--fs-base);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.message {
+  font-size: var(--fs-md);
+  color: var(--color-text-primary);
+  font-weight: var(--fw-medium);
+}
+
+.detail {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+.dismiss {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-base);
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+  border-radius: var(--radius-control);
+}
+
+.dismiss:hover {
+  color: var(--color-text-primary);
+}
+
+.dismiss:focus-visible {
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: 2px;
+}
