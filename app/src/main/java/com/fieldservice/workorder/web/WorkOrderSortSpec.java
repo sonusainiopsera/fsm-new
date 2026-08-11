@@ -17,10 +17,11 @@ public final class WorkOrderSortSpec {
 
     public static final SortAllowList ALLOW_LIST = SortAllowList.of(
             Map.of(
-                    "createdAt",  "createdAt",
-                    "priority",   "priority",
-                    "state",      "state",
-                    "reference",  "reference"
+                    "createdAt",          "createdAt",
+                    "priority",           "priority",
+                    "state",              "state",
+                    "reference",          "reference",
+                    "resolutionDeadline", "resolutionDeadline"
             ),
             "createdAt"
     );

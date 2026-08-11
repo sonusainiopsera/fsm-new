@@ -70,6 +70,15 @@ public class WorkOrder implements ScopedEntity {
     @Column(name = "cumulative_hold_minutes", nullable = false)
     private int cumulativeHoldMinutes = 0;
 
+    @Column(name = "response_deadline")
+    private Instant responseDeadline;
+
+    @Column(name = "resolution_deadline")
+    private Instant resolutionDeadline;
+
+    @Column(name = "at_risk", nullable = false)
+    private boolean atRisk = false;
+
     @Version
     private Integer version;
 
@@ -105,7 +114,21 @@ public class WorkOrder implements ScopedEntity {
     public String          getDescription()         { return description; }
     public Instant         getCreatedAt()            { return createdAt; }
     public int             getCumulativeHoldMinutes(){ return cumulativeHoldMinutes; }
+    public Instant         getResponseDeadline()    { return responseDeadline; }
+    public Instant         getResolutionDeadline()  { return resolutionDeadline; }
+    public boolean         isAtRisk()               { return atRisk; }
     public Integer         getVersion()             { return version; }
+
+    /** Sets SLA deadlines when a work order is created from a priority policy. */
+    public void applyDeadlines(Instant responseDeadline, Instant resolutionDeadline) {
+        this.responseDeadline   = responseDeadline;
+        this.resolutionDeadline = resolutionDeadline;
+    }
+
+    /** Marks the work order at-risk when elapsed time exceeds the SLA at-risk threshold. */
+    public void markAtRisk(boolean atRisk) {
+        this.atRisk = atRisk;
+    }
 
     /** Assigns a technician to this work order. */
     public void assignTechnician(UUID technicianId) {

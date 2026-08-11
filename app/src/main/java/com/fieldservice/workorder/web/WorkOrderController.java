@@ -10,7 +10,10 @@ import com.fieldservice.platform.pagination.SortAllowList;
 import com.fieldservice.platform.persistence.ScopedQueryExecutor;
 import com.fieldservice.platform.security.RequestScopedAccessScope;
 import com.fieldservice.platform.security.ScopeDenialTranslator;
+import com.fieldservice.workorder.application.WorkOrderSearchCriteria;
+import com.fieldservice.workorder.application.WorkOrderSearchService;
 import com.fieldservice.workorder.domain.WorkOrder;
+import com.fieldservice.workorder.domain.WorkOrderStatus;
 import com.fieldservice.workorder.holds.HoldReasonResponse;
 import com.fieldservice.workorder.holds.HoldReasonService;
 import com.fieldservice.workorder.holds.WorkOrderHold;
@@ -22,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +33,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,6 +61,10 @@ import java.util.UUID;
  * to produce either HTTP 403 (cross-role denials) or HTTP 404 (CUSTOMER cross-account
  * denials). In both cases the response is byte-identical whether the resource exists or
  * not, so callers cannot distinguish absence from denial.
+ *
+ * <h3>Conditional GET</h3>
+ * <p>The collection endpoint supports {@code ETag} and {@code If-None-Match} for
+ * conditional polling. A 304 response is returned when the content has not changed.
  */
 @RestController
 @RequestMapping("/api/v1/work-orders")
@@ -65,6 +78,7 @@ public class WorkOrderController {
     private final ScopeDenialTranslator    scopeDenialTranslator;
     private final HoldReasonService        holdReasonService;
     private final WorkOrderHoldRepository  workOrderHoldRepository;
+    private final WorkOrderSearchService   searchService;
 
     public WorkOrderController(WorkOrderRepository workOrderRepository,
                                ScopedQueryExecutor scopedQueryExecutor,
@@ -73,7 +87,8 @@ public class WorkOrderController {
                                KeysetCursor keysetCursor,
                                ScopeDenialTranslator scopeDenialTranslator,
                                HoldReasonService holdReasonService,
-                               WorkOrderHoldRepository workOrderHoldRepository) {
+                               WorkOrderHoldRepository workOrderHoldRepository,
+                               WorkOrderSearchService searchService) {
         this.workOrderRepository   = workOrderRepository;
         this.scopedQueryExecutor   = scopedQueryExecutor;
         this.accessScope           = accessScope;
@@ -82,10 +97,11 @@ public class WorkOrderController {
         this.scopeDenialTranslator = scopeDenialTranslator;
         this.holdReasonService     = holdReasonService;
         this.workOrderHoldRepository = workOrderHoldRepository;
+        this.searchService         = searchService;
     }
 
     /**
-     * Lists work orders visible to the current principal.
+     * Lists work orders visible to the current principal with optional filtering.
      *
      * <p>Offset pagination is used while {@code page < offsetThreshold} (default 20).
      * When the client requests a page at or above the threshold, {@code links.next} in
@@ -97,64 +113,93 @@ public class WorkOrderController {
      * query and the count query, so {@code totalElements} reflects only rows the caller
      * is allowed to see.
      *
-     * @param page   zero-based page number (offset mode only; ignored when cursor present)
-     * @param size   page size — default 20, hard-capped at 50
-     * @param sort   sort expression, e.g. {@code createdAt:desc}; unknown fields → 400
-     * @param cursor opaque keyset cursor from a previous response; triggers keyset mode
-     * @return a paginated envelope of work orders within the caller's scope
+     * <p>Supports ETag / If-None-Match conditional GET. A 304 is returned when the
+     * content fingerprint matches, reducing bandwidth for polling clients.
+     *
+     * @param page                 zero-based page number (offset mode; ignored when cursor present)
+     * @param size                 page size — default 20, server-enforced max 50
+     * @param sort                 sort expression, e.g. {@code createdAt:desc}; unknown fields → 400
+     * @param cursor               opaque keyset cursor; triggers keyset mode
+     * @param states               multi-valued state filter; unknown enum values → 400
+     * @param priority             priority filter (LOW, MEDIUM, HIGH, CRITICAL)
+     * @param assignedTechnicianId filter to a specific technician's work orders
+     * @param customerId           filter to work orders belonging to a customer's sites
+     * @param siteId               filter to a specific site
+     * @param createdFrom          inclusive lower bound on createdAt
+     * @param createdTo            inclusive upper bound on createdAt
+     * @param deadlineFrom         inclusive lower bound on resolutionDeadline
+     * @param deadlineTo           inclusive upper bound on resolutionDeadline
+     * @param atRisk               filter to at-risk (or non-at-risk) work orders
+     * @return a paginated board projection of work orders within the caller's scope
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('DISPATCHER', 'ADMIN', 'MANAGER', 'TECHNICIAN', 'CUSTOMER')")
-    public ResponseEntity<PagedResponse<WorkOrderResponse>> listWorkOrders(
+    public ResponseEntity<?> listWorkOrders(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
             @RequestParam(required = false) String  sort,
-            @RequestParam(required = false) String  cursor) {
+            @RequestParam(required = false) String  cursor,
+            @RequestParam(required = false) List<WorkOrderStatus> states,
+            @RequestParam(required = false) String  priority,
+            @RequestParam(required = false) UUID    assignedTechnicianId,
+            @RequestParam(required = false) UUID    customerId,
+            @RequestParam(required = false) UUID    siteId,
+            @RequestParam(required = false) Instant createdFrom,
+            @RequestParam(required = false) Instant createdTo,
+            @RequestParam(required = false) Instant deadlineFrom,
+            @RequestParam(required = false) Instant deadlineTo,
+            @RequestParam(required = false) Boolean atRisk,
+            WebRequest webRequest) {
 
-        PageQuery query = PageQuery.of(page, size, sort);
+        // Enforce server-side max size
+        int cappedSize = (size != null) ? Math.min(size, 50) : 20;
+        if (cappedSize <= 0) cappedSize = 20;
+
+        PageQuery query = PageQuery.of(page, cappedSize, sort);
         Sort resolvedSort = WorkOrderSortSpec.ALLOW_LIST.parse(query.sort());
         String fingerprint = SortAllowList.fingerprint(resolvedSort);
 
+        WorkOrderSearchCriteria criteria = new WorkOrderSearchCriteria(
+                states, priority, assignedTechnicianId, customerId, siteId,
+                createdFrom, createdTo, deadlineFrom, deadlineTo, atRisk);
+        Specification<WorkOrder> filterSpec = searchService.toSpecification(criteria);
+
+        Page<WorkOrder> woPage;
+
         if (cursor != null) {
-            // Keyset mode — cursor provided by client
             KeysetCursor.Payload payload = keysetCursor.decode(cursor, fingerprint);
             Specification<WorkOrder> cursorSpec = keysetSpec(payload, resolvedSort);
+            Specification<WorkOrder> combined   = filterSpec.and(cursorSpec);
             Pageable pageable = PageRequest.of(0, query.size(), resolvedSort);
-            Page<WorkOrder> woPage = scopedQueryExecutor.findAll(
-                    workOrderRepository, cursorSpec, pageable, accessScope.get(), WorkOrder.class);
-            return ResponseEntity.ok(toKeysetResponse(woPage, query.size(), sort, fingerprint));
+            woPage = scopedQueryExecutor.findAll(
+                    workOrderRepository, combined, pageable, accessScope.get(), WorkOrder.class);
+        } else {
+            Pageable pageable = query.toPageable(WorkOrderSortSpec.ALLOW_LIST);
+            woPage = scopedQueryExecutor.findAll(
+                    workOrderRepository, filterSpec, pageable, accessScope.get(), WorkOrder.class);
         }
 
-        // Offset mode
-        Pageable pageable = query.toPageable(WorkOrderSortSpec.ALLOW_LIST);
-        Page<WorkOrder> woPage = scopedQueryExecutor.findAll(
-                workOrderRepository, pageable, accessScope.get(), WorkOrder.class);
-        return ResponseEntity.ok(toOffsetResponse(woPage, query, sort, fingerprint));
+        // ETag / conditional GET
+        String etag = computeEtag(woPage);
+        if (webRequest.checkNotModified(etag)) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        }
+
+        PagedResponse<WorkOrderBoardRow> response = (cursor != null)
+                ? toKeysetBoardResponse(woPage, query.size(), sort, fingerprint)
+                : toOffsetBoardResponse(woPage, query, sort, fingerprint);
+
+        return ResponseEntity.ok().eTag(etag).body(response);
     }
 
     /**
      * Retrieves a single work order by id.
      *
-     * <p>Returns HTTP 403 for both nonexistent and out-of-scope ids — the two cases are
-     * deliberately indistinguishable (non-disclosure design).
+     * <p>Returns HTTP 403 for a cross-role denial and HTTP 404 for a cross-account
+     * customer denial. Response is byte-identical regardless of whether the resource
+     * exists (non-disclosure design).
      *
      * @param id the work order identifier
-     * @return the work order if it exists within the caller's scope
-     * @throws ScopedAccessDeniedException (→ 403) if the id is not found or not in scope
-     */
-    /**
-     * Retrieves a single work order by id.
-     *
-     * <p>Returns HTTP 403 for a cross-role denial (a technician requesting another
-     * technician's work order) and HTTP 404 for a cross-account customer denial. In both
-     * cases the response is byte-identical whether the resource exists or not
-     * (non-disclosure design). The denial is audited regardless of the HTTP status emitted.
-     *
-     * @param id the work order identifier
-     * @return the work order if it exists within the caller's scope
-     * @throws com.fieldservice.platform.api.exception.NotFoundException (→ 404) when
-     *         the caller is a CUSTOMER and the work order is outside their account scope
-     * @throws com.fieldservice.platform.security.ScopedAccessDeniedException (→ 403) for all other role denials
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('DISPATCHER', 'ADMIN', 'MANAGER', 'TECHNICIAN', 'CUSTOMER')")
@@ -185,11 +230,11 @@ public class WorkOrderController {
 
     // ---- Response builders -------------------------------------------------
 
-    private PagedResponse<WorkOrderResponse> toOffsetResponse(
+    private PagedResponse<WorkOrderBoardRow> toOffsetBoardResponse(
             Page<WorkOrder> woPage, PageQuery query, String sortParam, String fingerprint) {
 
-        List<WorkOrderResponse> data = woPage.getContent().stream()
-                .map(WorkOrderResponse::from).toList();
+        List<WorkOrderBoardRow> data = woPage.getContent().stream()
+                .map(WorkOrderBoardRow::from).toList();
         PageMeta meta = PageMeta.of(query.page(), query.size(), woPage.getTotalElements());
 
         String prevLink = (query.page() > 0)
@@ -200,7 +245,6 @@ public class WorkOrderController {
             int nextPage = query.page() + 1;
             if (nextPage >= paginationProperties.getOffsetThreshold()
                     && !woPage.getContent().isEmpty()) {
-                // Auto-switch to keyset for the next page
                 WorkOrder last = woPage.getContent().get(woPage.getContent().size() - 1);
                 String cur = keysetCursor.encode(last.getCreatedAt(), last.getId(), fingerprint);
                 nextLink = cursorLink(cur, query.size(), sortParam);
@@ -212,11 +256,11 @@ public class WorkOrderController {
         return PagedResponse.of(data, meta, PageLinks.of(nextLink, prevLink));
     }
 
-    private PagedResponse<WorkOrderResponse> toKeysetResponse(
+    private PagedResponse<WorkOrderBoardRow> toKeysetBoardResponse(
             Page<WorkOrder> woPage, int size, String sortParam, String fingerprint) {
 
-        List<WorkOrderResponse> data = woPage.getContent().stream()
-                .map(WorkOrderResponse::from).toList();
+        List<WorkOrderBoardRow> data = woPage.getContent().stream()
+                .map(WorkOrderBoardRow::from).toList();
         PageMeta meta = PageMeta.keyset(size);
 
         String nextLink = null;
@@ -231,15 +275,6 @@ public class WorkOrderController {
 
     // ---- Keyset predicate --------------------------------------------------
 
-    /**
-     * Builds a JPA Specification that restricts results to rows <em>after</em> the
-     * cursor position, respecting the active sort order.
-     *
-     * <p>For {@code created_at DESC, id ASC} (the default) this generates:
-     * <pre>
-     *   (created_at &lt; :ct) OR (created_at = :ct AND id &gt; :id)
-     * </pre>
-     */
     private static Specification<WorkOrder> keysetSpec(
             KeysetCursor.Payload cursor, Sort resolvedSort) {
 
@@ -247,9 +282,8 @@ public class WorkOrderController {
         boolean createdAtDesc = createdAtOrder == null || createdAtOrder.isDescending();
 
         return (root, query, cb) -> {
-            jakarta.persistence.criteria.Expression<java.time.Instant> ctExpr =
-                    root.get("createdAt");
-            jakarta.persistence.criteria.Expression<UUID> idExpr = root.get("id");
+            jakarta.persistence.criteria.Expression<Instant> ctExpr = root.get("createdAt");
+            jakarta.persistence.criteria.Expression<UUID>    idExpr = root.get("id");
 
             Predicate timeComp = createdAtDesc
                     ? cb.lessThan(ctExpr, cursor.lastCreatedAt())
@@ -261,6 +295,23 @@ public class WorkOrderController {
             );
             return cb.or(timeComp, tieBreak);
         };
+    }
+
+    // ---- ETag --------------------------------------------------------------
+
+    private static String computeEtag(Page<WorkOrder> page) {
+        var sb = new StringBuilder();
+        for (WorkOrder wo : page.getContent()) {
+            sb.append(wo.getId()).append(':').append(wo.getVersion()).append(',');
+        }
+        sb.append(page.getTotalElements());
+        try {
+            byte[] hash = MessageDigest.getInstance("SHA-256")
+                    .digest(sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return '"' + HexFormat.of().formatHex(hash) + '"';
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 not available", e);
+        }
     }
 
     // ---- Link builders -----------------------------------------------------

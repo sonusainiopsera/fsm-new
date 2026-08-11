@@ -203,3 +203,10 @@
 - **Files:** 21 (+946/-40)
 - **Duration:** 1067ss
 - **Approach:** N/A
+
+## WO-127: User Story: WO-127 - Paginated work order search with row-scoped access
+- **Status:** completed
+- **Commit:** `c53e335`
+- **Files:** 10 (+765/-61)
+- **Duration:** 844ss
+- **Approach:** Implemented filterable, paginated, row-scoped work order collection. WorkOrderSearchCriteria record holds all optional filter fields; WorkOrderSearchService builds a Specification<WorkOrder> by ANDing non-null criteria. The controller enforces server-side size cap (max 50), validates sort via SortAllowList.ALLOW_LIST (unknown field → 400), computes SHA-256 ETag over id:version tuples for conditional GET (304 support), and switches from offset to keyset pagination at offsetThreshold (page 20). Row scope is enforced by ScopedQueryExecutor which ANDs the AccessScope predicate into every query and count, so out-of-scope rows are never loaded. Board responses use WorkOrderBoardRow records, not JPA entities. V19 migration adds response_deadline, resolution_deadline, at_risk columns plus composite indexes and a partial at-risk index.
