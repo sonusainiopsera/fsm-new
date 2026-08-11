@@ -308,3 +308,10 @@
 - **Files:** 7 (+1359/-0)
 - **Duration:** 903ss
 - **Approach:** Created shared ApiAssertions helpers (assertEnvelope, assertErrorShape, assertPageMeta, assertEmptyEnvelope, assertLastPage, assertNoInternalLeak) and one contract test class per P0 endpoint group. All tests extend AbstractIntegrationTest (Testcontainers PostgreSQL + stub JWT decoder on 'test' profile), with TransitionContractTest and PartsConsumptionContractTest additionally annotated @ActiveProfiles('api') to activate IdempotencyKeyFilter. Tests focus on contract-level assertions (envelope shape, error shape, pagination invariants, idempotency proof) rather than duplicating functional coverage in existing WorkOrderTransitionControllerIT/WorkOrderPartsIT. OpenApiConformanceTest validates live responses against required fields declared in OpenAPI component schemas, and asserts no undocumented top-level fields in collection responses.
+
+## WO-118: User Story: WO-118 - Workforce module: technician profiles, skills and availability
+- **Status:** completed
+- **Commit:** `9d66b0e`
+- **Files:** 34 (+1182/-0)
+- **Duration:** 1064ss
+- **Approach:** N/A

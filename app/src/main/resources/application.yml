@@ -128,6 +128,13 @@ app:
       max-failures: ${AUTH_LOCKOUT_MAX_FAILURES:5}
       window-seconds: ${AUTH_LOCKOUT_WINDOW_SECONDS:900}
 
+  crypto:
+    # AES-256 field encryption key (base64-encoded 32 bytes). Supply via APP_CRYPTO_FIELD_ENCRYPTION_KEY.
+    field-encryption-key: ${APP_CRYPTO_FIELD_ENCRYPTION_KEY:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+
+  workforce:
+    position-retention-days: ${APP_WORKFORCE_POSITION_RETENTION_DAYS:90}
+
   idempotency:
     # How long an IN_PROGRESS record holds its lease before it can be reclaimed (crash recovery)
     lease-duration: ${APP_IDEMPOTENCY_LEASE_DURATION:PT30S}
