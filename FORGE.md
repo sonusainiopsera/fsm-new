@@ -70,3 +70,10 @@
 - **Files:** 16 (+1409/-0)
 - **Duration:** 1296ss
 - **Approach:** Declarative table approach: encode all lifecycle rules as an immutable Map<TransitionKey,TransitionDescriptor> built once at class init using Map.ofEntries wrapped in Collections.unmodifiableMap. TransitionKey is a record(fromState, event), TransitionDescriptor is a record(toState, requiredRoles, guardIds). 13 legal transitions across 8 states and 8 events. WorkOrderTransitionServiceImpl is the sole code path that calls WorkOrder.setState — it loads the work order via EntityManager.find, resolves the descriptor, checks caller authorities from SecurityContextHolder, evaluates registered guard beans, then saves. GuardResult is a sealed interface (Satisfied/Refused) for the deferred guards story. ADR-0007 resolves cancellation reachability: EN_ROUTE→CANCELLED and ON_HOLD→CANCELLED both permitted.
+
+## WO-176: User Story: WO-176 - Provider-agnostic AI gateway with resilience and cost guardrails
+- **Status:** completed
+- **Commit:** `17a0470`
+- **Files:** 33 (+1780/-0)
+- **Duration:** 1255ss
+- **Approach:** Built the AI gateway as a two-layer module: a public api package (AiGatewayPort interface + provider-agnostic request/response records + typed exceptions) and a package-private internal package (HttpAiProviderAdapter wrapped with Resilience4j TimeLimiter/CircuitBreaker/Bulkhead/Retry, EgressAllowList SSRF protection, EnvironmentSecretsProvider, RedisUsageCapService with Redis INCR+EXPIRE, AiGatewayMetrics, FeatureFlagGuardAdapter). The config class AiGatewayResilienceConfig (profile !test) wires the full chain; the test profile registers FakeAiGatewayAdapter instead. Redis autoconfiguration is excluded from the test profile. The feature flag ai.copilot.enabled defaults to false so the platform ships with zero AI network calls.

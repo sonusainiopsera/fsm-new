@@ -61,6 +61,24 @@ spring:
           jwks-uri: ${JWKS_URI:http://localhost:8080/.well-known/jwks.json}
           issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
 
+# AI Gateway — feature flag defaults to OFF; vendor is not yet selected
+ai:
+  copilot:
+    # Master feature flag: when false the gateway short-circuits with 503 before any network call
+    enabled: ${AI_COPILOT_ENABLED:false}
+    # Maximum AI interactions per user per UTC day; enforced via Redis
+    daily-cap-per-user: ${AI_COPILOT_DAILY_CAP:100}
+  provider:
+    # Base URL for the selected AI provider — no trailing slash
+    base-url: ${AI_PROVIDER_BASE_URL:https://api.example.com/v1}
+    # Comma-separated list of FQDNs permitted for outbound AI egress (SSRF protection)
+    # Leave empty to refuse all calls; never add user-supplied hosts
+    allowed-hosts: ${AI_PROVIDER_ALLOWED_HOSTS:}
+    connect-timeout: ${AI_PROVIDER_CONNECT_TIMEOUT:2s}
+    read-timeout: ${AI_PROVIDER_READ_TIMEOUT:10s}
+    # Estimated cost per token in USD; used for ai_gateway_estimated_cost_total metric
+    cost-per-token: ${AI_PROVIDER_COST_PER_TOKEN:0.00002}
+
 # Pagination defaults — override in production with a strong random secret
 app:
   pagination:
@@ -154,6 +172,13 @@ spring:
   config:
     activate:
       on-profile: test
+
+  # Disable Redis autoconfiguration — no Redis in test environment; the AI gateway
+  # is replaced by FakeAiGatewayAdapter and RedisUsageCapService is not activated
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
   flyway:
     locations: classpath:db/migration,classpath:db/fixtures

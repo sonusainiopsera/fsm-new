@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/completions-slow"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "fixedDelayMilliseconds": 11000,
+    "jsonBody": {
+      "id": "cmpl-slow-001",
+      "choices": [
+        {
+          "message": {
+            "role": "assistant",
+            "content": "This arrived too late."
+          },
+          "finishReason": "stop"
+        }
+      ],
+      "usage": {
+        "promptTokens": 10,
+        "completionTokens": 5,
+        "totalTokens": 15
+      }
+    }
+  }
+}

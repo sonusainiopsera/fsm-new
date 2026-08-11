@@ -1,5 +1,7 @@
 package com.fieldservice.api;
 
+import com.fieldservice.aigateway.api.AiCapExceededException;
+import com.fieldservice.aigateway.api.AiUnavailableException;
 import com.fieldservice.platform.api.ErrorEnvelope;
 import com.fieldservice.platform.api.FieldError;
 import com.fieldservice.platform.exception.BusinessGuardException;
@@ -241,6 +243,39 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
                 ErrorEnvelope.Code.GUARD_REFUSED,
                 "The operation was refused by a business rule.");
+    }
+
+    // -------------------------------------------------------------------------
+    // AI Gateway (503 / 429)
+    // -------------------------------------------------------------------------
+
+    @ExceptionHandler(AiUnavailableException.class)
+    public ResponseEntity<ErrorEnvelope> handleAiUnavailable(
+            AiUnavailableException ex,
+            HttpServletRequest request) {
+
+        log.warn("AI provider unavailable: traceId={}, path={}", traceId(), request.getRequestURI());
+        return errorResponse(HttpStatus.SERVICE_UNAVAILABLE,
+                ErrorEnvelope.Code.AI_PROVIDER_UNAVAILABLE,
+                "AI assistance is temporarily unavailable. You can continue without it.");
+    }
+
+    @ExceptionHandler(AiCapExceededException.class)
+    public ResponseEntity<ErrorEnvelope> handleAiCapExceeded(
+            AiCapExceededException ex,
+            HttpServletRequest request) {
+
+        log.info("AI daily cap exceeded: retryAfter={}s traceId={} path={}",
+                ex.getRetryAfterSeconds(), traceId(), request.getRequestURI());
+        String tid = traceId();
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(TRACE_HEADER, tid)
+                .header("Retry-After", String.valueOf(ex.getRetryAfterSeconds()))
+                .body(new ErrorEnvelope(
+                        ErrorEnvelope.Code.AI_DAILY_LIMIT_REACHED,
+                        "You have reached your daily AI interaction limit. Please try again tomorrow.",
+                        tid,
+                        Instant.now()));
     }
 
     // -------------------------------------------------------------------------

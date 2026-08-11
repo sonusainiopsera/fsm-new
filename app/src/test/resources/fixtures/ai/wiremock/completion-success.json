@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/completions"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "cmpl-test-001",
+      "choices": [
+        {
+          "message": {
+            "role": "assistant",
+            "content": "This is a test AI completion response."
+          },
+          "finishReason": "stop"
+        }
+      ],
+      "usage": {
+        "promptTokens": 10,
+        "completionTokens": 12,
+        "totalTokens": 22
+      }
+    }
+  }
+}

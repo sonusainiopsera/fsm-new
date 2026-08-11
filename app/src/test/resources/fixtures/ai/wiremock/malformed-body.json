@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/completions-malformed"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{ \"not_a_choices_field\": [] }"
+  }
+}

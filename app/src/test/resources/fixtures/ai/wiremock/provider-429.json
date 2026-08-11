@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/completions-429"
+  },
+  "response": {
+    "status": 429,
+    "headers": {
+      "Content-Type": "application/json",
+      "Retry-After": "60"
+    },
+    "jsonBody": {
+      "error": {
+        "message": "Rate limit exceeded",
+        "type": "rate_limit_error"
+      }
+    }
+  }
+}

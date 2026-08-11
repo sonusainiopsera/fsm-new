@@ -76,5 +76,11 @@ public record ErrorEnvelope(
 
         /** 409 — the prior response for this key was too large to store for replay. */
         public static final String IDEMPOTENCY_NON_REPLAYABLE = "IDEMPOTENCY_NON_REPLAYABLE";
+
+        /** 503 — AI provider is temporarily unavailable; no provider details are leaked. */
+        public static final String AI_PROVIDER_UNAVAILABLE = "AI_PROVIDER_UNAVAILABLE";
+
+        /** 429 — caller has reached their daily AI interaction cap; see Retry-After header. */
+        public static final String AI_DAILY_LIMIT_REACHED = "AI_DAILY_LIMIT_REACHED";
     }
 }
