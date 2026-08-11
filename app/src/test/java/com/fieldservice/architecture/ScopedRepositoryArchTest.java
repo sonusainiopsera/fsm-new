@@ -63,7 +63,10 @@ class ScopedRepositoryArchTest {
                     + "PortalAccountUserRepository|PortalInvitationRepository|"
                     // WO-189: retention policy and purge run tables are compliance metadata with
                     // no per-user row scope; access controlled at API layer by PRIVACY_ADMIN/ADMIN
-                    + "RetentionPolicyRepository|PurgeRunRepository";
+                    + "RetentionPolicyRepository|PurgeRunRepository|"
+                    // WO-198: role-permission matrix is configuration data for the admin console;
+                    // not row-scoped; access controlled at API layer by ADMIN authority
+                    + "RolePermissionMatrixRepository";
 
     /**
      * Production rule: domain JPA repositories that are not in the non-scoped allow-list

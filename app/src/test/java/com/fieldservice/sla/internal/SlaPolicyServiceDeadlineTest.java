@@ -3,6 +3,7 @@ package com.fieldservice.sla.internal;
 import com.fieldservice.domain.sla.SlaPolicy;
 import com.fieldservice.sla.SlaDeadlines;
 import com.fieldservice.sla.SlaPolicyUnavailableException;
+import com.fieldservice.platform.api.DomainEventPublisher;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +50,8 @@ class SlaPolicyServiceDeadlineTest {
         policyRepo = mock(SlaPolicyRepository.class);
         pauseRepo = mock(SlaClockPauseRepository.class);
         Clock fixedClock = Clock.fixed(FIXED_NOW, ZoneOffset.UTC);
-        service = new SlaPolicyService(policyRepo, pauseRepo, fixedClock, new SimpleMeterRegistry());
+        DomainEventPublisher noopPublisher = event -> {};
+        service = new SlaPolicyService(policyRepo, pauseRepo, fixedClock, new SimpleMeterRegistry(), noopPublisher);
     }
 
     // ── Response and resolution deadlines ────────────────────────────────────

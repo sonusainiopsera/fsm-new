@@ -60,6 +60,9 @@ public class SlaPolicy {
     @Column(name = "active", nullable = false)
     private boolean active = true;
 
+    @Column(name = "ratified", nullable = false)
+    private boolean ratified = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -90,7 +93,11 @@ public class SlaPolicy {
     public Instant getCreatedAt() { return createdAt; }
 
     public Integer getVersion() { return version; }
+    public void setVersion(Integer version) { this.version = version; }
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public boolean isRatified() { return ratified; }
+    public void setRatified(boolean ratified) { this.ratified = ratified; }
 }

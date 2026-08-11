@@ -1,10 +1,16 @@
 package com.fieldservice.sla.internal;
 
+import com.fieldservice.platform.api.DomainEvent;
+import com.fieldservice.platform.api.DomainEventPublisher;
+import com.fieldservice.platform.outbox.PiiRedactionUtility;
 import com.fieldservice.sla.SlaDeadlineCalculator;
 import com.fieldservice.sla.SlaDeadlines;
 import com.fieldservice.sla.SlaPolicy;
+import com.fieldservice.sla.SlaPolicyAdminService;
 import com.fieldservice.sla.SlaPolicyProvider;
 import com.fieldservice.sla.SlaPolicyUnavailableException;
+import com.fieldservice.sla.web.dto.CreateSlaPolicyRequest;
+import com.fieldservice.sla.web.dto.UpdateSlaPolicyRequest;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
@@ -31,7 +37,8 @@ import java.util.UUID;
  */
 @Service
 @Transactional(readOnly = true)
-class SlaPolicyService implements SlaPolicyProvider, SlaDeadlineCalculator, com.fieldservice.sla.SlaClockPausePort {
+class SlaPolicyService implements SlaPolicyProvider, SlaDeadlineCalculator,
+        com.fieldservice.sla.SlaClockPausePort, SlaPolicyAdminService {
 
     private static final Logger log = LoggerFactory.getLogger(SlaPolicyService.class);
     static final String CACHE_NAME = "sla-policy";
@@ -39,15 +46,18 @@ class SlaPolicyService implements SlaPolicyProvider, SlaDeadlineCalculator, com.
     private final SlaPolicyRepository slaPolicyRepository;
     private final SlaClockPauseRepository pauseRepository;
     private final Clock clock;
+    private final DomainEventPublisher eventPublisher;
     private final Counter resolutionFailureCounter;
 
     SlaPolicyService(SlaPolicyRepository slaPolicyRepository,
                      SlaClockPauseRepository pauseRepository,
                      Clock clock,
-                     MeterRegistry meterRegistry) {
+                     MeterRegistry meterRegistry,
+                     DomainEventPublisher eventPublisher) {
         this.slaPolicyRepository = slaPolicyRepository;
         this.pauseRepository = pauseRepository;
         this.clock = clock;
+        this.eventPublisher = eventPublisher;
         this.resolutionFailureCounter = Counter.builder("sla_policy_resolution_failures_total")
                 .description("Number of times SLA policy resolution failed for a priority")
                 .register(meterRegistry);
@@ -109,11 +119,54 @@ class SlaPolicyService implements SlaPolicyProvider, SlaDeadlineCalculator, com.
         return resolutionDueAt.plusSeconds(accruedSeconds);
     }
 
-    // ── Admin write operations (cache-evicting) ──────────────────────────────
+    // ── SlaPolicyAdminService implementation ─────────────────────────────────
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SlaPolicy> listPolicies() {
+        return slaPolicyRepository.findAllOrderedByPriorityAndEffectiveFrom()
+                .stream().map(SlaPolicyService::toDto).toList();
+    }
+
+    @Override
+    @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
+    @Transactional
+    public SlaPolicy createPolicy(CreateSlaPolicyRequest req) {
+        com.fieldservice.domain.sla.SlaPolicy entity = new com.fieldservice.domain.sla.SlaPolicy();
+        entity.setPriority(req.priority());
+        entity.setResponseMinutes(req.responseMinutes());
+        entity.setResolutionMinutes(req.resolutionMinutes());
+        entity.setAtRiskFraction(req.atRiskFraction());
+        entity.setEffectiveFrom(req.effectiveFrom());
+        com.fieldservice.domain.sla.SlaPolicy saved = slaPolicyRepository.save(entity);
+        publishChangedEvent(saved, "CREATE");
+        return toDto(saved);
+    }
+
+    @Override
+    @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
+    @Transactional
+    public SlaPolicy updatePolicy(UUID id, UpdateSlaPolicyRequest req) {
+        com.fieldservice.domain.sla.SlaPolicy entity = slaPolicyRepository.findById(id)
+                .orElseThrow(() -> new com.fieldservice.platform.exception.NotFoundException(
+                        "SlaPolicy", id));
+        // Optimistic lock check: @Version on entity handles the DB-level conflict;
+        // the client supplies the version so Hibernate sets it on the entity.
+        entity.setVersion(req.version());
+        entity.setResponseMinutes(req.responseMinutes());
+        entity.setResolutionMinutes(req.resolutionMinutes());
+        entity.setAtRiskFraction(req.atRiskFraction());
+        entity.setRatified(req.ratified());
+        com.fieldservice.domain.sla.SlaPolicy saved = slaPolicyRepository.save(entity);
+        publishChangedEvent(saved, "UPDATE");
+        return toDto(saved);
+    }
+
+    // ── Legacy admin write operations (still used by existing controller POST) ──
 
     @CacheEvict(cacheNames = CACHE_NAME, allEntries = true)
     @Transactional
-    public com.fieldservice.domain.sla.SlaPolicy createPolicy(
+    public com.fieldservice.domain.sla.SlaPolicy createPolicyEntity(
             com.fieldservice.domain.sla.SlaPolicy policy) {
         return slaPolicyRepository.save(policy);
     }
@@ -133,10 +186,31 @@ class SlaPolicyService implements SlaPolicyProvider, SlaDeadlineCalculator, com.
         return slaPolicyRepository.save(newPolicy);
     }
 
-    /** Returns all policies for admin listing. */
+    /** Returns all policies for admin listing (legacy, retained for backward compat). */
     @Transactional(readOnly = true)
     public List<com.fieldservice.domain.sla.SlaPolicy> findAll() {
         return slaPolicyRepository.findAllOrderedByPriorityAndEffectiveFrom();
+    }
+
+    private void publishChangedEvent(com.fieldservice.domain.sla.SlaPolicy entity, String operation) {
+        var payload = PiiRedactionUtility.toPayloadMap(
+                new com.fieldservice.outbox.payload.SlaPolicyChangedPayload(
+                        entity.getId(),
+                        entity.getPriority(),
+                        entity.getResponseMinutes(),
+                        entity.getResolutionMinutes(),
+                        entity.getAtRiskFraction(),
+                        entity.isRatified(),
+                        operation,
+                        clock.instant()));
+        eventPublisher.publish(DomainEvent.of(
+                com.fieldservice.outbox.payload.SlaPolicyChangedPayload.EVENT_TYPE,
+                com.fieldservice.outbox.payload.SlaPolicyChangedPayload.AGGREGATE_TYPE,
+                entity.getId(),
+                clock.instant(),
+                null,
+                null,
+                payload));
     }
 
     // ── SLA clock pause management ───────────────────────────────────────────
@@ -168,6 +242,7 @@ class SlaPolicyService implements SlaPolicyProvider, SlaDeadlineCalculator, com.
                 e.getEffectiveFrom(),
                 e.getEffectiveTo(),
                 e.isActive(),
+                e.isRatified(),
                 e.getVersion());
     }
 }

@@ -21,5 +21,6 @@ public record SlaPolicy(
         Instant effectiveFrom,
         Instant effectiveTo,
         boolean active,
+        boolean ratified,
         Integer version
 ) {}

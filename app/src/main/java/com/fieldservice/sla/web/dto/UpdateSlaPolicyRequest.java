@@ -3,28 +3,23 @@ package com.fieldservice.sla.web.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 
 /**
- * Request DTO for creating or updating an SLA policy.
+ * Request DTO for direct PUT update of an SLA policy row.
  *
- * <p>Unknown JSON properties are rejected (FAIL_ON_UNKNOWN_PROPERTIES semantics) so
- * a client cannot silently pass fields that won't be persisted.
+ * <p>Unlike {@link CreateSlaPolicyRequest}, this request carries a {@code version} field
+ * for optimistic-lock conflict detection (returns 409 on mismatch) and a {@code ratified}
+ * flag to mark a seeded placeholder as stakeholder-approved.
+ *
+ * <p>Unknown JSON properties are rejected to prevent mass-assignment.
  */
 @JsonIgnoreProperties(ignoreUnknown = false)
 @ValidSlaPolicy
-public record CreateSlaPolicyRequest(
-
-        @NotBlank
-        @Pattern(regexp = "LOW|MEDIUM|HIGH|CRITICAL",
-                 message = "priority must be one of LOW, MEDIUM, HIGH, CRITICAL")
-        String priority,
+public record UpdateSlaPolicyRequest(
 
         @NotNull
         @Positive(message = "responseMinutes must be positive")
@@ -40,5 +35,8 @@ public record CreateSlaPolicyRequest(
         BigDecimal atRiskFraction,
 
         @NotNull
-        Instant effectiveFrom
+        Boolean ratified,
+
+        @NotNull
+        Integer version
 ) {}

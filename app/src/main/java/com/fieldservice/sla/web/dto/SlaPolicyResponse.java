@@ -18,18 +18,19 @@ public record SlaPolicyResponse(
         Instant effectiveFrom,
         Instant effectiveTo,
         boolean active,
+        boolean ratified,
         Integer version
 ) {
     public static SlaPolicyResponse from(SlaPolicy p) {
         return new SlaPolicyResponse(
                 p.id(), p.priority(), p.responseMinutes(), p.resolutionMinutes(),
-                p.atRiskFraction(), p.effectiveFrom(), p.effectiveTo(), p.active(), p.version());
+                p.atRiskFraction(), p.effectiveFrom(), p.effectiveTo(), p.active(), p.ratified(), p.version());
     }
 
     public static SlaPolicyResponse from(com.fieldservice.domain.sla.SlaPolicy e) {
         return new SlaPolicyResponse(
                 e.getId(), e.getPriority(), e.getResponseMinutes(), e.getResolutionMinutes(),
                 e.getAtRiskFraction(), e.getEffectiveFrom(), e.getEffectiveTo(),
-                e.isActive(), e.getVersion());
+                e.isActive(), e.isRatified(), e.getVersion());
     }
 }
