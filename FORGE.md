@@ -259,3 +259,10 @@
 - **Files:** 26 (+1091/-12)
 - **Duration:** 818ss
 - **Approach:** N/A
+
+## WO-150: User Story: WO-150 - Append-only stock ledger and reconciliation integrity check
+- **Status:** completed
+- **Commit:** `f0c4c51`
+- **Files:** 21 (+1603/-37)
+- **Duration:** 851ss
+- **Approach:** Extended stock_ledger table via expand-only Flyway migration V23 adding 11 rich movement columns (from_location_id, movement_type, delta_quantity, resulting_quantity, reason_code, work_order_id, actor_user_id, correlation_id, idempotency_key, occurred_at) plus backfill from legacy columns. Append-only enforcement is layered: REVOKE UPDATE/DELETE in the migration, an ArchUnit rule blocking delete paths at build time, and Propagation.MANDATORY on LedgerWriteService. A scheduled reconciliation sweep (worker profile, PostgreSQL advisory lock, configurable interval) compares SUM(delta_quantity) per (part, location) against stock_balance and emits Micrometer counters and ALERT logs on discrepancy. A completeness gauge tracks what fraction of closed work orders in a 24-hour window have ledger entries or are marked no_parts_required. The movement query API exposes paginated filtered reads at /api/v1/inventory/movements with TECHNICIAN scoping to their assigned location.

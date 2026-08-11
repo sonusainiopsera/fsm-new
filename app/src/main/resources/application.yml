@@ -69,6 +69,10 @@ app:
     dispatch-timeout-ms: 10000
     poll-interval-ms: 500
     poll-initial-delay-ms: 0
+  inventory:
+    reconciliation:
+      enabled: true
+      interval-ms: 60000
   api:
     public-base-url: ${APP_API_PUBLIC_BASE_URL:http://localhost:8080}
   auth:

@@ -6,6 +6,7 @@ import com.fieldservice.inventory.domain.Part;
 import com.fieldservice.inventory.domain.StockBalance;
 import com.fieldservice.inventory.domain.StockLedger;
 import com.fieldservice.inventory.domain.WorkOrderPart;
+import com.fieldservice.inventory.ledger.LedgerWriteService;
 import com.fieldservice.inventory.repository.PartRepository;
 import com.fieldservice.inventory.repository.StockBalanceRepository;
 import com.fieldservice.inventory.repository.WorkOrderPartRepository;
@@ -48,17 +49,20 @@ public class StockMovementServiceImpl implements StockMovementService {
     private final PartRepository          partRepository;
     private final EntityManager           entityManager;
     private final DomainEventPublisher    eventPublisher;
+    private final LedgerWriteService      ledgerWriteService;
 
     public StockMovementServiceImpl(StockBalanceRepository stockBalanceRepository,
                                     WorkOrderPartRepository workOrderPartRepository,
                                     PartRepository partRepository,
                                     EntityManager entityManager,
-                                    DomainEventPublisher eventPublisher) {
+                                    DomainEventPublisher eventPublisher,
+                                    LedgerWriteService ledgerWriteService) {
         this.stockBalanceRepository  = stockBalanceRepository;
         this.workOrderPartRepository = workOrderPartRepository;
         this.partRepository          = partRepository;
         this.entityManager           = entityManager;
         this.eventPublisher          = eventPublisher;
+        this.ledgerWriteService      = ledgerWriteService;
     }
 
     @Override
@@ -88,6 +92,9 @@ public class StockMovementServiceImpl implements StockMovementService {
             throw new InsufficientStockException(shortfalls);
         }
 
+        // Shared correlation id for all lines in this batch
+        UUID correlationId = UuidV7.generate();
+
         // Second pass: apply conditional decrements; roll back everything on first zero-rows result
         List<StockMovementResult.LoggedLine> loggedLines = new ArrayList<>();
         for (ConsumePartsCommand.LineItem line : cmd.lines()) {
@@ -100,12 +107,17 @@ public class StockMovementServiceImpl implements StockMovementService {
                                 line.partId(), cmd.stockLocationId(), line.quantity(), 0)));
             }
 
-            // Ledger entry
-            StockLedger ledgerEntry = new StockLedger(
-                    line.partId(), cmd.stockLocationId(),
-                    -line.quantity(),
-                    "WO:" + cmd.workOrderId());
-            entityManager.persist(ledgerEntry);
+            // Re-read resulting balance (cleared by flushAutomatically)
+            StockBalance updated = stockBalanceRepository
+                    .findByPartIdAndLocationId(line.partId(), cmd.stockLocationId())
+                    .orElseThrow();
+
+            // Rich ledger entry via LedgerWriteService (Propagation.MANDATORY — same tx)
+            StockLedger ledgerEntry = ledgerWriteService.record(
+                    line.partId(), cmd.stockLocationId(), null,
+                    -line.quantity(), updated.getQuantityOnHand(),
+                    "CONSUMPTION", line.reasonCode(),
+                    cmd.workOrderId(), cmd.actorUserId(), correlationId, null, now);
 
             // Consumption record
             WorkOrderPart wop = new WorkOrderPart(
@@ -114,10 +126,6 @@ public class StockMovementServiceImpl implements StockMovementService {
                     ledgerEntry.getId(), cmd.actorUserId(), now);
             workOrderPartRepository.save(wop);
 
-            // Re-read resulting balance for response (balance was cleared by flushAutomatically)
-            StockBalance updated = stockBalanceRepository
-                    .findByPartIdAndLocationId(line.partId(), cmd.stockLocationId())
-                    .orElseThrow();
             Part part = partMap.get(line.partId());
             loggedLines.add(new StockMovementResult.LoggedLine(
                     line.partId(),
@@ -153,6 +161,8 @@ public class StockMovementServiceImpl implements StockMovementService {
         Map<UUID, Part> partMap = resolveParts(cmd.lines().stream()
                 .map(ReturnPartsCommand.LineItem::partId).collect(Collectors.toList()));
 
+        UUID correlationId = UuidV7.generate();
+
         List<StockMovementResult.LoggedLine> loggedLines = new ArrayList<>();
         for (ReturnPartsCommand.LineItem line : cmd.lines()) {
             int rowsUpdated = stockBalanceRepository.increment(
@@ -163,11 +173,15 @@ public class StockMovementServiceImpl implements StockMovementService {
                         + " at location " + cmd.stockLocationId());
             }
 
-            StockLedger ledgerEntry = new StockLedger(
-                    line.partId(), cmd.stockLocationId(),
-                    line.quantity(),
-                    "WO-RETURN:" + cmd.workOrderId());
-            entityManager.persist(ledgerEntry);
+            StockBalance updated = stockBalanceRepository
+                    .findByPartIdAndLocationId(line.partId(), cmd.stockLocationId())
+                    .orElseThrow();
+
+            StockLedger ledgerEntry = ledgerWriteService.record(
+                    line.partId(), cmd.stockLocationId(), null,
+                    line.quantity(), updated.getQuantityOnHand(),
+                    "RETURN", line.reasonCode(),
+                    cmd.workOrderId(), cmd.actorUserId(), correlationId, null, now);
 
             WorkOrderPart wop = new WorkOrderPart(
                     cmd.workOrderId(), line.partId(), cmd.stockLocationId(),
@@ -175,9 +189,6 @@ public class StockMovementServiceImpl implements StockMovementService {
                     ledgerEntry.getId(), cmd.actorUserId(), now);
             workOrderPartRepository.save(wop);
 
-            StockBalance updated = stockBalanceRepository
-                    .findByPartIdAndLocationId(line.partId(), cmd.stockLocationId())
-                    .orElseThrow();
             Part part = partMap.get(line.partId());
             loggedLines.add(new StockMovementResult.LoggedLine(
                     line.partId(),

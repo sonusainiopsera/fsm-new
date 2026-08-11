@@ -82,6 +82,9 @@ public class WorkOrder implements ScopedEntity {
     @Column(name = "at_risk_at")
     private Instant atRiskAt;
 
+    @Column(name = "no_parts_required", nullable = false)
+    private boolean noPartsRequired = false;
+
     @Version
     private Integer version;
 
@@ -121,7 +124,10 @@ public class WorkOrder implements ScopedEntity {
     public Instant         getResolutionDeadline()  { return resolutionDeadline; }
     public boolean         isAtRisk()               { return atRisk; }
     public Instant         getAtRiskAt()            { return atRiskAt; }
+    public boolean         isNoPartsRequired()      { return noPartsRequired; }
     public Integer         getVersion()             { return version; }
+
+    public void markNoPartsRequired() { this.noPartsRequired = true; }
 
     public void setDescription(String description) { this.description = description; }
 
