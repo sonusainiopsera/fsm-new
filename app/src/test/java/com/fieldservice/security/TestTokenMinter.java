@@ -44,13 +44,22 @@ public final class TestTokenMinter {
 
     /** Valid token for a user with the given roles. */
     public String valid(UUID subject, List<String> roles) {
-        return mint(subject, roles, DEFAULT_ISSUER, DEFAULT_AUDIENCE,
+        return mint(subject, roles, java.util.Map.of(), DEFAULT_ISSUER, DEFAULT_AUDIENCE,
+                Instant.now(), Instant.now().plusSeconds(DEFAULT_TTL_SECONDS), UUID.randomUUID().toString());
+    }
+
+    /**
+     * Valid token for a user with roles and additional claims (e.g., {@code technicianId},
+     * {@code customerAccountIds}).
+     */
+    public String validWithClaims(UUID subject, List<String> roles, java.util.Map<String, Object> extraClaims) {
+        return mint(subject, roles, extraClaims, DEFAULT_ISSUER, DEFAULT_AUDIENCE,
                 Instant.now(), Instant.now().plusSeconds(DEFAULT_TTL_SECONDS), UUID.randomUUID().toString());
     }
 
     /** Token that expired 5 seconds ago. */
     public String expired(UUID subject, List<String> roles) {
-        return mint(subject, roles, DEFAULT_ISSUER, DEFAULT_AUDIENCE,
+        return mint(subject, roles, java.util.Map.of(), DEFAULT_ISSUER, DEFAULT_AUDIENCE,
                 Instant.now().minusSeconds(DEFAULT_TTL_SECONDS + 5),
                 Instant.now().minusSeconds(5),
                 UUID.randomUUID().toString());
@@ -59,25 +68,25 @@ public final class TestTokenMinter {
     /** Token with a future iat (issued in the future, beyond skew). */
     public String futureDated(UUID subject, List<String> roles) {
         Instant future = Instant.now().plusSeconds(120);
-        return mint(subject, roles, DEFAULT_ISSUER, DEFAULT_AUDIENCE,
+        return mint(subject, roles, java.util.Map.of(), DEFAULT_ISSUER, DEFAULT_AUDIENCE,
                 future, future.plusSeconds(DEFAULT_TTL_SECONDS), UUID.randomUUID().toString());
     }
 
     /** Token with wrong issuer. */
     public String wrongIssuer(UUID subject, List<String> roles) {
-        return mint(subject, roles, "https://evil.example.com", DEFAULT_AUDIENCE,
+        return mint(subject, roles, java.util.Map.of(), "https://evil.example.com", DEFAULT_AUDIENCE,
                 Instant.now(), Instant.now().plusSeconds(DEFAULT_TTL_SECONDS), UUID.randomUUID().toString());
     }
 
     /** Token with wrong audience. */
     public String wrongAudience(UUID subject, List<String> roles) {
-        return mint(subject, roles, DEFAULT_ISSUER, "other-service",
+        return mint(subject, roles, java.util.Map.of(), DEFAULT_ISSUER, "other-service",
                 Instant.now(), Instant.now().plusSeconds(DEFAULT_TTL_SECONDS), UUID.randomUUID().toString());
     }
 
     /** Valid token with a specific jti (for denylist tests). */
     public String withJti(UUID subject, List<String> roles, String jti) {
-        return mint(subject, roles, DEFAULT_ISSUER, DEFAULT_AUDIENCE,
+        return mint(subject, roles, java.util.Map.of(), DEFAULT_ISSUER, DEFAULT_AUDIENCE,
                 Instant.now(), Instant.now().plusSeconds(DEFAULT_TTL_SECONDS), jti);
     }
 
@@ -99,25 +108,27 @@ public final class TestTokenMinter {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return new TestTokenMinter(wrongKey).valid(subject, roles);
+        return new TestTokenMinter(wrongKey).validWithClaims(subject, roles, java.util.Map.of());
     }
 
     private String mint(UUID subject, List<String> roles,
+                        java.util.Map<String, Object> extraClaims,
                         String issuer, String audience,
                         Instant issuedAt, Instant expiresAt, String jti) {
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
                 .keyID(signingKey.getKeyID())
                 .build();
 
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+        JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder()
                 .subject(subject.toString())
                 .claim("roles", roles)
                 .jwtID(jti)
                 .issuer(issuer)
                 .audience(audience)
                 .issueTime(Date.from(issuedAt))
-                .expirationTime(Date.from(expiresAt))
-                .build();
+                .expirationTime(Date.from(expiresAt));
+        extraClaims.forEach(claimsBuilder::claim);
+        JWTClaimsSet claims = claimsBuilder.build();
 
         try {
             SignedJWT jwt = new SignedJWT(header, claims);

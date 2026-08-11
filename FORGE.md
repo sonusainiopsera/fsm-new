@@ -168,3 +168,10 @@
 - **Files:** 13 (+1537/-4)
 - **Duration:** 1040ss
 - **Approach:** Refresh-token rotation implemented via a single atomic conditional UPDATE (consumed_at WHERE NULL) to prevent read-then-write races under concurrency. Reuse detection revokes the entire family and publishes a RefreshTokenReuseDetected event through the existing transactional outbox; subsequent reuse on an already-revoked family only increments a Micrometer counter (SIEM deduplication). The V17 migration adds absolute_expires_at (expand-only, backward-compatible default) to refresh_token_family. The AuthController POST /refresh endpoint reads exclusively from the HttpOnly refreshToken cookie, validates the 43-char base64url handle before any DB lookup, and collapses all failure modes to the same 401 REAUTHENTICATION_REQUIRED shape. Plaintext handles never reach the database.
+
+## WO-113: User Story: WO-113 - Enforce mandatory row-scope AccessScope query predicates
+- **Status:** completed
+- **Commit:** `91d1db7`
+- **Files:** 12 (+1014/-16)
+- **Duration:** 1272ss
+- **Approach:** The row-scope enforcement framework (AccessScope, AccessScopeResolver, AccessScopePredicateFactory, ScopedQueryExecutor, ScopedRepository, ScopedEntity) was already in place from prior WOs. This WO completed the framework by: (1) implementing the single 403-vs-404 translation point (ScopeDenialTranslator — CUSTOMER cross-account → 404, all other scope denials → 403) with structured audit log and Micrometer counter; (2) wiring the translator into GlobalExceptionHandler replacing the fixed 403; (3) adding Micrometer counter to RestAccessDeniedHandler for filter-chain denials; (4) creating GET /api/v1/work-orders/{id} as the representative read endpoint used by the HTTP probe matrix; (5) adding the ArchUnit scoped-repository rule with a non-compliant fixture proving the rule fires; (6) extending TestTokenMinter with extra-claims support for HTTP-level technician/customer token minting; (7) writing SQL inspection, HTTP probe matrix, and unit tests.

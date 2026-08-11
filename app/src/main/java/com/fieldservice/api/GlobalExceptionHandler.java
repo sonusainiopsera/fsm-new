@@ -4,6 +4,7 @@ import com.fieldservice.aigateway.api.AiCapExceededException;
 import com.fieldservice.aigateway.api.AiUnavailableException;
 import com.fieldservice.platform.api.ErrorEnvelope;
 import com.fieldservice.platform.api.FieldError;
+import com.fieldservice.platform.error.ScopeDenialTranslator;
 import com.fieldservice.platform.exception.BusinessGuardException;
 import com.fieldservice.platform.exception.ConflictException;
 import com.fieldservice.platform.exception.ForbiddenException;
@@ -63,6 +64,12 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final String TRACE_HEADER = "X-Trace-Id";
 
+    private final ScopeDenialTranslator scopeDenialTranslator;
+
+    public GlobalExceptionHandler(ScopeDenialTranslator scopeDenialTranslator) {
+        this.scopeDenialTranslator = scopeDenialTranslator;
+    }
+
     // -------------------------------------------------------------------------
     // Authentication / Authorization
     // -------------------------------------------------------------------------
@@ -72,11 +79,7 @@ public class GlobalExceptionHandler {
             ScopedAccessDeniedException ex,
             HttpServletRequest request) {
 
-        if (ex.getResourceType().isEmpty()) {
-            log.warn("Scope resolution denied: message={}, traceId={}, path={}",
-                    ex.getMessage(), traceId(), request.getRequestURI());
-        }
-        return forbidden();
+        return scopeDenialTranslator.translate(ex, request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
