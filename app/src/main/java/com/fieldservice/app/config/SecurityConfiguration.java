@@ -1,16 +1,20 @@
 package com.fieldservice.app.config;
 
+import com.fieldservice.identity.application.StreamTicketService;
 import com.fieldservice.identity.config.RolesClaimAuthorityConverter;
+import com.fieldservice.identity.token.StreamTicketAuthFilter;
 import com.fieldservice.platform.web.RestAccessDeniedHandler;
 import com.fieldservice.platform.web.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 
@@ -63,7 +67,38 @@ public class SecurityConfiguration {
         this.rolesClaimAuthorityConverter = rolesClaimAuthorityConverter;
     }
 
+    /**
+     * Filter chain for SSE stream connections at {@code /api/v1/streams/**}.
+     *
+     * <p>Authenticated exclusively by single-use stream tickets (query parameter) — no bearer
+     * header, no cookie. The filter is scoped to this chain only so query-parameter credentials
+     * are never accepted on any other path.
+     *
+     * <p>{@code @Order(1)} ensures this chain is evaluated before the default JWT chain.
+     */
     @Bean
+    @Order(1)
+    public SecurityFilterChain streamFilterChain(
+            HttpSecurity http,
+            StreamTicketService streamTicketService) throws Exception {
+
+        StreamTicketAuthFilter ticketFilter = new StreamTicketAuthFilter(streamTicketService);
+
+        http
+            .securityMatcher("/api/v1/streams/**")
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(ticketFilter, UsernamePasswordAuthenticationFilter.class)
+            .authorizeHttpRequests(authz -> authz.anyRequest().authenticated())
+            .exceptionHandling(exc -> exc
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler));
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             // ---- Session / CSRF -----------------------------------------------

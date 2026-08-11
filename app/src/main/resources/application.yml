@@ -133,6 +133,13 @@ server:
     include-binding-errors: never
     include-stacktrace: never
     include-exception: false
+  tomcat:
+    accesslog:
+      enabled: false
+      # When enabled, use %U (URI without query string) so SSE stream ticket values
+      # in query parameters are never written to access logs.
+      # Example production pattern: %h %l %u %t "%m %U %H" %s %b
+      pattern: '%h %l %u %t "%m %U %H" %s %b'
 
 ---
 spring:

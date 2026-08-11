@@ -3,8 +3,10 @@ package com.fieldservice.identity.api;
 import com.fieldservice.identity.api.dto.LoginRequest;
 import com.fieldservice.identity.api.dto.LoginResponse;
 import com.fieldservice.identity.api.dto.RefreshResponse;
+import com.fieldservice.identity.api.dto.StreamTicketResponse;
 import com.fieldservice.identity.application.LoginService;
 import com.fieldservice.identity.application.RefreshTokenService;
+import com.fieldservice.identity.application.StreamTicketService;
 import com.fieldservice.platform.api.ApiErrorResponse;
 import com.fieldservice.platform.api.ErrorCode;
 import com.fieldservice.platform.api.exception.InvalidCredentialsException;
@@ -17,6 +19,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,10 +56,14 @@ public class AuthController {
 
     private final LoginService        loginService;
     private final RefreshTokenService refreshTokenService;
+    private final StreamTicketService streamTicketService;
 
-    public AuthController(LoginService loginService, RefreshTokenService refreshTokenService) {
+    public AuthController(LoginService loginService,
+                          RefreshTokenService refreshTokenService,
+                          StreamTicketService streamTicketService) {
         this.loginService        = loginService;
         this.refreshTokenService = refreshTokenService;
+        this.streamTicketService = streamTicketService;
     }
 
     @Operation(operationId = "login", summary = "Authenticate with email and password")
@@ -141,6 +149,32 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie(result.tokens().refreshHandle()).toString())
                 .body(RefreshResponse.of(result.tokens().accessToken(), expiresIn));
+    }
+
+    /**
+     * Exchanges a valid bearer token for a single-use, IP-bound, 60-second SSE stream ticket.
+     *
+     * <p>The browser {@code EventSource} API cannot set an {@code Authorization} header, so
+     * clients call this endpoint first, then present the returned ticket as the {@code ticket}
+     * query parameter when opening the stream connection. The ticket is consumed atomically
+     * on connect and cannot be replayed.
+     *
+     * <p>Returns 503 when the ticket store (Redis) is unavailable — fail-closed contract.
+     */
+    @Operation(operationId = "issueStreamTicket",
+               summary     = "Exchange access token for a single-use SSE stream ticket")
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping(value = "/stream-ticket", produces = "application/json")
+    public ResponseEntity<StreamTicketResponse> issueStreamTicket(
+            HttpServletRequest httpRequest,
+            Authentication authentication) {
+
+        String clientIp = resolveClientIp(httpRequest);
+        StreamTicketService.StreamTicketResult result =
+                streamTicketService.issue(authentication, clientIp);
+
+        return ResponseEntity.ok(
+                new StreamTicketResponse(result.ticketValue(), result.expiresIn()));
     }
 
     // ---- Helpers ---------------------------------------------------------------
