@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "id": "cert-type-0000-0000-0000-000000000001",
+      "code": "GAS_SAFE_[PLACEHOLDER]",
+      "displayName": "[PLACEHOLDER] Gas Safe Register",
+      "regulated": true,
+      "defaultValidityMonths": 12,
+      "active": true,
+      "version": 1
+    },
+    {
+      "id": "cert-type-0000-0000-0000-000000000002",
+      "code": "ELECTRICAL_18TH_[PLACEHOLDER]",
+      "displayName": "[PLACEHOLDER] 18th Edition Electrical",
+      "regulated": true,
+      "defaultValidityMonths": null,
+      "active": true,
+      "version": 1
+    },
+    {
+      "id": "cert-type-0000-0000-0000-000000000003",
+      "code": "FIRST_AID_[PLACEHOLDER]",
+      "displayName": "[PLACEHOLDER] First Aid at Work",
+      "regulated": false,
+      "defaultValidityMonths": 36,
+      "active": true,
+      "version": 1
+    }
+  ],
+  "page": { "number": 0, "size": 25, "totalElements": 3, "totalPages": 1 },
+  "links": {}
+}

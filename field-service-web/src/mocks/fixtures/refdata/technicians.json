@@ -1,0 +1,9 @@
+{
+  "data": [
+    { "id": "tech-0001-0000-0000-000000000001", "employeeNo": "T001", "displayName": "Alice Smith", "timezone": "Europe/London", "active": true },
+    { "id": "tech-0001-0000-0000-000000000002", "employeeNo": "T002", "displayName": "Bob Jones", "timezone": "Europe/London", "active": true },
+    { "id": "tech-0001-0000-0000-000000000003", "employeeNo": "T003", "displayName": "Carol White", "timezone": "America/New_York", "active": false }
+  ],
+  "page": { "number": 0, "size": 25, "totalElements": 3, "totalPages": 1 },
+  "links": {}
+}

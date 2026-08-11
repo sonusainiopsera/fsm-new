@@ -1,0 +1,6 @@
+{
+  "code": "FORBIDDEN",
+  "message": "You do not have permission to perform this action.",
+  "traceId": "trace-403-00000000000000000001",
+  "fieldErrors": []
+}

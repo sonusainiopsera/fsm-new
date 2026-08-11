@@ -14,6 +14,7 @@ export const SURFACES = {
   FIELD: 'field',
   OPERATIONS: 'operations',
   PORTAL: 'portal',
+  ADMIN: 'admin',
 }
 
 /**
@@ -92,6 +93,54 @@ export const NAV_MANIFEST = [
     icon: 'help-circle',
     allowedRoles: ['CUSTOMER'],
     surface: SURFACES.PORTAL,
+  },
+  {
+    key: 'admin-customers',
+    path: '/admin/customers',
+    label: 'Customers',
+    icon: 'users',
+    allowedRoles: ['ADMIN', 'MANAGER'],
+    surface: SURFACES.ADMIN,
+  },
+  {
+    key: 'admin-sites',
+    path: '/admin/sites',
+    label: 'Sites',
+    icon: 'map-pin',
+    allowedRoles: ['ADMIN', 'MANAGER'],
+    surface: SURFACES.ADMIN,
+  },
+  {
+    key: 'admin-assets',
+    path: '/admin/assets',
+    label: 'Assets',
+    icon: 'cpu',
+    allowedRoles: ['ADMIN', 'MANAGER'],
+    surface: SURFACES.ADMIN,
+  },
+  {
+    key: 'admin-technicians',
+    path: '/admin/technicians',
+    label: 'Technicians',
+    icon: 'tool',
+    allowedRoles: ['ADMIN', 'MANAGER'],
+    surface: SURFACES.ADMIN,
+  },
+  {
+    key: 'admin-skills',
+    path: '/admin/skills',
+    label: 'Skills',
+    icon: 'award',
+    allowedRoles: ['ADMIN', 'MANAGER'],
+    surface: SURFACES.ADMIN,
+  },
+  {
+    key: 'admin-cert-types',
+    path: '/admin/certification-types',
+    label: 'Certification Types',
+    icon: 'shield',
+    allowedRoles: ['ADMIN', 'MANAGER', 'DISPATCHER'],
+    surface: SURFACES.ADMIN,
   },
   {
     key: 'settings',

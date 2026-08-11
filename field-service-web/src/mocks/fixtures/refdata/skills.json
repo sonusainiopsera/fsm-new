@@ -1,0 +1,9 @@
+{
+  "data": [
+    { "id": "skill-001-0000-0000-000000000001", "code": "PLUMBING", "displayName": "Plumbing", "description": "Residential and commercial plumbing", "active": true },
+    { "id": "skill-001-0000-0000-000000000002", "code": "ELECTRICAL", "displayName": "Electrical", "description": "Electrical installation and repair", "active": true },
+    { "id": "skill-001-0000-0000-000000000003", "code": "HVAC", "displayName": "HVAC", "description": "Heating, ventilation and air conditioning", "active": true }
+  ],
+  "page": { "number": 0, "size": 25, "totalElements": 3, "totalPages": 1 },
+  "links": {}
+}

@@ -1,0 +1,8 @@
+{
+  "data": [
+    { "id": "site-0001-0000-0000-000000000001", "name": "London HQ", "reference": "LON001", "addressLine1": "1 Main St", "addressLine2": null, "city": "London", "postcode": "EC1A 1BB", "country": "GB", "active": true },
+    { "id": "site-0001-0000-0000-000000000002", "name": "Manchester Depot", "reference": "MAN001", "addressLine1": "5 Depot Rd", "addressLine2": null, "city": "Manchester", "postcode": "M1 1AA", "country": "GB", "active": true }
+  ],
+  "page": { "number": 0, "size": 25, "totalElements": 2, "totalPages": 1 },
+  "links": {}
+}

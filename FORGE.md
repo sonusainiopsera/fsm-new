@@ -392,3 +392,10 @@
 - **Files:** 25 (+1701/-145)
 - **Duration:** 887ss
 - **Approach:** N/A
+
+## WO-121: User Story: WO-121 - Admin web screens for reference data and certifications
+- **Status:** completed
+- **Commit:** `0a92527`
+- **Files:** 39 (+3221/-1)
+- **Duration:** 1165ss
+- **Approach:** Full admin surface with seven CRUD pages (Customers, Sites, Assets, Technicians, Skills, CertificationTypes, TechnicianCertifications) using shared useUrlPageState + usePagedQuery + useFieldErrors hooks. Certification currency is rendered exclusively from API-derived fields — the client performs zero date math. A CSV import wizard handles both skills and certifications: client-side parse, per-row validation preview, chunked batch submission (max 200/batch) with idempotency keys, and a downloadable error report. Navigation and router wired to the new admin/* code-split surface. Role filtering is a usability affordance; every write is also blocked server-side.

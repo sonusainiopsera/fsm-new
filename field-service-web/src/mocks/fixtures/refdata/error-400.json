@@ -1,0 +1,9 @@
+{
+  "code": "VALIDATION_ERROR",
+  "message": "Validation failed",
+  "traceId": "trace-400-00000000000000000001",
+  "fieldErrors": [
+    { "field": "name", "message": "must not be blank" },
+    { "field": "reference", "message": "must not be blank" }
+  ]
+}

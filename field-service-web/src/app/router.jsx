@@ -15,11 +15,12 @@ import { AppShell } from './AppShell.jsx'
 import { ErrorBoundary } from './ErrorBoundary.jsx'
 import { LoadingState } from '../components/index.js'
 
-// Route-level code splitting — four surface chunks + sign-in + not-found
+// Route-level code splitting — surface chunks + sign-in + not-found
 const DispatchSurface = lazy(() => import('../surfaces/dispatch/index.jsx'))
 const FieldSurface = lazy(() => import('../surfaces/field/index.jsx'))
 const OperationsSurface = lazy(() => import('../surfaces/operations/index.jsx'))
 const PortalSurface = lazy(() => import('../surfaces/portal/index.jsx'))
+const AdminSurface = lazy(() => import('../surfaces/admin/index.jsx'))
 const SignIn = lazy(() => import('../surfaces/auth/SignIn.jsx'))
 const NotFound = lazy(() => import('../surfaces/NotFound.jsx'))
 
@@ -87,6 +88,14 @@ export const router = createBrowserRouter([
         element: (
           <LazyRoute>
             <PortalSurface />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'admin/*',
+        element: (
+          <LazyRoute>
+            <AdminSurface />
           </LazyRoute>
         ),
       },

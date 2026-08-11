@@ -1,0 +1,8 @@
+{
+  "data": [
+    { "id": "asset-001-0000-0000-000000000001", "serialNumber": "SN-00001", "assetTag": "AT-001", "assetTypeCode": "BOILER", "siteName": "London HQ", "siteId": "site-0001-0000-0000-000000000001", "description": "Gas boiler unit", "active": true },
+    { "id": "asset-001-0000-0000-000000000002", "serialNumber": "SN-00002", "assetTag": "AT-002", "assetTypeCode": "HVAC", "siteName": "Manchester Depot", "siteId": "site-0001-0000-0000-000000000002", "description": "HVAC unit", "active": true }
+  ],
+  "page": { "number": 0, "size": 25, "totalElements": 2, "totalPages": 1 },
+  "links": {}
+}

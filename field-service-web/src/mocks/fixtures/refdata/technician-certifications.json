@@ -1,0 +1,28 @@
+{
+  "data": [
+    {
+      "id": "tcert-001-0000-0000-000000000001",
+      "typeCode": "GAS_SAFE_[PLACEHOLDER]",
+      "typeDisplayName": "[PLACEHOLDER] Gas Safe Register",
+      "regulated": true,
+      "certificateReference": "REF-GS-001",
+      "issuedOn": "2025-01-01",
+      "expiresOn": "2027-08-15",
+      "current": true,
+      "daysUntilExpiry": 4
+    },
+    {
+      "id": "tcert-001-0000-0000-000000000002",
+      "typeCode": "FIRST_AID_[PLACEHOLDER]",
+      "typeDisplayName": "[PLACEHOLDER] First Aid at Work",
+      "regulated": false,
+      "certificateReference": null,
+      "issuedOn": "2023-06-01",
+      "expiresOn": "2024-05-31",
+      "current": false,
+      "daysUntilExpiry": null
+    }
+  ],
+  "page": { "number": 0, "size": 25, "totalElements": 2, "totalPages": 1 },
+  "links": {}
+}

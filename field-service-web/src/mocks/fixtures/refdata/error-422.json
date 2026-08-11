@@ -1,0 +1,6 @@
+{
+  "code": "certification-currency",
+  "message": "Technician lacks current regulated certification(s): [GAS_SAFE_[PLACEHOLDER]]",
+  "traceId": "trace-422-00000000000000000001",
+  "fieldErrors": []
+}
