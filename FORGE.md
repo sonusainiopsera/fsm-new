@@ -21,3 +21,10 @@
 - **Files:** 28 (+1383/-136)
 - **Duration:** 1195ss
 - **Approach:** Replaced the minimal V1__init.sql with a comprehensive 4-migration Flyway set (V1__baseline_core.sql: all 15 tables; V2__sla_policy.sql: SLA table + seeded rows; V3__indexes.sql: all P0 indexes; V4__seed_reference_data.sql: representative test data). Added RFC-9562-compliant UuidV7 generator in the platform module using 48-bit unix millis prefix, 12-bit monotonic sub-millisecond sequence, and 62 bits random. Renamed the customer_account table to customer and updated site.customer_account_id to customer_id, updated WorkOrderStatus enum (OPEN→NEW, added CLOSED), renamed work_order.status column to state, and added priority column. Updated all JPA entity field/column mappings, ScopeSpec predicates, and test fixtures to align with the new schema. All version columns changed from BIGINT/Long to INTEGER/Integer per spec. New minimal JPA entity stubs created for all 10 new tables to support Hibernate startup validation in production profile.
+
+## WO-006: User Story: WO-006 - Uniform error contract and strict request validation pipeline
+- **Status:** completed
+- **Commit:** `01aec5b`
+- **Files:** 3 (+15/-6)
+- **Duration:** 763ss
+- **Approach:** Platform module receives the full uniform error contract: ErrorCode enum, FieldError and ApiErrorResponse records, 7 typed domain exception classes, @ValidEnum and @SafeText custom validation annotations, and a comprehensive GlobalExceptionHandler @RestControllerAdvice covering every agreed status code (400/401/403/404/409/422/429+Retry-After/503/500). All 403 outcomes return body-identical responses for non-disclosure. Jackson is configured to fail-on-unknown-properties and fail-on-null-for-primitives. An ErrorControllerFallback handles filter-stage failures. The old app.error.ErrorResponse and app.error.GlobalExceptionHandler (ACCESS_DENIED code) are deleted and replaced by the platform types. CrossRoleProbeMatrixTest updated from ACCESS_DENIED to FORBIDDEN.

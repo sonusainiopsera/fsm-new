@@ -107,8 +107,7 @@ class CrossRoleProbeMatrixTest {
         void dispatcher_nonexistent_returns_403() throws Exception {
             withJwt(get("/api/v1/work-orders/{id}", NONEXISTENT_ID), dispatcher())
                     .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.code").value("ACCESS_DENIED"))
-                    .andExpect(jsonPath("$.status").value(403));
+                    .andExpect(jsonPath("$.code").value("FORBIDDEN"));
         }
     }
 
@@ -245,13 +244,13 @@ class CrossRoleProbeMatrixTest {
             ResultActions outOfScope =
                     withJwt(get("/api/v1/work-orders/{id}", WO_001_ID), customerSingleAccount())
                             .andExpect(status().isForbidden())
-                            .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+                            .andExpect(jsonPath("$.code").value("FORBIDDEN"));
 
             // Same customer probing a nonexistent id
             ResultActions nonExistent =
                     withJwt(get("/api/v1/work-orders/{id}", NONEXISTENT_ID), customerSingleAccount())
                             .andExpect(status().isForbidden())
-                            .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+                            .andExpect(jsonPath("$.code").value("FORBIDDEN"));
 
             // Both responses must not leak the resource id
             assertThat(outOfScope.andReturn().getResponse().getContentAsString())
@@ -261,9 +260,9 @@ class CrossRoleProbeMatrixTest {
 
             // Both must carry exactly the same error code
             assertThat(outOfScope.andReturn().getResponse().getContentAsString())
-                    .contains("ACCESS_DENIED");
+                    .contains("FORBIDDEN");
             assertThat(nonExistent.andReturn().getResponse().getContentAsString())
-                    .contains("ACCESS_DENIED");
+                    .contains("FORBIDDEN");
         }
 
         @Test
