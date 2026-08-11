@@ -3,11 +3,14 @@ package com.fieldservice.domain.technician;
 import com.fieldservice.platform.persistence.ScopedEntity;
 import com.fieldservice.platform.util.UuidV7;
 import jakarta.persistence.*;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "technician_certification")
+@Audited
 public class TechnicianCertification implements ScopedEntity {
 
     @Id
@@ -15,6 +18,7 @@ public class TechnicianCertification implements ScopedEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "technician_id", nullable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private Technician technician;
 
     @Column(name = "cert_type", nullable = false, length = 100)

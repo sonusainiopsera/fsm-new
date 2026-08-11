@@ -3,10 +3,12 @@ package com.fieldservice.domain.site;
 import com.fieldservice.platform.persistence.ScopedEntity;
 import com.fieldservice.platform.util.UuidV7;
 import jakarta.persistence.*;
+import org.hibernate.envers.Audited;
 import java.util.UUID;
 
 @Entity
 @Table(name = "site")
+@Audited
 public class Site implements ScopedEntity {
 
     @Id

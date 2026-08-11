@@ -3,12 +3,14 @@ package com.fieldservice.domain.sla;
 import com.fieldservice.platform.persistence.ScopedEntity;
 import com.fieldservice.platform.util.UuidV7;
 import jakarta.persistence.*;
+import org.hibernate.envers.Audited;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "sla_policy")
+@Audited
 public class SlaPolicy implements ScopedEntity {
 
     @Id

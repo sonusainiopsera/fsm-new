@@ -18,6 +18,12 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
         generate_statistics: false
+        envers:
+          audit_table_suffix: _aud
+          store_data_at_delete: true
+          default_schema: public
+          revision_field_name: rev
+          revision_type_field_name: revtype
   flyway:
     enabled: true
     locations: classpath:db/migration

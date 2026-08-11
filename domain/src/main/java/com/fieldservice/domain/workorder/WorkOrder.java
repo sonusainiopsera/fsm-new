@@ -4,11 +4,13 @@ import com.fieldservice.domain.site.Site;
 import com.fieldservice.platform.persistence.ScopedEntity;
 import com.fieldservice.platform.util.UuidV7;
 import jakarta.persistence.*;
+import org.hibernate.envers.Audited;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "work_order")
+@Audited
 public class WorkOrder implements ScopedEntity {
 
     @Id
