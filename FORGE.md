@@ -210,3 +210,10 @@
 - **Files:** 10 (+765/-61)
 - **Duration:** 844ss
 - **Approach:** Implemented filterable, paginated, row-scoped work order collection. WorkOrderSearchCriteria record holds all optional filter fields; WorkOrderSearchService builds a Specification<WorkOrder> by ANDing non-null criteria. The controller enforces server-side size cap (max 50), validates sort via SortAllowList.ALLOW_LIST (unknown field → 400), computes SHA-256 ETag over id:version tuples for conditional GET (304 support), and switches from offset to keyset pagination at offsetThreshold (page 20). Row scope is enforced by ScopedQueryExecutor which ANDs the AccessScope predicate into every query and count, so out-of-scope rows are never loaded. Board responses use WorkOrderBoardRow records, not JPA entities. V19 migration adds response_deadline, resolution_deadline, at_risk columns plus composite indexes and a partial at-risk index.
+
+## WO-149: User Story: WO-149 - Atomic parts consumption enforcing non-negative stock
+- **Status:** completed
+- **Commit:** `3c5f848`
+- **Files:** 23 (+1572/-1)
+- **Duration:** 892ss
+- **Approach:** Implemented BR-16/BR-17 (stock never negative, atomic consumption) via a conditional UPDATE primitive (quantity_on_hand >= :qty predicate). StockMovementService is the sole writer of stock tables. Two-pass consume: pass 1 scans all balance rows for shortfalls before any mutation; pass 2 applies conditionalDecrement, persists StockLedger + WorkOrderPart + Envers audit, publishes PARTS_CONSUMED outbox event — all in one @Transactional boundary. Race loss in pass 2 also throws InsufficientStockException, rolling back all decrements already applied. WorkOrderPartsController lives in workorder.web (not inventory.web) and delegates to StockMovementService interface. ADR-0009 records 422 vs 409 resolution.

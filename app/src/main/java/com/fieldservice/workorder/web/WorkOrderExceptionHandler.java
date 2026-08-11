@@ -1,5 +1,7 @@
 package com.fieldservice.workorder.web;
 
+import com.fieldservice.inventory.application.InsufficientStockException;
+import com.fieldservice.inventory.application.InvalidStockMovementException;
 import com.fieldservice.platform.api.ApiErrorResponse;
 import com.fieldservice.platform.api.ErrorCode;
 import com.fieldservice.platform.api.FieldError;
@@ -80,6 +82,35 @@ public class WorkOrderExceptionHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiErrorResponse.of(ErrorCode.WORK_ORDER_VERSION_CONFLICT,
                         "The work order was modified by another request. Retry with the latest version.",
+                        traceId));
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ApiErrorResponse> handleInsufficientStock(InsufficientStockException ex) {
+        String traceId = resolveTraceId();
+        List<FieldError> fieldErrors = new java.util.ArrayList<>();
+        for (int i = 0; i < ex.getShortfalls().size(); i++) {
+            var s = ex.getShortfalls().get(i);
+            fieldErrors.add(new FieldError(
+                    "lines[" + i + "].quantity",
+                    "requested " + s.requested() + ", available " + s.available()));
+        }
+        return ResponseEntity.status(org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY)
+                .header("X-Trace-Id", traceId)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(ApiErrorResponse.withFieldErrors(ErrorCode.INSUFFICIENT_STOCK,
+                        ex.getMessage(), fieldErrors, traceId));
+    }
+
+    @ExceptionHandler(InvalidStockMovementException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidStockMovement(InvalidStockMovementException ex) {
+        String traceId = resolveTraceId();
+        return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST)
+                .header("X-Trace-Id", traceId)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(ApiErrorResponse.withFieldErrors(ErrorCode.INVALID_STOCK_MOVEMENT,
+                        ex.getMessage(),
+                        List.of(new FieldError(ex.getField(), ex.getMessage())),
                         traceId));
     }
 
