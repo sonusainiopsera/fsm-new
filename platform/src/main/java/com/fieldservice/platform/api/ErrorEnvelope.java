@@ -67,5 +67,14 @@ public record ErrorEnvelope(
 
         /** 500 — unexpected server error. */
         public static final String INTERNAL_ERROR = "INTERNAL_ERROR";
+
+        /** 409 — Idempotency-Key reused with a different request payload. */
+        public static final String IDEMPOTENCY_CONFLICT = "IDEMPOTENCY_CONFLICT";
+
+        /** 409 — a concurrent request with the same Idempotency-Key is still in progress. */
+        public static final String IDEMPOTENCY_IN_PROGRESS = "IDEMPOTENCY_IN_PROGRESS";
+
+        /** 409 — the prior response for this key was too large to store for replay. */
+        public static final String IDEMPOTENCY_NON_REPLAYABLE = "IDEMPOTENCY_NON_REPLAYABLE";
     }
 }

@@ -69,6 +69,20 @@ app:
     keyset:
       threshold: ${APP_PAGINATION_KEYSET_THRESHOLD:20}
 
+  idempotency:
+    # How long an IN_PROGRESS record holds its lease before it can be reclaimed (crash recovery)
+    lease-duration: ${APP_IDEMPOTENCY_LEASE_DURATION:PT30S}
+    # How long a completed response is retained for replay after the request completes
+    retention-duration: ${APP_IDEMPOTENCY_RETENTION_DURATION:PT24H}
+    # When true, mutating requests without an Idempotency-Key header are rejected with 422
+    require-key: ${APP_IDEMPOTENCY_REQUIRE_KEY:false}
+    # Maximum response body size stored for replay; larger responses are marked NON_REPLAYABLE
+    max-body-bytes: ${APP_IDEMPOTENCY_MAX_BODY_BYTES:65536}
+    # Maximum number of records deleted per purge-job invocation
+    purge-batch-size: ${APP_IDEMPOTENCY_PURGE_BATCH_SIZE:500}
+    # Interval between purge-job runs in milliseconds
+    purge-interval: ${APP_IDEMPOTENCY_PURGE_INTERVAL:300000}
+
 # Actuator — health and info only exposed by default
 management:
   endpoints:
