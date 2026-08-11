@@ -301,3 +301,10 @@
 - **Files:** 4 (+1161/-0)
 - **Duration:** 923ss
 - **Approach:** Created a declarative Java-code matrix (AccessControlMatrix) enumerating all 30+ protected endpoints with expected HTTP status per role (DISPATCHER, TECHNICIAN, MANAGER, CUSTOMER, ADMIN, UNAUTHENTICATED). The matrix is driven by a parameterized integration test (AccessControlMatrixTest) that mints real RS256 JWTs via TestTokenMinter/TestRsaKeyPair and routes them through the production SecurityFilterChainTestConfig JwtDecoder. An EndpointCoverageTest loads the full Spring context via RequestMappingHandlerMapping and fails the build if any endpoint is absent from the matrix. Token-shape negatives, row-scope SQL proofs, and service-layer method-security proofs are already covered by SecurityFilterChainIntegrationTest, ScopedQuerySqlInspectionTest, and MethodSecurityTest respectively; those tests were not duplicated.
+
+## WO-204: User Story: WO-204 - P0 API Contract And Envelope Conformance Suite
+- **Status:** completed
+- **Commit:** `a0de9b6`
+- **Files:** 7 (+1359/-0)
+- **Duration:** 903ss
+- **Approach:** Created shared ApiAssertions helpers (assertEnvelope, assertErrorShape, assertPageMeta, assertEmptyEnvelope, assertLastPage, assertNoInternalLeak) and one contract test class per P0 endpoint group. All tests extend AbstractIntegrationTest (Testcontainers PostgreSQL + stub JWT decoder on 'test' profile), with TransitionContractTest and PartsConsumptionContractTest additionally annotated @ActiveProfiles('api') to activate IdempotencyKeyFilter. Tests focus on contract-level assertions (envelope shape, error shape, pagination invariants, idempotency proof) rather than duplicating functional coverage in existing WorkOrderTransitionControllerIT/WorkOrderPartsIT. OpenApiConformanceTest validates live responses against required fields declared in OpenAPI component schemas, and asserts no undocumented top-level fields in collection responses.

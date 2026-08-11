@@ -402,3 +402,86 @@ mvn -pl app test -Dtest="EndpointCoverageTest"
 # Both together
 mvn -pl app test -Dtest="AccessControlMatrixTest,EndpointCoverageTest"
 ```
+
+---
+
+## P0 API Contract And Envelope Conformance Suite (WO-204)
+
+The conformance suite proves on every build that all P0 endpoints share the same envelope and
+error shape, enforce the pagination contract deterministically, honour idempotency keys, reject
+unknown properties, and match the published OpenAPI schema.
+
+### Test classes
+
+| Class | What it asserts |
+|---|---|
+| `com.fieldservice.api.support.ApiAssertions` | Shared helpers: `assertEnvelope`, `assertErrorShape`, `assertPageMeta`, `assertEmptyEnvelope`, `assertLastPage`, `assertNoInternalLeak` |
+| `com.fieldservice.api.AuthContractTest` | Login success envelope, invalid-credentials error shape, lockout non-disclosure, strict-schema rejection |
+| `com.fieldservice.api.WorkOrderContractTest` | Creation/retrieval contracts, pagination envelope shape, size clamping, sort-field rejection, empty envelope, page-beyond-last, strict-schema, no writable status field, pagination stability (no duplicates) |
+| `com.fieldservice.api.TransitionContractTest` | Legal-transition response shape, 409/422 error envelopes, concurrent one-winner, idempotency proof (one revision on replay) |
+| `com.fieldservice.api.PartsConsumptionContractTest` | Consumption response shape, 422 error envelope, idempotency proof (one stock-ledger row on replay), strict-schema rejection |
+| `com.fieldservice.api.OpenApiConformanceTest` | Live responses satisfy OpenAPI component schemas; no undocumented top-level fields in collection responses |
+
+### Envelope conventions
+
+Every collection endpoint must return:
+```json
+{
+  "data":  [...],
+  "page":  { "number": 0, "size": 20, "totalElements": 1234, "totalPages": 62 },
+  "links": { "next": "https://…?page=1", "prev": null }
+}
+```
+
+Every error endpoint must return:
+```json
+{
+  "code":        "STABLE_CODE",
+  "message":     "Human-readable message — no resource IDs, no stack traces",
+  "fieldErrors": [],
+  "traceId":     "uuid-v4"
+}
+```
+
+### Idempotency proof
+
+The `api` profile activates `IdempotencyKeyFilter`. Tests in `TransitionContractTest` and
+`PartsConsumptionContractTest` annotated `@ActiveProfiles("api")` prove:
+1. Replay with same `Idempotency-Key` returns the identical response body.
+2. Exactly one Envers revision / stock-ledger row exists after the replay (no double-write).
+3. A distinct key on the same payload creates a second effect.
+
+### Running the conformance suite
+
+```bash
+# All conformance tests (requires Testcontainers PostgreSQL + Redis)
+mvn -pl app test -Dtest="AuthContractTest,WorkOrderContractTest,TransitionContractTest,PartsConsumptionContractTest,OpenApiConformanceTest"
+
+# Shared assertion helpers (no Spring context — just compile check)
+mvn -pl app test -Dtest="com.fieldservice.api.support.*"
+
+# Full P0 suite including access-control matrix and OpenAPI lint
+mvn -pl app verify
+```
+
+### Adding a new endpoint to the conformance suite
+
+1. Add a `MatrixEntry` to `AccessControlMatrix` (required by `EndpointCoverageTest`).
+2. Add at least one test in the appropriate contract test class asserting:
+   - Status code and envelope shape for the happy path.
+   - Error envelope for at least one 4xx case.
+3. For mutating endpoints, add an idempotency proof using `Idempotency-Key` header.
+4. If the endpoint returns a new response type, add it to the OpenAPI `components.schemas`
+   and add a schema-conformance assertion in `OpenApiConformanceTest`.
+
+### OpenAPI schema drift detection
+
+`OpenApiSnapshotTest` detects schema drift by comparing the live spec to the committed
+snapshot at `src/test/resources/openapi/snapshot.json`. When a response field is added
+without updating the snapshot, the build fails with a readable diff.
+
+Regenerate the snapshot after a deliberate API change:
+```bash
+mvn test -pl app -Dtest=OpenApiSnapshotTest -DUPDATE_SNAPSHOT=true
+```
+Then commit the updated snapshot and re-run the suite to confirm it passes.
