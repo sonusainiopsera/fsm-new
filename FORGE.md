@@ -399,3 +399,10 @@
 - **Files:** 39 (+3221/-1)
 - **Duration:** 1165ss
 - **Approach:** Full admin surface with seven CRUD pages (Customers, Sites, Assets, Technicians, Skills, CertificationTypes, TechnicianCertifications) using shared useUrlPageState + usePagedQuery + useFieldErrors hooks. Certification currency is rendered exclusively from API-derived fields — the client performs zero date math. A CSV import wizard handles both skills and certifications: client-side parse, per-row validation preview, chunked batch submission (max 200/batch) with idempotency keys, and a downloadable error report. Navigation and router wired to the new admin/* code-split surface. Role filtering is a usability affordance; every write is also blocked server-side.
+
+## WO-129: User Story: WO-129 - Work order timeline and immutable revision history API
+- **Status:** completed
+- **Commit:** `18725f8`
+- **Files:** 10 (+1652/-174)
+- **Duration:** 1138ss
+- **Approach:** Added WorkOrderHistoryController (GET-only, under workorder.api) and WorkOrderHistoryService (under workorder.application) superseding the old audit-package WorkOrderRevisionController. The service performs an access-scope pre-check before any Envers query: PRIVILEGED/CUSTOMER use ScopedQueryExecutor.findById, TECHNICIAN check their Envers history to allow past-assignee access. Field diffs compute only allow-listed fields; free-text values are truncated at 500 chars. Timeline derivation maps RevisionType and state deltas to the stable 10-event vocabulary (CREATED, ASSIGNED, DEPARTED, STARTED, HELD, RESUMED, COMPLETED, CLOSED, CANCELLED, REASSIGNED). Role-aware DTO assembly is applied at construction time — CUSTOMER gets BASE_FIELDS only (no description, no assignedTechnicianId, no faultDescription), TECHNICIAN adds INTERNAL_FIELDS, PRIVILEGED adds CONFIDENTIAL_FIELDS. Actor display names omit raw user UUIDs for customer-facing responses. Max page size enforced at 50.
