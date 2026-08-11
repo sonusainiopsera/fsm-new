@@ -131,12 +131,21 @@ class WorkOrderContractTest extends AbstractIntegrationTest {
     // ── Creation ─────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("POST /work-orders with missing required fields → 400 VALIDATION_FAILED with fieldErrors")
+    @DisplayName("POST /work-orders with missing faultDescription → 400 VALIDATION_FAILED with fieldErrors")
     void create_missingRequiredFields_returns400WithFieldErrors() throws Exception {
+        // Send all required fields except faultDescription — ensures exactly one field error
+        String body = """
+                {
+                  "customerId":"%s",
+                  "siteId":"%s",
+                  "priority":"HIGH",
+                  "title":"Contract test WO"
+                }
+                """.formatted(ACCT_A, SITE_A1);
         ApiAssertions.assertErrorShape(
                 mockMvc.perform(post(BASE_URL)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"priority\":\"HIGH\"}")
+                                .content(body)
                                 .with(jwt().jwt(TestJwtFactory.dispatcherJwt())
                                         .authorities(new SimpleGrantedAuthority("ROLE_DISPATCHER"))))
                         .andExpect(status().isBadRequest()),

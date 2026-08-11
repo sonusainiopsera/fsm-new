@@ -58,6 +58,7 @@ public class WorkOrderController {
     private static WorkOrderSummaryResponse toSummary(WorkOrder wo, WorkOrderHold openHold) {
         return new WorkOrderSummaryResponse(
                 wo.getId(),
+                wo.getReference(),
                 wo.getState(),
                 wo.getPriority(),
                 wo.getTitle(),
@@ -69,6 +70,10 @@ public class WorkOrderController {
                 wo.getUpdatedAt(),
                 wo.getCumulativeHoldMinutes(),
                 openHold != null ? openHold.getReasonCode() : null,
-                openHold != null ? openHold.getStartedAt() : null);
+                openHold != null ? openHold.getStartedAt() : null,
+                wo.getResponseDueAt(),
+                wo.getResolutionDueAt(),
+                wo.getAtRiskAt(),
+                wo.getAppliedSlaPolicyId());
     }
 }

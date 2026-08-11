@@ -107,5 +107,14 @@ public record ErrorEnvelope(
 
         /** 422 — insufficient stock to fulfil one or more consumption lines; see fieldErrors for per-line detail. */
         public static final String INSUFFICIENT_STOCK = "INSUFFICIENT_STOCK";
+
+        /** 422 — no active SLA policy row exists for the requested priority; creation refused. */
+        public static final String SLA_POLICY_MISSING = "SLA_POLICY_MISSING";
+
+        /** 422 — the referenced site does not belong to the referenced customer. */
+        public static final String SITE_CUSTOMER_MISMATCH = "SITE_CUSTOMER_MISMATCH";
+
+        /** 422 — the referenced asset is not located at the referenced site. */
+        public static final String ASSET_SITE_MISMATCH = "ASSET_SITE_MISMATCH";
     }
 }

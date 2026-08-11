@@ -97,6 +97,17 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
     @Column(name = "cumulative_hold_minutes", nullable = false)
     private int cumulativeHoldMinutes = 0;
 
+    @DataClassification(tier = ClassificationTier.CONFIDENTIAL,
+            note = "Free-text fault description may contain customer-reported PII — stored parameterised only, never logged in full")
+    @Column(name = "fault_description", columnDefinition = "TEXT")
+    private String faultDescription;
+
+    @Column(name = "reference", length = 20)
+    private String reference;
+
+    @Column(name = "applied_sla_policy_id")
+    private UUID appliedSlaPolicyId;
+
     protected WorkOrder() {
     }
 
@@ -198,4 +209,13 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
 
     public boolean isNoPartsRequired() { return noPartsRequired; }
     public void setNoPartsRequired(boolean noPartsRequired) { this.noPartsRequired = noPartsRequired; }
+
+    public String getFaultDescription() { return faultDescription; }
+    public void setFaultDescription(String faultDescription) { this.faultDescription = faultDescription; }
+
+    public String getReference() { return reference; }
+    public void setReference(String reference) { this.reference = reference; }
+
+    public UUID getAppliedSlaPolicyId() { return appliedSlaPolicyId; }
+    public void setAppliedSlaPolicyId(UUID appliedSlaPolicyId) { this.appliedSlaPolicyId = appliedSlaPolicyId; }
 }

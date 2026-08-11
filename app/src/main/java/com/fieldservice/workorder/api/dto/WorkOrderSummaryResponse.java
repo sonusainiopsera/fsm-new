@@ -8,10 +8,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Read-only summary of a work order returned by GET /api/v1/work-orders/{id}.
+ * Read-only summary of a work order returned by POST /api/v1/work-orders (201) and
+ * GET /api/v1/work-orders/{id}.
  */
 public record WorkOrderSummaryResponse(
         UUID id,
+        @Nullable String reference,
         WorkOrderState state,
         WorkOrderPriority priority,
         String title,
@@ -23,5 +25,9 @@ public record WorkOrderSummaryResponse(
         Instant updatedAt,
         int cumulativeHoldMinutes,
         @Nullable String currentHoldReasonCode,
-        @Nullable Instant holdStartedAt
+        @Nullable Instant holdStartedAt,
+        @Nullable Instant responseDeadlineAt,
+        @Nullable Instant resolutionDeadlineAt,
+        @Nullable Instant atRiskAt,
+        @Nullable UUID appliedSlaPolicyId
 ) {}

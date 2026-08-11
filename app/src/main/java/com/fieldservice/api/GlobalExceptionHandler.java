@@ -363,8 +363,32 @@ public class GlobalExceptionHandler {
         log.error("sla.policy_unavailable: priority={}, traceId={}, path={}",
                 ex.getPriority(), traceId(), request.getRequestURI());
         return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
-                ErrorEnvelope.Code.GUARD_REFUSED,
+                ErrorEnvelope.Code.SLA_POLICY_MISSING,
                 "No active SLA policy found for priority: " + ex.getPriority());
+    }
+
+    @ExceptionHandler(com.fieldservice.workorder.application.SiteCustomerMismatchException.class)
+    public ResponseEntity<ErrorEnvelope> handleSiteCustomerMismatch(
+            com.fieldservice.workorder.application.SiteCustomerMismatchException ex,
+            HttpServletRequest request) {
+
+        log.warn("workorder.site_customer_mismatch: siteId={}, customerId={}, traceId={}, path={}",
+                ex.getSiteId(), ex.getCustomerId(), traceId(), request.getRequestURI());
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                ErrorEnvelope.Code.SITE_CUSTOMER_MISMATCH,
+                "The referenced site does not belong to the referenced customer.");
+    }
+
+    @ExceptionHandler(com.fieldservice.workorder.application.AssetSiteMismatchException.class)
+    public ResponseEntity<ErrorEnvelope> handleAssetSiteMismatch(
+            com.fieldservice.workorder.application.AssetSiteMismatchException ex,
+            HttpServletRequest request) {
+
+        log.warn("workorder.asset_site_mismatch: assetId={}, siteId={}, traceId={}, path={}",
+                ex.getAssetId(), ex.getSiteId(), traceId(), request.getRequestURI());
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                ErrorEnvelope.Code.ASSET_SITE_MISMATCH,
+                "The referenced asset is not located at the referenced site.");
     }
 
     // -------------------------------------------------------------------------

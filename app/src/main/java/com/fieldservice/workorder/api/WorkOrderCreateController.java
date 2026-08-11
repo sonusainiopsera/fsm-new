@@ -17,8 +17,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * Creates work orders with atomically stamped SLA deadlines.
  *
- * <p>DISPATCHER, ADMIN, and MANAGER roles are permitted. TECHNICIAN and CUSTOMER
- * tokens receive 403 (method-security via @PreAuthorize in the service).
+ * <p>DISPATCHER, ADMIN, MANAGER, and CUSTOMER roles are permitted.
+ * TECHNICIAN tokens receive 403 (method-security via @PreAuthorize in the service).
+ * CUSTOMER tokens are additionally scope-validated to their own account in the service.
  */
 @RestController
 @RequestMapping("/api/v1/work-orders")
@@ -46,9 +47,10 @@ public class WorkOrderCreateController {
         return ResponseEntity.created(location).body(toResponse(wo));
     }
 
-    private static WorkOrderSummaryResponse toResponse(WorkOrder wo) {
+    static WorkOrderSummaryResponse toResponse(WorkOrder wo) {
         return new WorkOrderSummaryResponse(
                 wo.getId(),
+                wo.getReference(),
                 wo.getState(),
                 wo.getPriority(),
                 wo.getTitle(),
@@ -60,6 +62,10 @@ public class WorkOrderCreateController {
                 wo.getUpdatedAt(),
                 wo.getCumulativeHoldMinutes(),
                 null,
-                null);
+                null,
+                wo.getResponseDueAt(),
+                wo.getResolutionDueAt(),
+                wo.getAtRiskAt(),
+                wo.getAppliedSlaPolicyId());
     }
 }

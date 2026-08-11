@@ -98,7 +98,8 @@ public final class AccessControlMatrix {
                 () -> "{\"customerId\":\"" + CUST_A + "\","
                     + "\"siteId\":\"" + SITE_A1 + "\","
                     + "\"priority\":\"MEDIUM\","
-                    + "\"title\":\"Matrix test WO\"}",
+                    + "\"title\":\"Matrix test WO\","
+                    + "\"faultDescription\":\"HVAC unit not cooling — compressor fault suspected\"}",
                 Map.of(
                     "ADMIN",           CREATED,
                     "DISPATCHER",      CREATED,
