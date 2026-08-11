@@ -287,3 +287,10 @@
 - **Files:** 32 (+1596/-0)
 - **Duration:** 847ss
 - **Approach:** N/A
+
+## WO-200: User Story: WO-200 - ArchUnit Fitness Tests For Module And Security Boundaries
+- **Status:** completed
+- **Commit:** `8a0a9b6`
+- **Files:** 9 (+661/-0)
+- **Duration:** 860ss
+- **Approach:** Added three new ArchUnit test classes in app/src/test/java/com/fieldservice/app/arch/ that enforce architecture fitness rules: (1) LayeredArchitectureTest enforces the controller→service→repository layering rule and freezes 8 pre-existing legacy violations using ArchUnit's ignoreDependency() API with dated justifications; (2) InjectionAndCryptoRulesTest implements CRYPTO-1 (ban raw MessageDigest outside approved packages), CRYPTO-2 (no deprecated MD5/SHA-1/DES algorithms — enforced via an approved-package allowlist since ArchUnit cannot inspect method argument values), and INJECT-1 (ban direct JDBC Statement.execute/executeQuery/executeUpdate calls); (3) DtoBoundaryTest uses a custom ArchCondition to prevent @Entity types from appearing in @RestController method signatures. Each test class includes a self-test method importing a deliberately violating fixture class that proves the rule fires. Pre-existing tests (ModuleBoundaryTest, MethodSecurityTest, ScopedRepositoryFitnessTest) already cover module encapsulation, @PreAuthorize coverage, and row-scope repository rules.

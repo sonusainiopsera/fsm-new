@@ -331,3 +331,80 @@ SPRING_PROFILES_ACTIVE=worker ./mvnw spring-boot:run -pl app
 ```
 
 Set `app.analytics.enabled=false` to disable the worker without changing profiles.
+
+---
+
+## ArchUnit Fitness Tests
+
+The `com.fieldservice.app.arch` package enforces architectural rules at build time via
+[ArchUnit](https://www.archunit.org/). Rules run during `mvn verify` without a Spring
+context or database. Full suite completes in under 30 seconds.
+
+### Rule inventory
+
+| ID | File | What it enforces |
+|----|------|-----------------|
+| **MOD-1** | `ModuleBoundaryTest` | External code must not reach into `analytics.internal.*` |
+| **MOD-2** | `ModuleBoundaryTest` | `analytics.*` must not depend on `workorder.domain.*` or `inventory.domain.*` |
+| **MOD-3** | `ModuleBoundaryTest` | `analytics.*` must not depend on `aigateway.internal.*` |
+| **MOD-4** | `ModuleBoundaryTest` | External code must not reach into `notification.internal.*` |
+| **MOD-5** | `AiGatewayBoundaryTest` | Business modules must not reach into `aigateway.internal.*` |
+| **L-1** | `LayeredArchitectureTest` | `@RestController` classes must not inject `Repository` types directly |
+| **SEC-1** | `MethodSecurityTest` | Every public method on a `@Service` class in `workorder.*` must have `@PreAuthorize` |
+| **RS-1** | `ScopedRepositoryFitnessTest` | Repositories over `ScopedEntity` types must extend `ScopedRepository` |
+| **CRYPTO-1** | `InjectionAndCryptoRulesTest` | Only reviewed packages may call `MessageDigest.getInstance()` |
+| **CRYPTO-2** | `InjectionAndCryptoRulesTest` | `MessageDigest.getInstance()` with MD5/SHA-1/SHA1/DES must not exist outside approved packages |
+| **INJECT-1** | `InjectionAndCryptoRulesTest` | No direct `Statement.execute()` / `executeQuery()` calls in production code |
+| **DTO-1/2** | `DtoBoundaryTest` | Controller methods must not return or accept `@Entity`-annotated types |
+| **INV-1** | `StockLedgerAppendOnlyTest` | No class may call `delete*` on `StockLedgerRepository` |
+
+### Exception process
+
+If a new violation of a rule appears in CI:
+
+1. **Assess**: Is this a genuine bug (missing annotation, wrong layer access) or a justified exception?
+2. **Fix preferred**: fix the violation; add the annotation or move the class to the right layer.
+3. **If exception is justified**: add a dated comment in the test file (or `frozen-violations/README.txt`
+   for frozen rules) and either add an `.ignoreDependency()` call (for `LayeredArchitectureTest`)
+   or add the package to the approved list (for `InjectionAndCryptoRulesTest`).
+4. **Commit the exception**: the exception is now part of the build; no future team member
+   can accidentally remove it without a test failure.
+
+### Self-test fixtures
+
+Deliberately non-compliant classes live in `com.fieldservice.app.arch.fixture` and are
+imported into the `DO_NOT_INCLUDE_TESTS`-excluded scope (they are never wired into the Spring
+context). Each rule class includes a `*_fires_on_*_fixture` test proving the rule still detects
+violations — this prevents silent weakening of a rule through refactoring.
+
+| Fixture | Violation it demonstrates |
+|---------|--------------------------|
+| `UnprotectedServiceFixture` | `@Service` without `@PreAuthorize` (SEC-1) |
+| `NonCompliantWorkOrderRepository` | `JpaRepository` without `ScopedRepository` (RS-1) |
+| `ViolatingControllerFixture` | `@RestController` injecting a repository (L-1) |
+| `CryptoViolatingFixture` | `MessageDigest.getInstance("MD5")` outside approved package (CRYPTO-1/2) |
+| `EntityLeakingControllerFixture` | Controller method returning a JPA `@Entity` (DTO-1) |
+
+### Frozen violations
+
+Pre-existing violations that cannot be fixed immediately are recorded in
+`src/test/resources/archunit/frozen-violations/README.txt` with a dated justification
+and backlog reference. New violations of a frozen rule still fail the build — only the
+exact pairs listed in the test's `.ignoreDependency()` calls are exempt.
+
+Current frozen violations (as of 2026-08-11, backlog BL-2026-001):
+- `WorkOrderController` → `WorkOrderRepository` and `WorkOrderHoldRepository` (L-1)
+- `WorkOrderPartsController` → `StockLocationRepository` (L-1)
+- `InventoryPartsController` → `PartRepository` (L-1)
+- `InventoryStockController` → `StockBalanceRepository`, `StockLocationRepository` (L-1)
+- `InventoryMovementsController` → `StockLedgerRepository`, `StockLocationRepository` (L-1)
+
+### Running the suite
+
+```bash
+# Full verify phase (includes ArchUnit suite, no DB required)
+./mvnw verify -pl app -Dmaven.test.skip=false
+
+# ArchUnit tests only (fast)
+./mvnw test -pl app -Dtest="*Test,*FitnessTest" -Dgroups="!integration"
+```
