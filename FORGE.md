@@ -455,3 +455,10 @@
 - **Files:** 21 (+1617/-0)
 - **Duration:** 1015ss
 - **Approach:** N/A
+
+## WO-191: User Story: WO-191 - Rectification and cryptographic erasure of subject data
+- **Status:** completed
+- **Commit:** `52e5662`
+- **Files:** 22 (+1954/-0)
+- **Duration:** 1114ss
+- **Approach:** Implemented cryptographic erasure and field-level rectification for GDPR subject rights. Rectification routes corrections through per-module SubjectDataRectifier SPIs (never via direct privacy-module table updates), enforcing the classification registry allow-list (CONFIDENTIAL/RESTRICTED only) and VERIFIED DSAR authorisation. Erasure destroys the AES-256-GCM envelope key via SubjectKeyManager.destroy(), leaving Envers *_AUD rows intact but permanently unreadable. An append-only subject_erasure tombstone records subject reference, key identifier, actor, section row counts and verification results with zero PII values. Post-erasure verification runs two pluggable ErasureVerificationScope beans: live_tables (JDBC plaintext probe) and envers_audit (asserts AUD row count > 0 to detect illegal deletion). Idempotency is handled via a unique partial index on (subject_type, subject_id) WHERE outcome='COMPLETED' and an early-return path before key destruction.
