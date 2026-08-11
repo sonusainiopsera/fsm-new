@@ -12,6 +12,8 @@ import com.fieldservice.platform.api.exception.IllegalTransitionException;
 import com.fieldservice.platform.api.exception.InvalidCursorException;
 import com.fieldservice.platform.api.exception.InvalidSortException;
 import com.fieldservice.platform.api.exception.NotFoundException;
+import com.fieldservice.platform.api.exception.AiCapExceededException;
+import com.fieldservice.platform.api.exception.AiUnavailableException;
 import com.fieldservice.platform.api.exception.ProviderDegradedException;
 import com.fieldservice.platform.api.exception.RateLimitedException;
 import com.fieldservice.platform.security.ScopedAccessDeniedException;
@@ -237,6 +239,31 @@ public class GlobalExceptionHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiErrorResponse.of(ErrorCode.RATE_LIMITED,
                         "Rate limit exceeded. Please retry later.", traceId));
+    }
+
+    // ---- 503 AI Provider Unavailable ------------------------------------------
+
+    @ExceptionHandler(AiUnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> handleAiUnavailable(AiUnavailableException ex) {
+        String traceId = resolveTraceId();
+        log.warn("ai_provider_unavailable operation={} trace_id={}", ex.getOperation(), traceId);
+        return errorResponse(HttpStatus.SERVICE_UNAVAILABLE,
+                ApiErrorResponse.of(ErrorCode.AI_PROVIDER_UNAVAILABLE,
+                        "AI assistance is temporarily unavailable. You can continue without it.", traceId));
+    }
+
+    // ---- 429 AI Daily Limit Reached ------------------------------------------
+
+    @ExceptionHandler(AiCapExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleAiCapExceeded(AiCapExceededException ex) {
+        String traceId = resolveTraceId();
+        log.info("ai_daily_cap_exceeded user_id={} trace_id={}", ex.getUserId(), traceId);
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(X_TRACE_ID, traceId)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiErrorResponse.of(ErrorCode.AI_DAILY_LIMIT_REACHED,
+                        "You have reached your daily AI interaction limit. Please try again tomorrow.", traceId));
     }
 
     // ---- 503 Provider Degraded ------------------------------------------------

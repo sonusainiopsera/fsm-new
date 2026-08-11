@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/v1/chat/completions"
+  },
+  "response": {
+    "status": 500,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "error": {
+        "message": "Internal server error",
+        "type": "server_error",
+        "code": "internal_error"
+      }
+    }
+  }
+}

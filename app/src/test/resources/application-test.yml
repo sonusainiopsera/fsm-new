@@ -41,6 +41,25 @@ app:
     max-body-bytes: 262144
     purge-job-enabled: false
 
+ai:
+  copilot:
+    enabled: false
+    daily-cap-per-user: 10
+  provider:
+    base-url: https://api.example.ai
+    api-key: ""
+    allowed-hosts:
+      - api.example.ai
+      - localhost
+      - 127.0.0.1
+
+# Disable Redis auto-configuration in tests — cap service uses NoOpUsageCapService
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
 logging:
   level:
     com.fieldservice: DEBUG
