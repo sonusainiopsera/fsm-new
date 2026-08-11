@@ -1,0 +1,234 @@
+# Integration Test Harness — Developer Guide
+
+This document covers how to run the integration test suite locally, how to select the right
+isolation strategy for a new test, how to use the assertion helpers, and how to inspect coverage
+reports.
+
+---
+
+## Quick start
+
+```bash
+# Unit tests only (no Docker required)
+./mvnw test -pl app
+
+# Unit + integration tests (requires Docker)
+./mvnw verify -pl app
+
+# Skip unit tests, run integration tests only
+./mvnw verify -pl app -DskipTests -DskipITs=false
+```
+
+All integration test classes end in `IT` or `IntegrationTest`. Maven Failsafe runs them in the
+`integration-test` phase; Maven Surefire runs everything else.
+
+---
+
+## Prerequisites
+
+- Docker Desktop (or Docker Engine) running locally.
+- Java 21+ and Maven 3.9+.
+- No network access beyond pulling the `postgres:16-alpine` image the first time.
+
+If Docker is absent, Testcontainers raises `DockerNotAvailableException` on first container start.
+The error message names the missing daemon — install Docker and retry.
+
+---
+
+## Container reuse (warm starts)
+
+The `PostgresContainerSupport` base class starts a **singleton** `PostgreSQLContainer` once per JVM
+and reuses it across all test classes in the same run. Container reuse across local re-runs is
+controlled by the `CI` environment variable:
+
+| Environment       | `CI` variable | Container reuse | Cold-start cost |
+|-------------------|---------------|-----------------|-----------------|
+| Developer laptop  | unset         | Enabled         | First run only  |
+| CI pipeline       | `CI=true`     | Disabled        | Every run       |
+
+When reuse is enabled and the container is already running from a previous `./mvnw verify`, the
+second run bypasses the PostgreSQL startup entirely (< 1 s overhead). Cold start is typically
+10–20 s depending on hardware.
+
+To force a clean container locally:
+
+```bash
+docker stop $(docker ps -q --filter "label=org.testcontainers.sessionId") 2>/dev/null
+./mvnw verify -pl app
+```
+
+---
+
+## Test isolation — choosing a strategy
+
+Two strategies are available. Pick based on whether the test needs real committed rows.
+
+### 1. Transactional rollback (default — read-mostly tests)
+
+Extend `AbstractIntegrationTest` and annotate the test class (or individual test methods) with
+`@Transactional`. Spring rolls back after each test. No explicit cleanup required.
+
+```java
+@Transactional
+class MyServiceTest extends AbstractIntegrationTest {
+    @Test
+    void shouldComputeSomething() { … }
+}
+```
+
+Use this for: query tests, service logic that does not involve outbox events or version counters.
+
+### 2. DatabaseCleaner — non-transactional tests
+
+For tests that need real commits (outbox polling, optimistic locking, Envers revisions), do
+**not** annotate with `@Transactional`. Call `DatabaseCleaner.clean(jdbc)` in `@AfterEach`.
+
+```java
+class MyE2ETest extends AbstractIntegrationTest {
+
+    @Autowired JdbcTemplate jdbc;
+
+    @AfterEach void clean() { DatabaseCleaner.clean(jdbc); }
+
+    @Test
+    void shouldWriteOutboxEvent() { … }
+}
+```
+
+`DatabaseCleaner.clean()` issues one `TRUNCATE … RESTART IDENTITY CASCADE` statement over all
+application tables in dependency order. Reference tables (`role`, `sla_policy`,
+`flyway_schema_history`) are excluded and their seed data is preserved.
+
+---
+
+## Assertion helpers
+
+### AuditAssertions — Envers revisions
+
+```java
+// Assert a work order has exactly 2 revisions
+List<RevisionRecord> revs = AuditAssertions.assertRevisionCount(
+        jdbc, "work_order_aud", workOrderId, 2);
+
+// Assert the first revision is an ADD (creation)
+assertThat(revs.get(0).revType()).isEqualTo(AuditAssertions.RevisionType.ADD);
+
+// Assert the latest revision is MOD (state change)
+AuditAssertions.assertLatestRevisionType(jdbc, "work_order_aud", workOrderId,
+        AuditAssertions.RevisionType.MOD);
+```
+
+Revision types: `ADD` (0), `MOD` (1), `DEL` (2) — matches `org.hibernate.envers.RevisionType`.
+
+### OutboxAssertions — outbox events
+
+```java
+// Assert exactly one event of the given type was committed
+OutboxAssertions.assertExactlyOneEvent(jdbc, aggregateId, "WorkOrderStateChanged");
+
+// Assert no event was committed (e.g. after a rolled-back transition)
+OutboxAssertions.assertNoEvent(jdbc, aggregateId);
+
+// Retrieve all events for inspection
+List<OutboxEventRecord> events = OutboxAssertions.queryEvents(jdbc, aggregateId);
+```
+
+Both helpers query over JDBC so they work in non-transactional test contexts where the JPA
+session would not yet see the committed rows.
+
+---
+
+## Redis mixin
+
+Tests that exercise cache, rate limiting, or the refresh-token denylist extend
+`RedisContainerSupport` (or a class that already extends it):
+
+```java
+class RateLimitIT extends RedisContainerSupport {
+    // spring.data.redis.host/port are registered automatically
+}
+```
+
+All other tests extend `AbstractIntegrationTest` and pay no Redis startup cost.
+
+---
+
+## Coverage report
+
+After `./mvnw verify`, the merged HTML report is at:
+
+```
+app/target/site/jacoco/index.html
+```
+
+Open it in a browser to see line and branch coverage by package. The build fails if the
+**line coverage ratio** across the entire `app` module falls below **80 %**. If the check
+fails, the build output shows:
+
+```
+[ERROR] Rule violated for bundle app: lines covered ratio is X.XX, but expected minimum is 0.80
+```
+
+To see which classes are below threshold, open `index.html`, sort by "Missed Lines".
+
+Coverage is collected from two exec files and merged:
+
+| File                         | Source                 |
+|------------------------------|------------------------|
+| `target/jacoco.exec`         | Surefire (unit tests)  |
+| `target/jacoco-it.exec`      | Failsafe (IT tests)    |
+| `target/jacoco-merged.exec`  | Merged (report + gate) |
+
+---
+
+## Debugging a failing container
+
+**1. Connection refused at startup**
+Testcontainers logs the Docker socket path it is using. Verify Docker is running:
+
+```bash
+docker info
+```
+
+**2. Flyway migration failure**
+The build output will contain `FlywayException` with the offending migration filename and SQL
+error. Fix the migration file — do not add a repair migration.
+
+**3. Schema-shape test failure** (`SchemaShapeTest`)
+A `@Audited` entity was added without a corresponding Flyway migration that creates the `*_aud`
+table, `revinfo`, or `revinfo_seq`. Add the migration and re-run.
+
+**4. Inspect the live test database**
+
+While a test is running (or after a reused container is still up), connect with:
+
+```bash
+docker exec -it $(docker ps -q --filter "ancestor=postgres:16-alpine") \
+    psql -U test -d fieldservice_test
+```
+
+Then inspect with standard `\dt`, `\d tablename`, or `SELECT` queries.
+
+**5. Disable container reuse for one run**
+
+```bash
+CI=true ./mvnw verify -pl app
+```
+
+This forces a fresh container even on a developer machine.
+
+---
+
+## CI pipeline
+
+The CI environment sets `CI=true`, which disables container reuse. The pipeline runs:
+
+```
+./mvnw verify
+```
+
+Failsafe runs integration tests, JaCoCo merges the exec files, and the check goal enforces the
+80 % threshold. The build fails if the threshold is violated.
+
+Total wall-clock time for the integration suite is printed in the Failsafe summary at the end of
+the build.
