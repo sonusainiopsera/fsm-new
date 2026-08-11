@@ -280,3 +280,10 @@
 - **Files:** 25 (+1384/-1)
 - **Duration:** 1283ss
 - **Approach:** Created a new privacy Maven module (inheriting the parent pom, depending on platform + hibernate-envers + spring-boot-starter-cache) registered in parent modules and as an app dependency. The module is split into a public api package (ClassificationTier enum, @DataClassification annotation, ClassificationView record, ClassificationRegistry read-only interface, ClassificationService mutation+paging extension) and a package-private internal package (DataClassificationEntity @Audited JPA entity, DataClassificationRepository Spring Data, ClassificationRegistryImpl with @Cacheable/@CacheEvict, ClassificationConsistencyCheck ApplicationRunner gated by @ConditionalOnProperty). The web package provides ClassificationController at /api/v1/privacy/classifications with @PreAuthorize('hasAnyRole(PRIVACY_ADMIN,ADMIN)'). V25 Flyway migration creates data_classification with CHECK constraint and functional unique index, creates data_classification_aud for Envers, extends role_assignment CHECK to include PRIVACY_ADMIN, and seeds the full data-classification taxonomy (RESTRICTED/CONFIDENTIAL/INTERNAL/PUBLIC). @DataClassification applied to AppUser, WorkOrder, Technician, SlaPolicy covering all four tiers. PRIVACY_ADMIN added to AppRole enum.
+
+## WO-195: User Story: WO-195 - Resilient notification delivery port with degraded in-app fallback
+- **Status:** completed
+- **Commit:** `a21eec7`
+- **Files:** 32 (+1596/-0)
+- **Duration:** 847ss
+- **Approach:** N/A

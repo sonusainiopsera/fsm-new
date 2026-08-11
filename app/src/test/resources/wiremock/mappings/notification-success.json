@@ -1,0 +1,28 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/send",
+    "headers": {
+      "Authorization": {
+        "matches": "Bearer .*"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.channel",
+        "matchesJsonPath": "$.recipient",
+        "matchesJsonPath": "$.eventRef"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": "prov-ref-ok-001",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "scenarioName": "provider-success",
+  "requiredScenarioState": "Started",
+  "newScenarioState": "DONE"
+}

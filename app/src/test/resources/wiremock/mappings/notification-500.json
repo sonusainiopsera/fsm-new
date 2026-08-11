@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/send"
+  },
+  "response": {
+    "status": 500,
+    "jsonBody": {"error": "internal server error"},
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "scenarioName": "provider-5xx",
+  "requiredScenarioState": "Started"
+}

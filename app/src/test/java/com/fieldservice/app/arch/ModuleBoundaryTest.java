@@ -121,4 +121,21 @@ class ModuleBoundaryTest {
                 .because("analytics is a read-model substrate and has no AI concerns")
                 .check(ALL_CLASSES);
     }
+
+    // ---------------------------------------------------------------
+    // Rule 4: notification.internal is not accessible from outside
+    // ---------------------------------------------------------------
+
+    @Test
+    @DisplayName("No code outside notification may depend on notification.internal")
+    void outsideCode_mustNotDependOn_notificationInternals() {
+        noClasses()
+                .that().resideOutsideOfPackage("com.fieldservice.notification..")
+                .and().resideOutsideOfPackage("..test..")
+                .should().dependOnClassesThat()
+                .resideInAPackage("com.fieldservice.notification.internal..")
+                .because("notification.internal is package-private; use NotificationPort from " +
+                         "com.fieldservice.notification.api only")
+                .check(ALL_CLASSES);
+    }
 }

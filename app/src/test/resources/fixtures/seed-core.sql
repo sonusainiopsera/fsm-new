@@ -11,6 +11,7 @@
 --   00000000-0000-7014-8000-XXXXXXXXXXXX  seed-core assets
 --   00000000-0000-7015-8000-XXXXXXXXXXXX  seed-core parts
 --   00000000-0000-7016-8000-XXXXXXXXXXXX  seed-core stock locations
+--   00000000-0000-7017-8000-XXXXXXXXXXXX  seed-core notification users (WO-195)
 --
 -- password_hash values are BCrypt cost-12 hashes of 'TestPassword123!'
 -- Hash: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC
@@ -241,4 +242,36 @@ VALUES
     ('00000000-0000-7025-9000-000000000002', 'test', 'TestConfidentialEntity', null,       'CONFIDENTIAL','Test confidential','Test handling'),
     ('00000000-0000-7025-9000-000000000003', 'test', 'TestInternalEntity',     null,       'INTERNAL',    'Test internal',    'Test handling'),
     ('00000000-0000-7025-9000-000000000004', 'test', 'TestPublicEntity',       null,       'PUBLIC',      'Test public',      'Test handling')
+ON CONFLICT DO NOTHING;
+
+-- ---- Notification recipient users (WO-195, fully anonymised) ----------------
+-- UUID prefix: 00000000-0000-7017-8000-XXXXXXXXXXXX
+-- BCrypt hash of 'TestPassword123!': $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC
+-- Emails are test-only, no real personal data.
+INSERT INTO app_user (id, email, password_hash, full_name, active, version)
+VALUES
+    ('00000000-0000-7017-8000-000000000001', 'd.seed@example.test',
+     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC',
+     'Seed Dispatcher', TRUE, 0),
+    ('00000000-0000-7017-8000-000000000002', 't.seed@example.test',
+     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC',
+     'Seed Technician', TRUE, 0),
+    ('00000000-0000-7017-8000-000000000003', 'm.seed@example.test',
+     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC',
+     'Seed Manager', TRUE, 0),
+    ('00000000-0000-7017-8000-000000000004', 'c.seed@example.test',
+     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC',
+     'Seed Customer', TRUE, 0),
+    ('00000000-0000-7017-8000-000000000005', 'a.seed@example.test',
+     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC',
+     'Seed Admin', TRUE, 0)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO role_assignment (user_id, role_name)
+VALUES
+    ('00000000-0000-7017-8000-000000000001', 'DISPATCHER'),
+    ('00000000-0000-7017-8000-000000000002', 'TECHNICIAN'),
+    ('00000000-0000-7017-8000-000000000003', 'MANAGER'),
+    ('00000000-0000-7017-8000-000000000004', 'CUSTOMER'),
+    ('00000000-0000-7017-8000-000000000005', 'ADMIN')
 ON CONFLICT DO NOTHING;
