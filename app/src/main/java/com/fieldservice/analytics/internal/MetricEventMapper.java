@@ -14,9 +14,15 @@ import java.util.Set;
 final class MetricEventMapper {
 
     private static final Map<String, Set<String>> MAPPING = Map.of(
-            "WORK_ORDER_CREATED",    Set.of("wo.created_count",    "wo.backlog_count"),
+            "WORK_ORDER_CREATED",    Set.of("wo.created_count",    "wo.backlog_count",
+                                            "quality.first_time_fix.provisional",
+                                            "quality.unclassifiable.count"),
             "WORK_ORDER_TRANSITION", Set.of("wo.completion_rate",  "wo.sla_compliance",
-                                            "wo.first_time_fix_rate", "wo.backlog_count"),
+                                            "wo.first_time_fix_rate", "wo.backlog_count",
+                                            "quality.first_time_fix.matured",
+                                            "quality.first_time_fix.provisional",
+                                            "quality.repeat_visit.count",
+                                            "quality.unclassifiable.count"),
             "ASSIGNMENT_CREATED",    Set.of("wo.backlog_count",    "technician.utilization"),
             "SLA_BREACH",            Set.of("wo.sla_compliance"),
             "SLA_AT_RISK",           Set.of("wo.sla_compliance"),

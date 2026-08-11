@@ -1,5 +1,6 @@
 package com.fieldservice.analytics.internal;
 
+import com.fieldservice.analytics.internal.quality.RepeatVisitLinker;
 import com.fieldservice.platform.outbox.EventHandler;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,18 @@ class AnalyticsConfiguration {
     }
 
     @Bean
-    EventHandler workOrderTransitionAnalyticsHandler(KpiOutboxConsumer consumer) {
-        return KpiOutboxConsumer.handlerFor("WORK_ORDER_TRANSITION", consumer);
+    EventHandler workOrderTransitionAnalyticsHandler(KpiOutboxConsumer consumer,
+                                                      RepeatVisitLinker linker) {
+        return new EventHandler() {
+            @Override
+            public String supportedEventType() { return "WORK_ORDER_TRANSITION"; }
+
+            @Override
+            public void handle(com.fieldservice.platform.api.DomainEvent event) throws Exception {
+                linker.processEvent(event);
+                consumer.accept(event);
+            }
+        };
     }
 
     @Bean

@@ -94,6 +94,12 @@ public class WorkOrder implements ScopedEntity {
     @Column(name = "applied_sla_policy_id")
     private UUID appliedSlaPolicyId;
 
+    @Column(name = "fault_code", length = 100)
+    private String faultCode;
+
+    @Column(name = "fault_category", length = 100)
+    private String faultCategory;
+
     @Version
     private Integer version;
 
@@ -136,6 +142,8 @@ public class WorkOrder implements ScopedEntity {
     public Instant         getAtRiskAt()            { return atRiskAt; }
     public boolean         isNoPartsRequired()      { return noPartsRequired; }
     public UUID            getAppliedSlaPolicyId()  { return appliedSlaPolicyId; }
+    public String          getFaultCode()            { return faultCode; }
+    public String          getFaultCategory()        { return faultCategory; }
     public Integer         getVersion()             { return version; }
 
     public void markNoPartsRequired() { this.noPartsRequired = true; }
@@ -143,6 +151,10 @@ public class WorkOrder implements ScopedEntity {
     public void setDescription(String description) { this.description = description; }
 
     public void setAssetId(UUID assetId) { this.assetId = assetId; }
+
+    public void setFaultCode(String faultCode) { this.faultCode = faultCode; }
+
+    public void setFaultCategory(String faultCategory) { this.faultCategory = faultCategory; }
 
     /** Sets SLA deadlines and snapshots the policy id at creation time. */
     public void applyDeadlines(Instant responseDeadline, Instant resolutionDeadline,

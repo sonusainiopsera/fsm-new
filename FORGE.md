@@ -329,3 +329,10 @@
 - **Files:** 27 (+3144/-2)
 - **Duration:** 873ss
 - **Approach:** Built the inventory React surfaces in order: (1) utility libs — idempotency.js generates per-attempt UUIDs reused on retries, freshness.js evaluates the 60-second staleness budget for BR-15; (2) typed API client inventory.js covering WO-053/054/055/056 endpoints with ETag-conditional GET and idempotency-keyed POSTs; (3) PartsLoggingPanel mobile-first (360 px, 44 px targets) with debounced part search, multi-line staging, inline quantity validation, 422 INSUFFICIENT_STOCK per-line detail + awaiting-parts hold action, network-failure not-connected state, and idempotent submission; (4) Inventory route module — StockPositionsPage with DataTable (density control, sticky header, tabular figures), LowStockPage with text+icon+shape multi-cue indicators (BR-32/BR-34), MovementHistoryDrawer with ETag-conditional polling and stale state; (5) router.jsx updated with lazy /inventory/* route; (6) mock handlers extended with all inventory routes; (7) JSON fixtures including stale as-of and 422 insufficient-stock responses; (8) RTL component tests and Playwright E2E spec.
+
+## WO-164: User Story: WO-164 - First-time fix rate with matured cohort linkage
+- **Status:** completed
+- **Commit:** `3220d62`
+- **Files:** 18 (+1690/-4)
+- **Duration:** 1351ss
+- **Approach:** N/A
