@@ -114,6 +114,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api-docs", "/api-docs/**").permitAll()
                 .requestMatchers("/api/v1/auth/login").permitAll()
                 .requestMatchers("/api/v1/auth/refresh").permitAll()
+                .requestMatchers("/api/v1/auth/logout").permitAll()
                 .anyRequest().authenticated()
             )
 

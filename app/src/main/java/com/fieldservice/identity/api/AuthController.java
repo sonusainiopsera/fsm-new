@@ -5,6 +5,7 @@ import com.fieldservice.identity.api.dto.LoginResponse;
 import com.fieldservice.identity.api.dto.RefreshResponse;
 import com.fieldservice.identity.api.dto.StreamTicketResponse;
 import com.fieldservice.identity.application.LoginService;
+import com.fieldservice.identity.application.LogoutService;
 import com.fieldservice.identity.application.RefreshTokenService;
 import com.fieldservice.identity.application.StreamTicketService;
 import com.fieldservice.platform.api.ApiErrorResponse;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,13 +59,16 @@ public class AuthController {
     private final LoginService        loginService;
     private final RefreshTokenService refreshTokenService;
     private final StreamTicketService streamTicketService;
+    private final LogoutService       logoutService;
 
     public AuthController(LoginService loginService,
                           RefreshTokenService refreshTokenService,
-                          StreamTicketService streamTicketService) {
+                          StreamTicketService streamTicketService,
+                          LogoutService logoutService) {
         this.loginService        = loginService;
         this.refreshTokenService = refreshTokenService;
         this.streamTicketService = streamTicketService;
+        this.logoutService       = logoutService;
     }
 
     @Operation(operationId = "login", summary = "Authenticate with email and password")
@@ -177,6 +182,53 @@ public class AuthController {
                 new StreamTicketResponse(result.ticketValue(), result.expiresIn()));
     }
 
+    /**
+     * Revokes the session identified by the refresh cookie, denylists the outstanding
+     * access token JTI for its residual lifetime, and clears the cookie.
+     *
+     * <p>The endpoint is reachable without a valid bearer token ({@code permitAll}) so a
+     * client can sign out even after the access token has expired. When a bearer token is
+     * present its {@code jti} and {@code exp} claims are used to compute the denylist TTL.
+     *
+     * <p>Returns 204 in all non-error cases — including missing cookie, already-revoked
+     * family, and expired access token — so the endpoint is safely retryable.
+     *
+     * <p>Returns 503 only when family revocation succeeded but the Redis denylist insertion
+     * failed, because the access token may remain live until natural expiry.
+     */
+    @Operation(operationId = "logout",
+               summary     = "Revoke the current session",
+               description = "Revokes the refresh-token family and denylists the access token JTI. "
+                           + "Idempotent: returns 204 for missing or already-revoked sessions.")
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(
+            @CookieValue(name = REFRESH_COOKIE_NAME, required = false) String rawHandle,
+            Authentication authentication) {
+
+        String jti         = extractJtiFromAuth(authentication);
+        Instant tokenExpiry = extractExpiryFromAuth(authentication);
+
+        LogoutService.LogoutStatus status =
+                logoutService.logout(rawHandle, jti, tokenExpiry);
+
+        ResponseCookie clearCookie = clearRefreshCookie();
+
+        if (status == LogoutService.LogoutStatus.REVOKED_DENYLIST_FAILED) {
+            String traceId = resolveTraceId();
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .header(HttpHeaders.SET_COOKIE, clearCookie.toString())
+                    .body(ApiErrorResponse.of(
+                            ErrorCode.AUTH_DEPENDENCY_UNAVAILABLE,
+                            "Session revoked but token denylist unavailable; access token may "
+                                    + "remain live until natural expiry.",
+                            traceId));
+        }
+
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, clearCookie.toString())
+                .build();
+    }
+
     // ---- Helpers ---------------------------------------------------------------
 
     private ResponseCookie refreshCookie(String handle) {
@@ -190,9 +242,8 @@ public class AuthController {
                 .build();
     }
 
-    private ResponseEntity<ApiErrorResponse> reauthRequiredResponse() {
-        // Clears the cookie so the browser stops retrying the compromised handle
-        ResponseCookie clearCookie = ResponseCookie
+    private ResponseCookie clearRefreshCookie() {
+        return ResponseCookie
                 .from(REFRESH_COOKIE_NAME, "")
                 .httpOnly(true)
                 .secure(true)
@@ -200,6 +251,26 @@ public class AuthController {
                 .path(REFRESH_COOKIE_PATH)
                 .maxAge(0)
                 .build();
+    }
+
+    private static String extractJtiFromAuth(Authentication authentication) {
+        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+            String jti = jwtAuth.getToken().getId();
+            return (jti != null && !jti.isBlank()) ? jti : null;
+        }
+        return null;
+    }
+
+    private static Instant extractExpiryFromAuth(Authentication authentication) {
+        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+            return jwtAuth.getToken().getExpiresAt();
+        }
+        return null;
+    }
+
+    private ResponseEntity<ApiErrorResponse> reauthRequiredResponse() {
+        // Clears the cookie so the browser stops retrying the compromised handle
+        ResponseCookie clearCookie = clearRefreshCookie();
 
         String traceId = resolveTraceId();
 

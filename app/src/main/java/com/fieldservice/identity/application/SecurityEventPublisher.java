@@ -83,6 +83,25 @@ public class SecurityEventPublisher {
      * Reuse event payload. Contains no handle or hash material.
      * Only the family identifier and correlation fields appear in telemetry.
      */
+    /**
+     * Publishes an audit-grade USER_LOGGED_OUT event for session-termination history.
+     * Contains no token, handle, or hash material.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void publishLogout(RefreshTokenFamily family, UUID userId, String traceId) {
+        LogoutPayload payload = new LogoutPayload(userId, family.getId(), traceId);
+
+        eventPublisher.publish(new DomainEvent(
+                UuidV7.generate(),
+                "USER_LOGGED_OUT",
+                "REFRESH_TOKEN_FAMILY",
+                family.getId(),
+                Instant.now(),
+                traceId,
+                userId,
+                payload));
+    }
+
     record RefreshTokenReusePayload(
             UUID   userId,
             UUID   familyId,
@@ -91,6 +110,11 @@ public class SecurityEventPublisher {
             String userAgent) {}
 
     record RefreshTokenRotatedPayload(
+            UUID   userId,
+            UUID   familyId,
+            String traceId) {}
+
+    record LogoutPayload(
             UUID   userId,
             UUID   familyId,
             String traceId) {}
