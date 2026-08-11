@@ -10,6 +10,28 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash][extname]',
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
+        manualChunks(id) {
+          // Charting library — isolated to the operations surface chunk so the
+          // field (technician) entry never downloads chart code (AC-2).
+          if (id.includes('recharts') || id.includes('victory') || id.includes('chart.js')) {
+            return 'charting'
+          }
+          // React Router — shared vendor chunk
+          if (id.includes('react-router') || id.includes('@remix-run')) {
+            return 'vendor-router'
+          }
+          // TanStack Query — shared vendor chunk
+          if (id.includes('@tanstack/react-query')) {
+            return 'vendor-query'
+          }
+          // Surface-level code splitting
+          if (id.includes('/surfaces/dispatch/')) return 'surface-dispatch'
+          if (id.includes('/surfaces/operations/')) return 'surface-operations'
+          if (id.includes('/surfaces/portal/')) return 'surface-portal'
+          if (id.includes('/surfaces/field/')) return 'surface-field'
+          // Vendor bundle
+          if (id.includes('node_modules')) return 'vendor'
+        },
       },
     },
   },
@@ -32,6 +54,8 @@ export default defineConfig({
         'scripts/**',
         'eslint-local-rules/**',
         'docs/**',
+        'src/serviceWorker/fieldServiceWorker.js',
+        'src/surfaces/**',
       ],
     },
   },

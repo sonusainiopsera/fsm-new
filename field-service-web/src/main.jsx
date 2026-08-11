@@ -18,13 +18,8 @@ async function mountApp() {
     const { CatalogueRoute } = await import('./catalogue/CatalogueRoute.jsx')
     Component = CatalogueRoute
   } else {
-    Component = function App() {
-      return (
-        <div className="content-container">
-          <h1>Field Service Platform</h1>
-        </div>
-      )
-    }
+    const { AppProviders } = await import('./app/AppProviders.jsx')
+    Component = AppProviders
   }
 
   const root = createRoot(document.getElementById('root'))

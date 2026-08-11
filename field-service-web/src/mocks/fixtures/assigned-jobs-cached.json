@@ -1,0 +1,30 @@
+{
+  "items": [
+    {
+      "id": "bbbbbbbb-0000-0000-0000-000000000001",
+      "title": "Repair HVAC unit — zone 3",
+      "priority": "HIGH",
+      "state": "ASSIGNED",
+      "siteAddress": "123 Industrial Way, Unit 5",
+      "scheduledAt": "2024-01-15T09:00:00Z",
+      "estimatedDurationMinutes": 120,
+      "requiredCertifications": ["HVAC-Level2"]
+    },
+    {
+      "id": "bbbbbbbb-0000-0000-0000-000000000002",
+      "title": "Inspect fire suppression system",
+      "priority": "MEDIUM",
+      "state": "EN_ROUTE",
+      "siteAddress": "456 Commerce Park, Building B",
+      "scheduledAt": "2024-01-15T13:00:00Z",
+      "estimatedDurationMinutes": 60,
+      "requiredCertifications": ["FIRE-SAFETY"]
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 20,
+    "totalElements": 2,
+    "totalPages": 1
+  }
+}

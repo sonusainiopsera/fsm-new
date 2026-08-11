@@ -1,0 +1,76 @@
+/* TopBar — banner landmark, 56px height */
+
+.topbar {
+  grid-area: topbar;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--token-space-4);
+  background: var(--token-surface-card);
+  border-bottom: 1px solid var(--token-border-default);
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-3);
+}
+
+.brand {
+  font-family: var(--token-family-base);
+  font-size: var(--token-fs-16);
+  font-weight: 600;
+  color: var(--token-text-primary);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-2);
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--token-space-2);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--token-text-secondary);
+  font-family: var(--token-family-base);
+  font-size: var(--token-fs-16);
+  border-radius: var(--token-radius-control);
+  transition: background-color var(--token-duration-micro) var(--token-easing-standard),
+              color var(--token-duration-micro) var(--token-easing-standard);
+}
+
+.iconBtn:hover {
+  background: var(--token-neutral-100);
+  color: var(--token-text-primary);
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid var(--token-border-focus);
+  outline-offset: 2px;
+}
+
+.offlineBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-2);
+  padding: var(--token-space-1) var(--token-space-3);
+  background: var(--token-warning-subtle);
+  color: var(--token-warning-emphasis);
+  border-radius: var(--token-radius-control);
+  font-family: var(--token-family-base);
+  font-size: var(--token-fs-13);
+  font-weight: 500;
+  border: 1px solid var(--token-warning-default);
+}

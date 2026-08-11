@@ -1,0 +1,58 @@
+/* AppShell layout — token-only visual values, structural px allowed */
+
+.shell {
+  display: grid;
+  grid-template-areas:
+    "sidebar topbar"
+    "sidebar main";
+  grid-template-columns: var(--sidebar-width, 240px) 1fr;
+  grid-template-rows: 56px 1fr;
+  min-height: 100vh;
+}
+
+.contentCap {
+  max-width: 1440px;
+  width: 100%;
+  margin-inline: auto;
+  display: contents; /* pass grid areas through */
+}
+
+.main {
+  grid-area: main;
+  overflow-y: auto;
+  padding: var(--token-space-6);
+  background: var(--token-surface-base);
+}
+
+/* Skip-to-content link — visible on focus, hidden otherwise (no CLS) */
+.skipLink {
+  position: absolute;
+  top: var(--token-space-2);
+  left: var(--token-space-2);
+  padding: var(--token-space-2) var(--token-space-3);
+  background: var(--token-surface-card);
+  color: var(--token-text-primary);
+  border-radius: var(--token-radius-control);
+  text-decoration: none;
+  font-family: var(--token-family-base);
+  font-size: var(--token-fs-14);
+  transform: translateY(-300%);
+  transition: transform var(--token-duration-micro) var(--token-easing-standard);
+  z-index: 9999;
+  border: 1px solid var(--token-border-default);
+}
+
+.skipLink:focus {
+  transform: translateY(0);
+}
+
+/* Below 768px: switch to single-column, sidebar becomes off-canvas */
+@media (max-width: 767px) {
+  .shell {
+    grid-template-areas:
+      "topbar"
+      "main";
+    grid-template-columns: 1fr;
+    grid-template-rows: 56px 1fr;
+  }
+}

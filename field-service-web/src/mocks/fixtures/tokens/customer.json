@@ -1,0 +1,8 @@
+{
+  "sub": "aaaaaaaa-0000-0000-0000-000000000031",
+  "roles": ["CUSTOMER"],
+  "email": "customer@example.com",
+  "iat": 1700000000,
+  "exp": 9999999999,
+  "iss": "field-service"
+}
