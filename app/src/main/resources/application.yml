@@ -102,13 +102,21 @@ springdoc:
   show-actuator: false
 
 management:
+  server:
+    port: ${MANAGEMENT_PORT:8081}
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,prometheus
+      base-path: /actuator
   endpoint:
     health:
       show-details: never
+    prometheus:
+      enabled: true
+  # Explicitly disable sensitive endpoints — env, heapdump and loggers are never exposed
+  info:
+    enabled: false
 
 server:
   port: ${PORT:8080}

@@ -168,7 +168,7 @@ public class GlobalExceptionHandler {
         String traceId = resolveTraceId();
         log.warn("authentication_failed trace_id={}", traceId);
         return errorResponse(HttpStatus.UNAUTHORIZED,
-                ApiErrorResponse.of(ErrorCode.FORBIDDEN, "Authentication required.", traceId));
+                ApiErrorResponse.of(ErrorCode.UNAUTHENTICATED, "Authentication required.", traceId));
     }
 
     // ---- 403 Forbidden (body-identical for all causes) ------------------------
