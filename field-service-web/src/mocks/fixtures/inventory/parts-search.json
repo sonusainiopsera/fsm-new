@@ -1,0 +1,36 @@
+{
+  "data": [
+    {
+      "partId": "part-001",
+      "partNumber": "HVAC-FILTER-20x25",
+      "description": "HVAC Air Filter 20x25",
+      "unitOfMeasure": "EA",
+      "active": true
+    },
+    {
+      "partId": "part-002",
+      "partNumber": "COMPRESSOR-R22",
+      "description": "Compressor R-22 Refrigerant",
+      "unitOfMeasure": "CAN",
+      "active": true
+    },
+    {
+      "partId": "part-003",
+      "partNumber": "CAPACITOR-40/5-MFD",
+      "description": "Run Capacitor 40/5 MFD",
+      "unitOfMeasure": "EA",
+      "active": true
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 20,
+    "totalElements": 3,
+    "totalPages": 1
+  },
+  "links": {
+    "self": "/api/v1/inventory/parts/search?query=hvac&page=0&size=20",
+    "next": null,
+    "prev": null
+  }
+}

@@ -322,3 +322,10 @@
 - **Files:** 16 (+827/-29)
 - **Duration:** 966ss
 - **Approach:** N/A
+
+## WO-153: User Story: WO-153 - Stock position screens with low-stock and staleness states
+- **Status:** completed
+- **Commit:** `30fd94d`
+- **Files:** 19 (+2593/-2)
+- **Duration:** 823ss
+- **Approach:** Built the inventory stock-position and low-stock screens plus a technician parts-logging panel. All shared primitives (idempotency key management, freshness evaluation) live in src/lib/. A typed API client in src/api/inventory.js wraps all inventory endpoints. Components use TanStack Query useQuery with refetchInterval=30s and refetchIntervalInBackground=false (hidden-tab pause). Degraded state triggers when evaluateFreshness detects the as-of timestamp exceeds the 60-second BR-15 budget. The AlertIndicator on LowStockPage carries text+icon+shape (never colour-only) per AC-3/BR-32/BR-34. PartsLoggingPanel implements debounced search, multi-line staging, idempotency-key lifecycle (same key on retry, new key on fresh submission), 422 per-line insufficient-stock detail with hold action, and network-failure not-connected state. All interactive targets are ≥44px with no horizontal scroll at 360px. Role-based hiding uses explicit USABILITY-ONLY comment. Surfaces wired: dispatch /inventory and /inventory/low-stock; field /jobs/:workOrderId/parts.

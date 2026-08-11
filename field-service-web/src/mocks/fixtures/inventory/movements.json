@@ -1,0 +1,57 @@
+{
+  "data": [
+    {
+      "ledgerId": "led-001",
+      "partId": "part-001",
+      "partNumber": "HVAC-FILTER-20x25",
+      "locationId": "loc-wh-001",
+      "locationName": "Main Warehouse",
+      "movementType": "CONSUMPTION",
+      "delta": -2,
+      "balanceAfter": 48,
+      "workOrderId": "wo-00000001",
+      "actorUserId": "user-technician-1",
+      "occurredAt": "2024-06-15T09:45:00Z",
+      "correlationId": null
+    },
+    {
+      "ledgerId": "led-002",
+      "partId": "part-001",
+      "partNumber": "HVAC-FILTER-20x25",
+      "locationId": "loc-wh-001",
+      "locationName": "Main Warehouse",
+      "movementType": "RECEIPT",
+      "delta": 20,
+      "balanceAfter": 50,
+      "workOrderId": null,
+      "actorUserId": "user-dispatcher-1",
+      "occurredAt": "2024-06-14T08:00:00Z",
+      "correlationId": null
+    },
+    {
+      "ledgerId": "led-003",
+      "partId": "part-002",
+      "partNumber": "COMPRESSOR-R22",
+      "locationId": "loc-wh-001",
+      "locationName": "Main Warehouse",
+      "movementType": "TRANSFER_OUT",
+      "delta": -2,
+      "balanceAfter": 3,
+      "workOrderId": null,
+      "actorUserId": "user-dispatcher-1",
+      "occurredAt": "2024-06-13T14:30:00Z",
+      "correlationId": "corr-transfer-001"
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 50,
+    "totalElements": 3,
+    "totalPages": 1
+  },
+  "links": {
+    "self": "/api/v1/inventory/movements?page=0&size=50",
+    "next": null,
+    "prev": null
+  }
+}

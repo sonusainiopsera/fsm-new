@@ -1,0 +1,26 @@
+{
+  "data": [
+    {
+      "locationId": "loc-wh-001",
+      "locationName": "Main Warehouse",
+      "locationType": "WAREHOUSE",
+      "partId": "part-001",
+      "partNumber": "HVAC-FILTER-20x25",
+      "partDescription": "HVAC Air Filter 20x25",
+      "quantityOnHand": 48,
+      "reorderPoint": 10,
+      "asOf": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 50,
+    "totalElements": 1,
+    "totalPages": 1
+  },
+  "links": {
+    "self": "/api/v1/inventory/stock?page=0&size=50",
+    "next": null,
+    "prev": null
+  }
+}

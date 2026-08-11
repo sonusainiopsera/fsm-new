@@ -1,0 +1,15 @@
+{
+  "code": "INSUFFICIENT_STOCK",
+  "message": "Insufficient stock for one or more requested lines. No lines were applied.",
+  "fieldErrors": [
+    {
+      "field": "lines[0].quantity",
+      "message": "requested 5, available 2"
+    },
+    {
+      "field": "lines[1].quantity",
+      "message": "requested 3, available 0"
+    }
+  ],
+  "traceId": "trace-422-insufficient-stock"
+}

@@ -1,0 +1,59 @@
+{
+  "data": [
+    {
+      "locationId": "loc-wh-001",
+      "locationName": "Main Warehouse",
+      "locationType": "WAREHOUSE",
+      "partId": "part-001",
+      "partNumber": "HVAC-FILTER-20x25",
+      "partDescription": "HVAC Air Filter 20x25",
+      "quantityOnHand": 48,
+      "reorderPoint": 10,
+      "asOf": "2024-06-15T10:00:00Z"
+    },
+    {
+      "locationId": "loc-wh-001",
+      "locationName": "Main Warehouse",
+      "locationType": "WAREHOUSE",
+      "partId": "part-002",
+      "partNumber": "COMPRESSOR-R22",
+      "partDescription": "Compressor R-22 Refrigerant",
+      "quantityOnHand": 3,
+      "reorderPoint": 5,
+      "asOf": "2024-06-15T10:00:00Z"
+    },
+    {
+      "locationId": "loc-van-t01",
+      "locationName": "Van — T. Rodriguez",
+      "locationType": "VEHICLE",
+      "partId": "part-001",
+      "partNumber": "HVAC-FILTER-20x25",
+      "partDescription": "HVAC Air Filter 20x25",
+      "quantityOnHand": 4,
+      "reorderPoint": 2,
+      "asOf": "2024-06-15T10:00:00Z"
+    },
+    {
+      "locationId": "loc-van-t01",
+      "locationName": "Van — T. Rodriguez",
+      "locationType": "VEHICLE",
+      "partId": "part-003",
+      "partNumber": "CAPACITOR-40/5-MFD",
+      "partDescription": "Run Capacitor 40/5 MFD",
+      "quantityOnHand": 0,
+      "reorderPoint": 2,
+      "asOf": "2024-06-15T10:00:00Z"
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 50,
+    "totalElements": 4,
+    "totalPages": 1
+  },
+  "links": {
+    "self": "/api/v1/inventory/stock?page=0&size=50",
+    "next": null,
+    "prev": null
+  }
+}

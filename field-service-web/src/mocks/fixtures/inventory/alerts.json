@@ -1,0 +1,41 @@
+{
+  "data": [
+    {
+      "alertId": "alert-001",
+      "partId": "part-002",
+      "partNumber": "COMPRESSOR-R22",
+      "partDescription": "Compressor R-22 Refrigerant",
+      "locationId": "loc-wh-001",
+      "locationName": "Main Warehouse",
+      "locationType": "WAREHOUSE",
+      "alertType": "LOW_STOCK",
+      "quantityOnHand": 3,
+      "reorderPoint": 5,
+      "raisedAt": "2024-06-14T16:00:00Z"
+    },
+    {
+      "alertId": "alert-002",
+      "partId": "part-003",
+      "partNumber": "CAPACITOR-40/5-MFD",
+      "partDescription": "Run Capacitor 40/5 MFD",
+      "locationId": "loc-van-t01",
+      "locationName": "Van — T. Rodriguez",
+      "locationType": "VEHICLE",
+      "alertType": "STOCKOUT",
+      "quantityOnHand": 0,
+      "reorderPoint": 2,
+      "raisedAt": "2024-06-15T07:00:00Z"
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 50,
+    "totalElements": 2,
+    "totalPages": 1
+  },
+  "links": {
+    "self": "/api/v1/inventory/alerts?page=0&size=50",
+    "next": null,
+    "prev": null
+  }
+}
