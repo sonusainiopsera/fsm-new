@@ -55,7 +55,12 @@ class ScopedRepositoryArchTest {
                     + "KpiProjectionRepository|"
                     // WO-188: data classification rows are metadata with no per-user row scope;
                     // access is controlled at the API layer via PRIVACY_ADMIN and ADMIN roles
-                    + "ClassificationRepository";
+                    + "ClassificationRepository|"
+                    // WO-169: portal linkage infrastructure — PortalAccountUserRepository is the
+                    // scope-resolution mechanism itself (not a row-scoped query target);
+                    // PortalInvitationRepository is accessed only by InvitationService under
+                    // method-security; row scope is enforced via CustomerAccessScope predicate
+                    + "PortalAccountUserRepository|PortalInvitationRepository";
 
     /**
      * Production rule: domain JPA repositories that are not in the non-scoped allow-list
