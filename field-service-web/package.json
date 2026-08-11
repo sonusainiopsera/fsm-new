@@ -17,10 +17,13 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
+    "test:a11y": "playwright test tests/a11y",
+    "test:performance": "playwright test tests/performance",
+    "audit:design-system": "node scripts/audit-design-system.mjs",
     "prebuild": "node scripts/generate-token-contract.mjs",
     "build:catalogue": "VITE_CATALOGUE=true vite build --outDir dist-catalogue",
-    "build:ci": "npm run stylelint && npm run lint && npm run typecheck && npm run test:coverage && npm run build && npm run build:catalogue",
-    "build:node": "npm run stylelint && npm run lint && npm run typecheck && npm run test:coverage && npm run build && npm run build:catalogue"
+    "build:ci": "npm run stylelint && npm run lint && npm run typecheck && npm run test:coverage && npm run build && npm run build:catalogue && npm run audit:design-system",
+    "build:node": "npm run stylelint && npm run lint && npm run typecheck && npm run test:coverage && npm run build && npm run build:catalogue && npm run audit:design-system"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.51.1",
@@ -29,10 +32,13 @@
     "react-router-dom": "^6.24.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.9.1",
+    "@playwright/test": "^1.45.1",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^15.0.7",
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^1.6.0",
+    "axe-core": "^4.9.1",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsx-a11y": "^6.8.0",

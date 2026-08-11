@@ -1,0 +1,9 @@
+{
+  "caption": "Work Orders by State (Last 30 days)",
+  "columns": ["Month", "Completed", "Cancelled", "On Hold"],
+  "rows": [
+    { "name": "Jun",       "completed": "142", "cancelled": "8", "on_hold": "12" },
+    { "name": "Jul",       "completed": "158", "cancelled": "6", "on_hold": "9" },
+    { "name": "Aug (MTD)", "completed": "67",  "cancelled": "3", "on_hold": "5" }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Declared foreground/background token pairings. Every pairing used in the UI must be listed here. Undeclared pairings fail the contrast audit.",
+  "version": "1",
+  "pairings": [
+    {
+      "name": "body-text-primary-on-page",
+      "fg": "--token-text-primary",
+      "bg": "--token-surface-page",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "operations", "customer"],
+      "appearances": ["light", "dark"],
+      "note": "General body text on page surface. Technician has elevated 7:1 requirement."
+    },
+    {
+      "name": "technician-body-text-on-page-light",
+      "fg": "--token-text-primary",
+      "bg": "--token-surface-page",
+      "minRatio": 7,
+      "personas": ["technician"],
+      "appearances": ["light"],
+      "note": "Technician requires 7:1 body contrast in light (WO-187 AC-3)."
+    },
+    {
+      "name": "technician-body-text-on-page-dark",
+      "fg": "--token-text-primary",
+      "bg": "--token-surface-page",
+      "minRatio": 4.5,
+      "personas": ["technician"],
+      "appearances": ["dark"],
+      "note": "Technician dark appearance — standard 4.5:1 minimum."
+    },
+    {
+      "name": "body-text-secondary-on-page",
+      "fg": "--token-text-secondary",
+      "bg": "--token-surface-page",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "technician", "operations", "customer"],
+      "appearances": ["light", "dark"]
+    },
+    {
+      "name": "body-text-primary-on-card",
+      "fg": "--token-text-primary",
+      "bg": "--token-surface-card",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "technician", "operations", "customer"],
+      "appearances": ["light", "dark"]
+    },
+    {
+      "name": "body-text-secondary-on-card",
+      "fg": "--token-text-secondary",
+      "bg": "--token-surface-card",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "technician", "operations", "customer"],
+      "appearances": ["light", "dark"]
+    },
+    {
+      "name": "text-on-accent-interactive",
+      "fg": "--token-text-on-accent",
+      "bg": "--token-accent-600",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "technician", "operations", "customer"],
+      "appearances": ["light"],
+      "note": "White text on the primary accent button background in light."
+    },
+    {
+      "name": "text-on-accent-interactive-dark",
+      "fg": "--token-text-on-accent",
+      "bg": "--token-accent-500",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "technician", "operations", "customer"],
+      "appearances": ["dark"],
+      "note": "White text on the primary accent button background in dark (accent-500 is the interactive blue in dark)."
+    },
+    {
+      "name": "danger-text-on-subtle",
+      "fg": "--token-danger-emphasis",
+      "bg": "--token-danger-subtle",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "technician", "operations", "customer"],
+      "appearances": ["light", "dark"],
+      "note": "Danger text (chip emphasis colour) on danger subtle background."
+    },
+    {
+      "name": "success-text-on-subtle",
+      "fg": "--token-success-emphasis",
+      "bg": "--token-success-subtle",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "technician", "operations", "customer"],
+      "appearances": ["light", "dark"]
+    },
+    {
+      "name": "warning-text-on-subtle",
+      "fg": "--token-warning-emphasis",
+      "bg": "--token-warning-subtle",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "technician", "operations", "customer"],
+      "appearances": ["light", "dark"]
+    },
+    {
+      "name": "info-text-on-subtle",
+      "fg": "--token-info-emphasis",
+      "bg": "--token-info-subtle",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "technician", "operations", "customer"],
+      "appearances": ["light", "dark"]
+    },
+    {
+      "name": "primary-text-on-elevated",
+      "fg": "--token-text-primary",
+      "bg": "--token-surface-elevated",
+      "minRatio": 4.5,
+      "personas": ["dispatcher", "technician", "operations", "customer"],
+      "appearances": ["light", "dark"]
+    }
+  ]
+}

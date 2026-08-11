@@ -1,0 +1,43 @@
+{
+  "persona": "customer",
+  "density": "customer",
+  "page": "portal",
+  "requests": [
+    {
+      "id": "req-00001",
+      "reference": "SR-00001",
+      "summary": "Air conditioning not working in meeting room",
+      "status": "in_progress",
+      "submittedAt": "2026-08-08T14:00:00Z",
+      "lastUpdatedAt": "2026-08-11T09:30:00Z",
+      "statusLabel": "Being worked on",
+      "nextStep": "Our technician is on site and working to resolve this."
+    },
+    {
+      "id": "req-00002",
+      "reference": "SR-00002",
+      "summary": "Light fitting replacement in reception",
+      "status": "completed",
+      "submittedAt": "2026-08-05T10:00:00Z",
+      "lastUpdatedAt": "2026-08-06T15:00:00Z",
+      "statusLabel": "Completed",
+      "nextStep": null
+    },
+    {
+      "id": "req-00003",
+      "reference": "SR-00003",
+      "summary": "Request for annual boiler service",
+      "status": "new",
+      "submittedAt": "2026-08-11T08:00:00Z",
+      "lastUpdatedAt": "2026-08-11T08:00:00Z",
+      "statusLabel": "Received — we will be in touch",
+      "nextStep": "We have received your request and will schedule a visit shortly."
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 3,
+    "totalPages": 1
+  }
+}

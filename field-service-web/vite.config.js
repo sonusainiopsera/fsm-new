@@ -39,6 +39,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.js'],
     globals: true,
+    // Playwright tests live in tests/ — exclude them from Vitest
+    include: ['src/**/*.{test,spec}.{js,jsx}', 'scripts/**/*.test.mjs'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -54,6 +56,8 @@ export default defineConfig({
         'scripts/**',
         'eslint-local-rules/**',
         'docs/**',
+        'tests/**',
+        'playwright.config.js',
         'src/serviceWorker/fieldServiceWorker.js',
         'src/surfaces/**',
       ],

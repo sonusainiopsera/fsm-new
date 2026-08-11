@@ -1,0 +1,48 @@
+{
+  "persona": "operations",
+  "density": "operations",
+  "page": "operations",
+  "kpis": [
+    {
+      "id": "kpi-completion-rate",
+      "label": "Completion Rate",
+      "value": "94.2",
+      "unit": "%",
+      "delta": "+2.1",
+      "deltaDirection": "up",
+      "trend": "positive"
+    },
+    {
+      "id": "kpi-sla-breach",
+      "label": "SLA Breaches",
+      "value": "3",
+      "unit": "",
+      "delta": "-1",
+      "deltaDirection": "down",
+      "trend": "positive"
+    },
+    {
+      "id": "kpi-avg-response",
+      "label": "Avg Response Time",
+      "value": "47",
+      "unit": "min",
+      "delta": "+5",
+      "deltaDirection": "up",
+      "trend": "negative"
+    },
+    {
+      "id": "kpi-open-orders",
+      "label": "Open Orders",
+      "value": "28",
+      "unit": "",
+      "delta": "0",
+      "deltaDirection": "neutral",
+      "trend": "neutral"
+    }
+  ],
+  "chart": {
+    "title": "Work Orders by State (Last 30 days)",
+    "type": "bar",
+    "seriesKey": "workorders-by-state-30d"
+  }
+}

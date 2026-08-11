@@ -1,0 +1,34 @@
+{
+  "persona": "technician",
+  "density": "technician",
+  "page": "field",
+  "viewport": { "width": 360, "height": 800 },
+  "job": {
+    "id": "wo-00000002",
+    "reference": "WO-00002",
+    "title": "Electrical fault — Server Room B",
+    "state": "en_route",
+    "priority": "critical",
+    "risk": "high",
+    "siteName": "Data Centre East",
+    "siteAddress": "12 East Industrial Road, EC1A 1BB",
+    "scheduledAt": "2026-08-11T10:30:00Z",
+    "slaDeadline": "2026-08-11T12:00:00Z",
+    "description": "Intermittent power fault reported in server room B. Check distribution panel and UPS units.",
+    "contactName": "Facilities Manager",
+    "contactPhone": "+44 7700 900001",
+    "parts": [
+      { "partNumber": "MCB-32A", "description": "32A MCB single pole", "quantity": 2 }
+    ],
+    "checklistItems": [
+      { "id": "cl-1", "label": "Isolate power supply", "completed": false },
+      { "id": "cl-2", "label": "Test distribution panel", "completed": false },
+      { "id": "cl-3", "label": "Inspect UPS units", "completed": false }
+    ]
+  },
+  "primaryAction": {
+    "label": "Start Job",
+    "placement": "bottom",
+    "variant": "primary"
+  }
+}

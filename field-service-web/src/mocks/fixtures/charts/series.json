@@ -1,0 +1,15 @@
+{
+  "id": "workorders-by-state-30d",
+  "title": "Work Orders by State (Last 30 days)",
+  "nameKey": "month",
+  "series": [
+    { "key": "completed", "label": "Completed" },
+    { "key": "cancelled", "label": "Cancelled" },
+    { "key": "on_hold", "label": "On Hold" }
+  ],
+  "data": [
+    { "month": "Jun", "completed": 142, "cancelled": 8, "on_hold": 12 },
+    { "month": "Jul", "completed": 158, "cancelled": 6, "on_hold": 9 },
+    { "month": "Aug (MTD)", "completed": 67, "cancelled": 3, "on_hold": 5 }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "persona": "dispatcher",
+  "density": "dispatcher",
+  "page": "dispatch",
+  "workOrders": [
+    {
+      "id": "wo-00000001",
+      "reference": "WO-00001",
+      "title": "HVAC maintenance — Office Level 3",
+      "state": "assigned",
+      "priority": "high",
+      "risk": "medium",
+      "assignedTechnician": "T. Moore",
+      "siteName": "Northside Office",
+      "scheduledAt": "2026-08-11T09:00:00Z",
+      "slaDeadline": "2026-08-11T17:00:00Z",
+      "slaBreach": false
+    },
+    {
+      "id": "wo-00000002",
+      "reference": "WO-00002",
+      "title": "Electrical fault — Server Room B",
+      "state": "en_route",
+      "priority": "critical",
+      "risk": "high",
+      "assignedTechnician": "R. Patel",
+      "siteName": "Data Centre East",
+      "scheduledAt": "2026-08-11T10:30:00Z",
+      "slaDeadline": "2026-08-11T12:00:00Z",
+      "slaBreach": false
+    },
+    {
+      "id": "wo-00000003",
+      "reference": "WO-00003",
+      "title": "Lift annual inspection",
+      "state": "in_progress",
+      "priority": "medium",
+      "risk": "low",
+      "assignedTechnician": "S. Williams",
+      "siteName": "Retail Park South",
+      "scheduledAt": "2026-08-11T08:00:00Z",
+      "slaDeadline": "2026-08-11T16:00:00Z",
+      "slaBreach": false
+    },
+    {
+      "id": "wo-00000004",
+      "reference": "WO-00004",
+      "title": "Fire suppression system check",
+      "state": "new",
+      "priority": "medium",
+      "risk": "medium",
+      "assignedTechnician": null,
+      "siteName": "Industrial Unit 7",
+      "scheduledAt": null,
+      "slaDeadline": "2026-08-12T09:00:00Z",
+      "slaBreach": false
+    },
+    {
+      "id": "wo-00000005",
+      "reference": "WO-00005",
+      "title": "Cooling tower service",
+      "state": "on_hold",
+      "priority": "low",
+      "risk": "low",
+      "assignedTechnician": "T. Moore",
+      "siteName": "Northside Office",
+      "scheduledAt": "2026-08-12T14:00:00Z",
+      "slaDeadline": "2026-08-14T17:00:00Z",
+      "slaBreach": false
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "total": 5,
+    "totalPages": 1
+  }
+}
