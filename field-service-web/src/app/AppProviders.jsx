@@ -1,11 +1,12 @@
 import React from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import AppearanceProvider from '../appearance/AppearanceProvider.jsx';
 import { DensityProvider } from '../density/DensityContext.js';
 import { ToastProvider } from '../components/index.js';
 import { AuthProvider } from './AuthContext.js';
 import { router } from './router.jsx';
+import { queryClient } from '../api/queryClient.js';
 
 /**
  * Single composition root for the entire application.
@@ -30,18 +31,6 @@ import { router } from './router.jsx';
  * providers here so every screen inherits consistent context without
  * re-mounting providers inside individual surface routes.
  */
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 30_000,
-    },
-    mutations: {
-      retry: 0,
-    },
-  },
-});
 
 export default function AppProviders() {
   return (
