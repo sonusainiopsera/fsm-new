@@ -1,0 +1,4 @@
+{
+  "_comment": "Allow-list for legitimate exceptions to the lint gate. Each entry must have a path, reason, and date. Vendor paths must be scoped — never global exceptions. Validated by the contract test suite.",
+  "exceptions": []
+}

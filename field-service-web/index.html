@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Field Service Platform</title>
+    <script>
+      /* Apply saved appearance before first paint to avoid flash */
+      (function () {
+        var saved = localStorage.getItem('fs-appearance');
+        if (saved === 'dark') document.documentElement.setAttribute('data-appearance', 'dark');
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,106 @@
+/*
+ * LIGHT VALUE SET
+ * ===============
+ * Provides values for every token declared in tokens.contract.css.
+ * Applied as :root (the default appearance).
+ *
+ * NOTE: This file is excluded from Stylelint enforcement of var() usage
+ * because it IS the source of literal colour/size values — see .stylelintignore.
+ */
+
+:root {
+  /* ── Typography ── */
+  --fs-text-2xs: 0.75rem;
+  --fs-text-xs: 0.8125rem;
+  --fs-text-sm: 0.875rem;
+  --fs-text-base: 1rem;
+  --fs-text-lg: 1.25rem;
+  --fs-text-xl: 1.5rem;
+  --fs-text-2xl: 1.875rem;
+  --fs-line-height-body: 1.5;
+  --fs-tracking-tight: -0.015em;
+  --fs-font-variant-numeric: tabular-nums;
+  /* [Q13] System-ui stack — swap for licensed typeface when brand is ratified */
+  --fs-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+
+  /* ── Spacing ── */
+  --fs-space-1: 0.25rem;
+  --fs-space-2: 0.5rem;
+  --fs-space-3: 0.75rem;
+  --fs-space-4: 1rem;
+  --fs-space-6: 1.5rem;
+  --fs-space-8: 2rem;
+  --fs-content-max: 1440px;
+  --fs-gutter: 1.5rem;
+
+  /* ── Radius ── */
+  --fs-radius-control: 6px;
+  --fs-radius-card: 10px;
+  --fs-radius-overlay: 14px;
+  --fs-radius-pill: 9999px;
+
+  /* ── Elevation ── */
+  --fs-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --fs-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+  --fs-border-hairline: 1px solid #e2e8f0;
+  --fs-scrim: rgba(0, 0, 0, 0.40);
+
+  /* ── Motion ── */
+  --fs-duration-micro: 120ms;
+  --fs-duration-entry: 180ms;
+  --fs-duration-overlay: 240ms;
+  --fs-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Neutral greyscale ramp ── */
+  --fs-neutral-0: #ffffff;
+  --fs-neutral-50: #f8fafc;
+  --fs-neutral-100: #f1f5f9;
+  --fs-neutral-200: #e2e8f0;
+  --fs-neutral-300: #cbd5e1;
+  --fs-neutral-400: #94a3b8;
+  --fs-neutral-500: #64748b;
+  --fs-neutral-600: #475569;
+  --fs-neutral-700: #334155;
+  --fs-neutral-800: #1e293b;
+  --fs-neutral-900: #0f172a;
+  --fs-neutral-950: #020617;
+
+  /* ── Semantic surface / text ── */
+  --fs-color-surface: #ffffff;
+  --fs-color-surface-raised: #f8fafc;
+  --fs-color-text-primary: #0f172a;
+  --fs-color-text-secondary: #475569;
+  --fs-color-text-disabled: #94a3b8;
+  --fs-color-border: #e2e8f0;
+
+  /* ── Accent family — [Q13] placeholder blue ── */
+  --fs-accent-subtle: #eff6ff;
+  --fs-accent-muted: #bfdbfe;
+  --fs-accent-default: #3b82f6;
+  --fs-accent-strong: #1d4ed8;
+  --fs-accent-on: #ffffff;
+
+  /* ── Semantic: informational ── */
+  --fs-info-bg: #eff6ff;
+  --fs-info-border: #bfdbfe;
+  --fs-info-text: #1e40af;
+  --fs-info-icon: #3b82f6;
+
+  /* ── Semantic: success ── */
+  --fs-success-bg: #f0fdf4;
+  --fs-success-border: #bbf7d0;
+  --fs-success-text: #166534;
+  --fs-success-icon: #22c55e;
+
+  /* ── Semantic: warning ── */
+  --fs-warning-bg: #fffbeb;
+  --fs-warning-border: #fde68a;
+  --fs-warning-text: #92400e;
+  --fs-warning-icon: #f59e0b;
+
+  /* ── Semantic: danger ── */
+  --fs-danger-bg: #fef2f2;
+  --fs-danger-border: #fecaca;
+  --fs-danger-text: #991b1b;
+  --fs-danger-icon: #ef4444;
+}

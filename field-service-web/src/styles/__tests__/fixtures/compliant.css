@@ -1,0 +1,32 @@
+/*
+ * COMPLIANT FIXTURE
+ * =================
+ * All visual values reference CSS custom properties via var(--fs-*).
+ * The Stylelint lint gate must report ZERO warnings on this file.
+ */
+
+.compliant-card {
+  color: var(--fs-color-text-primary);
+  background-color: var(--fs-color-surface);
+  border-color: var(--fs-color-border);
+  border-radius: var(--fs-radius-card);
+  padding: var(--fs-space-4);
+  gap: var(--fs-space-3);
+  box-shadow: var(--fs-shadow-1);
+  transition-duration: var(--fs-duration-entry);
+}
+
+.compliant-button {
+  color: var(--fs-accent-on);
+  background-color: var(--fs-accent-default);
+  border-radius: var(--fs-radius-control);
+  padding: var(--fs-space-2);
+  margin: 0;
+  transition-duration: var(--fs-duration-micro);
+}
+
+.compliant-overlay {
+  background-color: var(--fs-scrim);
+  border-radius: var(--fs-radius-overlay);
+  padding: var(--fs-space-6);
+}

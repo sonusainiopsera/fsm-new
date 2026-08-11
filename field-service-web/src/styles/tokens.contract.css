@@ -1,0 +1,143 @@
+/*
+ * DESIGN TOKEN CONTRACT
+ * =====================
+ * Single source of truth for the token vocabulary.
+ * This file declares every named token with an empty value.
+ * Actual values are supplied by:
+ *   tokens.light.css  →  :root  (light appearance, the default)
+ *   tokens.dark.css   →  html[data-appearance="dark"]
+ *
+ * The machine-readable mirror tokens.contract.json is generated from
+ * this file by scripts/generate-token-contract.mjs and consumed by
+ * both the parity unit test and the lint rule.
+ *
+ * Q13 PLACEHOLDER — the following tokens have values pending brand
+ * ratification and are marked [Q13] below:
+ *   --fs-font-family    (typeface family — system-ui stack until licensed typeface is chosen)
+ *   --fs-accent-*       (accent hue — placeholder blue until brand colour is confirmed)
+ *
+ * Ratification procedure: change the token value in both tokens.light.css
+ * and tokens.dark.css; run `npm run generate-tokens`; the parity test
+ * will confirm the new value is present in both appearances.
+ */
+
+/* ── Typography ─────────────────────────────────────────────────────────── */
+/* Font size scale: 12 / 13 / 14 / 16 / 20 / 24 / 30 px */
+:root {
+  --fs-text-2xs: ;    /* 0.75rem  = 12 px */
+  --fs-text-xs: ;     /* 0.8125rem = 13 px */
+  --fs-text-sm: ;     /* 0.875rem = 14 px */
+  --fs-text-base: ;   /* 1rem     = 16 px */
+  --fs-text-lg: ;     /* 1.25rem  = 20 px — tight tracking applies */
+  --fs-text-xl: ;     /* 1.5rem   = 24 px — tight tracking applies */
+  --fs-text-2xl: ;    /* 1.875rem = 30 px — tight tracking applies */
+
+  /* Body line-height: 1.5 (WCAG 1.4.8) */
+  --fs-line-height-body: ;
+
+  /* Tightened letter-spacing for display sizes (20 px and above) */
+  --fs-tracking-tight: ;
+
+  /* Tabular figures — applied by the .numeric utility class (see base.css) */
+  --fs-font-variant-numeric: ;
+
+  /* [Q13] System-ui stack now; swap for licensed typeface when brand is ratified */
+  --fs-font-family: ;
+
+/* ── Spacing ─────────────────────────────────────────────────────────────── */
+/* 4 px base — rhythm: 4 / 8 / 12 / 16 / 24 / 32 */
+
+  --fs-space-1: ;     /* 0.25rem = 4 px */
+  --fs-space-2: ;     /* 0.5rem  = 8 px */
+  --fs-space-3: ;     /* 0.75rem = 12 px */
+  --fs-space-4: ;     /* 1rem    = 16 px */
+  --fs-space-6: ;     /* 1.5rem  = 24 px */
+  --fs-space-8: ;     /* 2rem    = 32 px */
+
+  /* Layout */
+  --fs-content-max: ; /* 1440 px content width cap */
+  --fs-gutter: ;      /* 1.5rem = 24 px side gutters */
+
+/* ── Radius ──────────────────────────────────────────────────────────────── */
+
+  --fs-radius-control: ;  /* 6 px — inputs, buttons, tags */
+  --fs-radius-card: ;     /* 10 px — cards, panels */
+  --fs-radius-overlay: ;  /* 14 px — modals, drawers */
+  --fs-radius-pill: ;     /* 9999 px — avatars, badge pills */
+
+/* ── Elevation ───────────────────────────────────────────────────────────── */
+/* At most two shadow levels; structural separation uses --fs-border-hairline */
+
+  --fs-shadow-1: ;        /* Elevation level 1 (above base surface) */
+  --fs-shadow-2: ;        /* Elevation level 2 (modals, popovers) */
+  --fs-border-hairline: ; /* 1 px structural separator — prefer over shadow */
+  --fs-scrim: ;           /* Overlay backdrop colour for modals */
+
+/* ── Motion ──────────────────────────────────────────────────────────────── */
+/* Three durations ≤ 300 ms; one standard easing curve */
+
+  --fs-duration-micro: ;    /* 120 ms — icon swap, tooltip */
+  --fs-duration-entry: ;    /* 180 ms — panel slide-in */
+  --fs-duration-overlay: ;  /* 240 ms — modal/drawer */
+  --fs-easing-standard: ;   /* cubic-bezier(0.4, 0, 0.2, 1) — single standard curve */
+
+/* ── Neutral greyscale ramp ──────────────────────────────────────────────── */
+
+  --fs-neutral-0: ;
+  --fs-neutral-50: ;
+  --fs-neutral-100: ;
+  --fs-neutral-200: ;
+  --fs-neutral-300: ;
+  --fs-neutral-400: ;
+  --fs-neutral-500: ;
+  --fs-neutral-600: ;
+  --fs-neutral-700: ;
+  --fs-neutral-800: ;
+  --fs-neutral-900: ;
+  --fs-neutral-950: ;
+
+/* ── Semantic surface / text ─────────────────────────────────────────────── */
+
+  --fs-color-surface: ;          /* Layer 0 background */
+  --fs-color-surface-raised: ;   /* Raised card / panel background */
+  --fs-color-text-primary: ;
+  --fs-color-text-secondary: ;
+  --fs-color-text-disabled: ;
+  --fs-color-border: ;           /* Default border colour */
+
+/* ── Accent family — [Q13] hue pending brand ratification ───────────────── */
+
+  --fs-accent-subtle: ;    /* Very light tint */
+  --fs-accent-muted: ;     /* Muted mid-tint */
+  --fs-accent-default: ;   /* Primary interactive accent */
+  --fs-accent-strong: ;    /* Strong / pressed state */
+  --fs-accent-on: ;        /* Foreground on accent backgrounds */
+
+/* ── Semantic: informational ─────────────────────────────────────────────── */
+
+  --fs-info-bg: ;
+  --fs-info-border: ;
+  --fs-info-text: ;
+  --fs-info-icon: ;
+
+/* ── Semantic: success ───────────────────────────────────────────────────── */
+
+  --fs-success-bg: ;
+  --fs-success-border: ;
+  --fs-success-text: ;
+  --fs-success-icon: ;
+
+/* ── Semantic: warning ───────────────────────────────────────────────────── */
+
+  --fs-warning-bg: ;
+  --fs-warning-border: ;
+  --fs-warning-text: ;
+  --fs-warning-icon: ;
+
+/* ── Semantic: danger ────────────────────────────────────────────────────── */
+
+  --fs-danger-bg: ;
+  --fs-danger-border: ;
+  --fs-danger-text: ;
+  --fs-danger-icon: ;
+}
