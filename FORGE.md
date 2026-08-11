@@ -63,3 +63,10 @@
 - **Files:** 17 (+1085/-59)
 - **Duration:** 1317ss
 - **Approach:** Three Flyway migrations (V8-V10) extend the identity model: V8 alters app_user (nullable password_hash, nullable full_name for graceful migration, adds display_name/external_subject/updated_at, drops simple UNIQUE and creates case-insensitive functional unique index on lower(email)), then creates role_assignment (with ON DELETE RESTRICT FK and CHECK constraint enforcing the 5-role vocabulary), refresh_token_family, and refresh_token tables. V9 extends app_user_aud and creates role_assignment_aud. V10 grants SELECT+INSERT only on role_assignment_aud to the fieldservice runtime role and explicitly revokes UPDATE/DELETE/TRUNCATE. Four JPA entities in com.fieldservice.identity.domain replace the minimal user.domain.AppUser stub; AppUser and RoleAssignment are @Audited with passwordHash @NotAudited. AppRole enum mirrors the 5-role CHECK constraint. UUIDv7 generator used for all primary keys. Four Spring Data repositories expose CRUD operations.
+
+## WO-123: User Story: WO-123 - Declarative work order lifecycle transition table
+- **Status:** completed
+- **Commit:** `24a5c11`
+- **Files:** 19 (+981/-1)
+- **Duration:** 1111ss
+- **Approach:** Implemented a fully declarative, immutable work-order lifecycle state machine as a package-private Map in WorkOrderTransitionTable, exposed through a public WorkOrderTransitionService @Component. The table encodes 13 transitions across 8 states via (TransitionKey→TransitionDescriptor) entries using Collections.unmodifiableMap(Map.ofEntries(...)). WorkOrderState and WorkOrderEvent enums are internal to the lifecycle package; IllegalWorkOrderTransitionException carries the stable error code WORK_ORDER_ILLEGAL_TRANSITION plus current state, requested event, and legal events. A separate WorkOrderExceptionHandler @RestControllerAdvice in the app module (not platform) handles the exception since platform cannot depend on app. Three new ErrorCode enum values were added. The ADR decision (EN_ROUTE and ON_HOLD may cancel directly) is documented in docs/adr/adr-0007.

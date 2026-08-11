@@ -114,4 +114,12 @@ public class WorkOrder implements ScopedEntity {
         this.assignedTechnicianId = null;
         this.state = WorkOrderStatus.NEW;
     }
+
+    /**
+     * Applies a validated state transition. Called exclusively by
+     * {@code WorkOrderTransitionService}; no other caller should mutate state directly.
+     */
+    public void applyStateTransition(WorkOrderStatus newState) {
+        this.state = newState;
+    }
 }
