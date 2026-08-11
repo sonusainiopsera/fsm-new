@@ -32,6 +32,9 @@ public class RefreshTokenFamily {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(name = "expires_at", nullable = false, updatable = false)
+    private Instant expiresAt;
+
     @Column(name = "revoked_at")
     private Instant revokedAt;
 
@@ -40,11 +43,12 @@ public class RefreshTokenFamily {
 
     protected RefreshTokenFamily() {}
 
-    public static RefreshTokenFamily open(AppUser user) {
+    public static RefreshTokenFamily open(AppUser user, Instant expiresAt) {
         RefreshTokenFamily f = new RefreshTokenFamily();
         f.id = UuidV7.generate();
         f.user = user;
         f.createdAt = Instant.now();
+        f.expiresAt = expiresAt;
         return f;
     }
 
@@ -57,6 +61,7 @@ public class RefreshTokenFamily {
     public UUID    getId()            { return id; }
     public AppUser getUser()          { return user; }
     public Instant getCreatedAt()     { return createdAt; }
+    public Instant getExpiresAt()     { return expiresAt; }
     public Instant getRevokedAt()     { return revokedAt; }
     public String  getRevokedReason() { return revokedReason; }
 }

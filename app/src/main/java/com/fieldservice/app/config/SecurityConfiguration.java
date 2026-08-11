@@ -78,6 +78,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/actuator/prometheus").permitAll()
                 .requestMatchers("/api-docs", "/api-docs/**").permitAll()
                 .requestMatchers("/api/v1/auth/login").permitAll()
+                .requestMatchers("/api/v1/auth/refresh").permitAll()
                 .anyRequest().authenticated()
             )
 

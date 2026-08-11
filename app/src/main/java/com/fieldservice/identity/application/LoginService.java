@@ -184,11 +184,11 @@ public class LoginService {
         TokenIssuer.TokenBundle tokens = tokenIssuer.issue(user, roles);
 
         // --- Step 8: Persist refresh token family ----------------------------
-        RefreshTokenFamily family = RefreshTokenFamily.open(user);
+        Instant expiresAt = Instant.now().plus(REFRESH_TOKEN_TTL);
+        RefreshTokenFamily family = RefreshTokenFamily.open(user, expiresAt);
         familyRepository.save(family);
 
         String tokenHash  = sha256Hex(tokens.refreshHandle());
-        Instant expiresAt = Instant.now().plus(REFRESH_TOKEN_TTL);
         RefreshToken refreshToken = RefreshToken.issue(family, tokenHash, expiresAt);
         refreshTokenRepository.save(refreshToken);
 
