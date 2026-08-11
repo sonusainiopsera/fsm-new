@@ -168,6 +168,15 @@ app:
       # Rate-limit window duration in seconds
       rate-limit-window-seconds: ${PORTAL_RATE_LIMIT_WINDOW_SECONDS:60}
 
+  copilot:
+    grounding:
+      # Maximum prior work orders to include in AI grounding context
+      max-prior-work-orders: ${COPILOT_GROUNDING_MAX_PRIOR_WOS:5}
+      # Maximum characters per free-text field before truncation with [TRUNCATED] marker
+      max-free-text-chars: ${COPILOT_GROUNDING_MAX_FREE_TEXT_CHARS:2000}
+      # Operation ID forwarded to the AI gateway for rate-limit accounting
+      operation-id: ${COPILOT_GROUNDING_OPERATION_ID:copilot-suggestion}
+
   sla:
     sweep:
       # Interval between SLA risk sweep ticks in milliseconds (worker profile only)

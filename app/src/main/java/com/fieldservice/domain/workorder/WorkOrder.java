@@ -40,6 +40,12 @@ import java.util.UUID;
 @Table(name = "work_order")
 public class WorkOrder extends BaseEntity implements ScopedEntity {
 
+    @Column(name = "asset_id")
+    private UUID assetId;
+
+    public UUID getAssetId() { return assetId; }
+    public void setAssetId(UUID assetId) { this.assetId = assetId; }
+
     // UUID FK field is audited — stores site_id in work_order_aud
     @Column(name = "site_id", nullable = false, insertable = false, updatable = false)
     private UUID siteId;
