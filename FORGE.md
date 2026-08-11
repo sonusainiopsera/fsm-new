@@ -119,3 +119,10 @@
 - **Files:** 13 (+1051/-37)
 - **Duration:** 1200ss
 - **Approach:** Single POST /api/v1/work-orders/{id}/transitions endpoint wired through a new applyTransition() service method. Loads via ScopedQueryExecutor (row-scope enforcement; absent == out-of-scope == 403 non-disclosure). Pre-checks client-supplied expectedVersion before guard evaluation. Guards evaluated fail-closed: any exception becomes GuardRefusedException. JPA flush inside @Transactional catches ObjectOptimisticLockingFailureException and rethrows as WorkOrderVersionConflictException. Outbox event published (MANDATORY propagation) atomically with the state change and Envers revision. Three work-order-specific HTTP error codes added to ErrorEnvelope.Code and wired into GlobalExceptionHandler. Legacy applyEvent() preserved unchanged for backward compatibility with existing lifecycle integration tests.
+
+## WO-148: User Story: WO-148 - Parts catalog, stock locations, and balance foundation
+- **Status:** completed
+- **Commit:** `6649872`
+- **Files:** 16 (+1292/-23)
+- **Duration:** 958ss
+- **Approach:** N/A

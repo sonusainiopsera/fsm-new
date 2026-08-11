@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
@@ -17,18 +18,20 @@ import java.util.UUID;
  *
  * <p>Scoped entity:
  * <ul>
- *   <li>TECHNICIAN — sees only balances for locations owned by their technician id
- *       ({@code stock_location.technician_id = scope.technicianId()}).</li>
+ *   <li>TECHNICIAN — sees only balances for locations owned by their technician id.</li>
  *   <li>DISPATCHER / ADMIN / MANAGER — permit-all.</li>
- *   <li>CUSTOMER — deny-all (inventory data is not customer-facing).</li>
+ *   <li>CUSTOMER — deny-all; inventory data is not customer-facing.</li>
  * </ul>
  *
- * <p>The {@code quantity_on_hand >= 0} CHECK constraint (enforced at the DB level)
- * implements BR-16 (no negative inventory). The {@code version} column enables
- * optimistic locking on the conditional-decrement path.
+ * <p>The {@code quantity_on_hand >= 0} CHECK constraint named {@code stock_non_negative}
+ * implements BR-16. The {@code version} column enables optimistic locking on the
+ * conditional-decrement path delivered in WO-053.
  *
- * <p>Note: this table has no {@code created_at} column; use {@code updated_at} for
- * audit purposes. It does NOT extend {@link com.fieldservice.platform.entity.BaseEntity}.
+ * <p>NOT Envers-audited: the append-only {@code stock_ledger} table (WO-054) is the
+ * audit mechanism for balance changes (ADR-0012: stock-balance-audit-mechanism).
+ *
+ * <p>{@code quantity_reserved} column exists as structural pre-wiring for reservation
+ * semantics; no code path in this release may set it (WO-148 constraint).
  */
 @Entity
 @Table(name = "stock_balance")
@@ -48,9 +51,17 @@ public class StockBalance implements ScopedEntity {
     @Column(name = "quantity_on_hand", nullable = false)
     private int quantityOnHand = 0;
 
+    /** Pre-wired for reservation semantics; not settable in this release (WO-148). */
+    @Column(name = "quantity_reserved", nullable = false)
+    private int quantityReserved = 0;
+
     @Version
     @Column(name = "version", nullable = false)
     private Integer version;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
@@ -70,7 +81,10 @@ public class StockBalance implements ScopedEntity {
     public int getQuantityOnHand() { return quantityOnHand; }
     public void setQuantityOnHand(int quantityOnHand) { this.quantityOnHand = quantityOnHand; }
 
+    public int getQuantityReserved() { return quantityReserved; }
+
     public Integer getVersion() { return version; }
 
+    public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }
