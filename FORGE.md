@@ -63,3 +63,10 @@
 - **Files:** 18 (+1341/-5)
 - **Duration:** 911ss
 - **Approach:** DDL-first approach: authored V8-V12 Flyway migrations, then derived JPA entities. V8 expands app_user with nullable password_hash (widened to VARCHAR(256)), external_subject reserved column, and case-insensitive email unique index. V9 creates role_assignment with FK ON DELETE RESTRICT, CHECK constraint mirroring IdentityRole enum, and UNIQUE(user_id, role_name). V10 creates refresh_token_family and refresh_token storing only SHA-256 hex hashes. V11 creates role_assignment_aud wired to existing REVINFO. V12 grants SELECT/INSERT (withholds UPDATE/DELETE) on role_assignment_aud to the fieldservice runtime role. Updated existing AppUser entity in-place (not duplicated) to avoid dual-entity JPA conflict. Created identity.domain package with RoleAssignment (@Audited), RefreshTokenFamily, RefreshToken entities and package-level repositories.
+
+## WO-123: User Story: WO-123 - Declarative work order lifecycle transition table
+- **Status:** completed
+- **Commit:** `e41636a`
+- **Files:** 16 (+1409/-0)
+- **Duration:** 1296ss
+- **Approach:** Declarative table approach: encode all lifecycle rules as an immutable Map<TransitionKey,TransitionDescriptor> built once at class init using Map.ofEntries wrapped in Collections.unmodifiableMap. TransitionKey is a record(fromState, event), TransitionDescriptor is a record(toState, requiredRoles, guardIds). 13 legal transitions across 8 states and 8 events. WorkOrderTransitionServiceImpl is the sole code path that calls WorkOrder.setState — it loads the work order via EntityManager.find, resolves the descriptor, checks caller authorities from SecurityContextHolder, evaluates registered guard beans, then saves. GuardResult is a sealed interface (Satisfied/Refused) for the deferred guards story. ADR-0007 resolves cancellation reachability: EN_ROUTE→CANCELLED and ON_HOLD→CANCELLED both permitted.
