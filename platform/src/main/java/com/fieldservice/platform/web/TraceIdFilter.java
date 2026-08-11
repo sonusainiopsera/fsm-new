@@ -25,8 +25,8 @@ import java.io.IOException;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class TraceIdFilter extends OncePerRequestFilter {
 
-    static final String TRACE_ID_HEADER = "X-Trace-Id";
-    static final String MDC_TRACE_KEY   = "traceId";
+    public static final String TRACE_ID_HEADER = "X-Trace-Id";
+    public static final String MDC_TRACE_KEY   = "traceId";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

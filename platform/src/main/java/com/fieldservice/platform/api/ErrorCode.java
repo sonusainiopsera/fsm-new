@@ -15,5 +15,6 @@ public enum ErrorCode {
     CONFLICT,
     RATE_LIMITED,
     PROVIDER_DEGRADED,
+    IDEMPOTENCY_CONFLICT,
     INTERNAL_ERROR
 }

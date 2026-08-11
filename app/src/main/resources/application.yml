@@ -62,6 +62,12 @@ fieldservice:
   pagination:
     cursor-hmac-secret: ${CURSOR_HMAC_SECRET:changeme-not-for-production}
     keyset-offset-threshold: 20
+  idempotency:
+    ttl: PT24H
+    lease-timeout: PT30S
+    max-body-size: 65536
+    purge-batch-size: 1000
+    require-key: false
 
 logging:
   level:
