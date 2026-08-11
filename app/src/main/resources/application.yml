@@ -61,6 +61,14 @@ app:
     purge-interval-ms: 900000
   outbox:
     max-payload-bytes: 65536
+    batch-size: 100
+    max-attempts: 5
+    backoff-base-ms: 1000
+    backoff-cap-ms: 300000
+    jitter-fraction: 0.2
+    dispatch-timeout-ms: 10000
+    poll-interval-ms: 500
+    poll-initial-delay-ms: 0
   api:
     public-base-url: ${APP_API_PUBLIC_BASE_URL:http://localhost:8080}
   auth:

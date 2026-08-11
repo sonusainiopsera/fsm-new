@@ -56,6 +56,12 @@ class OutboxEvent {
     @Column(name = "last_error")
     private String lastError;
 
+    @Column(name = "next_attempt_at", nullable = false)
+    private Instant nextAttemptAt = Instant.now();
+
+    @Column(name = "dead_lettered_at")
+    private Instant deadLetteredAt;
+
     protected OutboxEvent() {}
 
     static OutboxEvent from(DomainEvent event, String jsonPayload) {
@@ -72,15 +78,25 @@ class OutboxEvent {
         return e;
     }
 
-    UUID    getEventId()       { return eventId; }
-    String  getEventType()     { return eventType; }
-    String  getAggregateType() { return aggregateType; }
-    UUID    getAggregateId()   { return aggregateId; }
-    String  getPayload()       { return payload; }
-    String  getTraceId()       { return traceId; }
-    UUID    getActorUserId()   { return actorUserId; }
-    Instant getCreatedAt()     { return createdAt; }
-    Instant getPublishedAt()   { return publishedAt; }
-    int     getAttemptCount()  { return attemptCount; }
-    String  getLastError()     { return lastError; }
+    UUID    getEventId()         { return eventId; }
+    String  getEventType()       { return eventType; }
+    String  getAggregateType()   { return aggregateType; }
+    UUID    getAggregateId()     { return aggregateId; }
+    String  getPayload()         { return payload; }
+    String  getTraceId()         { return traceId; }
+    UUID    getActorUserId()     { return actorUserId; }
+    Instant getCreatedAt()       { return createdAt; }
+    Instant getPublishedAt()     { return publishedAt; }
+    int     getAttemptCount()    { return attemptCount; }
+    String  getLastError()       { return lastError; }
+    Instant getNextAttemptAt()   { return nextAttemptAt; }
+    Instant getDeadLetteredAt()  { return deadLetteredAt; }
+
+    void markPublished(Instant at)          { this.publishedAt = at; }
+    void markDeadLettered(Instant at)       { this.deadLetteredAt = at; }
+    void recordFailure(String err, Instant nextAttempt) {
+        this.attemptCount++;
+        this.lastError = err;
+        this.nextAttemptAt = nextAttempt;
+    }
 }
