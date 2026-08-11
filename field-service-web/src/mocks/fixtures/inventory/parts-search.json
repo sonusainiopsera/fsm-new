@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "id": "part-001",
+      "partNumber": "FLT-2890",
+      "description": "Oil Filter — Heavy Duty",
+      "unitOfMeasure": "EA",
+      "availableQuantity": 45
+    },
+    {
+      "id": "part-002",
+      "partNumber": "BRK-1040",
+      "description": "Brake Pad Set — Front",
+      "unitOfMeasure": "SET",
+      "availableQuantity": 8
+    }
+  ]
+}

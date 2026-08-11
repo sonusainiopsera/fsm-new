@@ -1,0 +1,109 @@
+.page {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.asOf {
+  font: var(--type-body-s);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.updating {
+  color: var(--color-text-tertiary);
+}
+
+.qtyCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  justify-content: flex-end;
+}
+
+.qty {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stockout indicator: diamond + text label (no colour-only, BR-32/BR-34) */
+.stockOut {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 4px;
+  border: 1px solid var(--color-status-error);
+  border-radius: 2px;
+  font: var(--type-body-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-status-error);
+  white-space: nowrap;
+}
+
+/* Low-stock indicator: triangle + text label (distinct shape from stockout, BR-32/BR-34) */
+.stockLow {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 4px;
+  background: var(--color-surface-warning);
+  border-radius: var(--radius-s);
+  font: var(--type-body-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-status-warning);
+  white-space: nowrap;
+}
+
+.historyBtn {
+  min-height: 32px;
+  padding: var(--space-1) var(--space-2);
+  background: none;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  font: var(--type-body-s);
+  color: var(--color-text-link);
+}
+
+.historyBtn:hover {
+  background: var(--color-surface-hover);
+}
+
+.historyBtn:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.pageBtn {
+  min-height: 44px;
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
+  cursor: pointer;
+  font: var(--type-body-s);
+  color: var(--color-text-primary);
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageBtn:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.pageInfo {
+  font: var(--type-body-s);
+  color: var(--color-text-secondary);
+}

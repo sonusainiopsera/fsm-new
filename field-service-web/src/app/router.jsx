@@ -12,6 +12,7 @@ const LazyDispatch = lazy(() => import('../surfaces/dispatch/index.jsx'));
 const LazyField = lazy(() => import('../surfaces/field/index.jsx'));
 const LazyOperations = lazy(() => import('../surfaces/operations/index.jsx'));
 const LazyPortal = lazy(() => import('../surfaces/portal/index.jsx'));
+const LazyInventory = lazy(() => import('../features/inventory/index.jsx'));
 const LazySignIn = lazy(() => import('../surfaces/auth/SignIn.jsx'));
 
 /** Shared Suspense wrapper bound to the LoadingState skeleton primitive. */
@@ -103,6 +104,14 @@ export const router = createBrowserRouter([
         element: (
           <SurfaceSuspense>
             <LazyPortal />
+          </SurfaceSuspense>
+        ),
+      },
+      {
+        path: 'inventory/*',
+        element: (
+          <SurfaceSuspense>
+            <LazyInventory />
           </SurfaceSuspense>
         ),
       },

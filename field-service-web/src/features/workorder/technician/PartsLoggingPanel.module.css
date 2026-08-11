@@ -1,0 +1,297 @@
+/* PartsLoggingPanel — mobile-first (360 px target), 44 px minimum touch targets */
+
+.panel {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.panelTitle {
+  font: var(--type-title-s);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Search */
+.searchSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.searchInput {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  font: var(--type-body-m);
+  color: var(--color-text-primary);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-color: var(--color-border-focus);
+}
+
+.searchStatus {
+  font: var(--type-body-s);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.searchEmpty {
+  padding: var(--space-3);
+  background: var(--color-surface-default);
+  border-radius: var(--radius-m);
+}
+
+.searchEmpty p {
+  margin: 0 0 var(--space-1);
+  font: var(--type-body-m);
+  color: var(--color-text-primary);
+}
+
+.searchEmptyHint {
+  font: var(--type-body-s) !important;
+  color: var(--color-text-secondary) !important;
+}
+
+.searchResults {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+}
+
+.searchResultBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-raised);
+  border: none;
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  text-align: left;
+  font: var(--type-body-m);
+  color: var(--color-text-primary);
+}
+
+.searchResultBtn:last-child {
+  border-bottom: none;
+}
+
+.searchResultBtn:hover {
+  background: var(--color-surface-hover);
+}
+
+.searchResultBtn:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+.searchResultBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.partNumber {
+  font-weight: var(--font-weight-medium);
+  flex-shrink: 0;
+}
+
+.partDesc {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-text-secondary);
+}
+
+.partAvail {
+  font: var(--type-body-s);
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* Staged lines */
+.stagedList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.stagedItem {
+  padding: var(--space-3);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
+}
+
+.stagedHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-1);
+}
+
+.stagedPartNum {
+  font-weight: var(--font-weight-medium);
+  font: var(--type-body-m);
+  color: var(--color-text-primary);
+}
+
+.removeBtn {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: var(--type-size-m);
+}
+
+.removeBtn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.removeBtn:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.stagedDesc {
+  font: var(--type-body-s);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.lineFields {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.qtyInput {
+  width: 80px;
+  min-height: 44px;
+  padding: var(--space-2);
+  font: var(--type-body-m);
+  color: var(--color-text-primary);
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.qtyInput:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.qtyInputError {
+  border-color: var(--color-status-error);
+}
+
+.reasonSelect {
+  flex: 1;
+  min-height: 44px;
+  padding: var(--space-2);
+  font: var(--type-body-m);
+  color: var(--color-text-primary);
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
+}
+
+.reasonSelect:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Insufficient stock error */
+.insufficientError {
+  padding: var(--space-3);
+  background: var(--color-surface-warning);
+  border: 2px solid var(--color-status-warning);
+  border-radius: var(--radius-m);
+  border-left: 4px solid var(--color-status-warning);
+}
+
+.insufficientTitle {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2);
+}
+
+.insufficientList {
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-4);
+  font: var(--type-body-s);
+}
+
+.insufficientList li {
+  margin-bottom: var(--space-1);
+}
+
+.insufficientHint {
+  font: var(--type-body-s);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2);
+}
+
+/* Submit error */
+.submitError {
+  font: var(--type-body-s);
+  color: var(--color-status-error);
+  margin: 0;
+  padding: var(--space-2);
+  background: var(--color-surface-error);
+  border-radius: var(--radius-m);
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+/* Empty staged state */
+.emptyStaged {
+  font: var(--type-body-s);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: var(--space-4) 0;
+}
+
+/* No horizontal scrolling at 360 px */
+@media (max-width: 400px) {
+  .lineFields {
+    flex-direction: column;
+  }
+
+  .qtyInput {
+    width: 100%;
+  }
+}

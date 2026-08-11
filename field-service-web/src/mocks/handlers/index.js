@@ -126,10 +126,112 @@ const DEFAULT_ROUTES = {
     headers: { 'ETag': '"mock-etag-v1"' },
   },
 
-  // Inventory stock
+  // Inventory stock positions
   'GET:/api/v1/inventory/stock': {
     status: 200,
-    body: { data: [], page: { number: 0, size: 20, totalElements: 0, totalPages: 0, estimated: false }, _links: {} },
+    body: {
+      data: [
+        {
+          id: 'sp-001', partId: 'part-001', partNumber: 'FLT-2890',
+          partDescription: 'Oil Filter — Heavy Duty', locationId: 'loc-wh-001',
+          locationName: 'Main Warehouse', locationType: 'WAREHOUSE',
+          quantityOnHand: 45, reorderPoint: 20, stockStatus: 'OK',
+          asOf: '2026-08-11T10:00:00Z',
+        },
+        {
+          id: 'sp-002', partId: 'part-002', partNumber: 'BRK-1040',
+          partDescription: 'Brake Pad Set — Front', locationId: 'loc-wh-001',
+          locationName: 'Main Warehouse', locationType: 'WAREHOUSE',
+          quantityOnHand: 8, reorderPoint: 10, stockStatus: 'LOW',
+          asOf: '2026-08-11T10:00:00Z',
+        },
+        {
+          id: 'sp-003', partId: 'part-003', partNumber: 'HVA-0055',
+          partDescription: 'HVAC Refrigerant R-410A (Can)', locationId: 'loc-van-001',
+          locationName: 'Van 12 — J. Smith', locationType: 'VEHICLE',
+          quantityOnHand: 0, reorderPoint: 2, stockStatus: 'OUT',
+          asOf: '2026-08-11T10:00:00Z',
+        },
+      ],
+      page: { number: 0, size: 50, totalElements: 3, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/inventory/stock?page=0&size=50', next: null, prev: null },
+      asOf: '2026-08-11T10:00:00Z',
+    },
+    headers: { 'ETag': '"stock-etag-v1"' },
+  },
+
+  // Inventory alerts
+  'GET:/api/v1/inventory/alerts': {
+    status: 200,
+    body: {
+      data: [
+        {
+          id: 'alert-001', partId: 'part-002', partNumber: 'BRK-1040',
+          partDescription: 'Brake Pad Set — Front', locationId: 'loc-wh-001',
+          locationName: 'Main Warehouse', quantityOnHand: 8, reorderPoint: 10,
+          stockStatus: 'LOW', raisedAt: '2026-08-10T14:30:00Z',
+          asOf: '2026-08-11T10:00:00Z',
+        },
+        {
+          id: 'alert-002', partId: 'part-003', partNumber: 'HVA-0055',
+          partDescription: 'HVAC Refrigerant R-410A (Can)', locationId: 'loc-van-001',
+          locationName: 'Van 12 — J. Smith', quantityOnHand: 0, reorderPoint: 2,
+          stockStatus: 'OUT', raisedAt: '2026-08-09T08:00:00Z',
+          asOf: '2026-08-11T10:00:00Z',
+        },
+      ],
+      page: { number: 0, size: 50, totalElements: 2, totalPages: 1, estimated: false },
+      _links: {},
+      asOf: '2026-08-11T10:00:00Z',
+    },
+    headers: { 'ETag': '"alerts-etag-v1"' },
+  },
+
+  // Inventory movements
+  'GET:/api/v1/inventory/movements': {
+    status: 200,
+    body: {
+      data: [
+        {
+          id: 'mv-001', partId: 'part-002', partNumber: 'BRK-1040',
+          locationId: 'loc-wh-001', movementType: 'CONSUMPTION', quantity: 4,
+          reasonCode: 'CONSUMED_ON_JOB', workOrderId: 'wo-001',
+          occurredAt: '2026-08-11T09:15:00Z', performedBy: 'J. Smith',
+        },
+        {
+          id: 'mv-002', partId: 'part-002', partNumber: 'BRK-1040',
+          locationId: 'loc-wh-001', movementType: 'RECEIPT', quantity: 20,
+          reasonCode: 'PO_RECEIPT', workOrderId: null,
+          occurredAt: '2026-08-10T08:00:00Z', performedBy: 'System',
+        },
+      ],
+      page: { number: 0, size: 50, totalElements: 2, totalPages: 1, estimated: false },
+      _links: {},
+    },
+    headers: { 'ETag': '"movements-etag-v1"' },
+  },
+
+  // Parts search
+  'GET:/api/v1/inventory/parts/search': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'part-001', partNumber: 'FLT-2890', description: 'Oil Filter — Heavy Duty', unitOfMeasure: 'EA', availableQuantity: 45 },
+        { id: 'part-002', partNumber: 'BRK-1040', description: 'Brake Pad Set — Front', unitOfMeasure: 'SET', availableQuantity: 8 },
+      ],
+    },
+  },
+
+  // Parts consumption
+  'POST:/api/v1/inventory/consumptions': {
+    status: 201,
+    body: { consumptionId: 'cons-001', applied: true },
+  },
+
+  // Parts returns
+  'POST:/api/v1/inventory/returns': {
+    status: 201,
+    body: { returnId: 'ret-001', applied: true },
   },
 
   // User preferences

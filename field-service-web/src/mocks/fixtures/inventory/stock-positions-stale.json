@@ -1,0 +1,30 @@
+{
+  "data": [
+    {
+      "id": "sp-001",
+      "partId": "part-001",
+      "partNumber": "FLT-2890",
+      "partDescription": "Oil Filter — Heavy Duty",
+      "locationId": "loc-wh-001",
+      "locationName": "Main Warehouse",
+      "locationType": "WAREHOUSE",
+      "quantityOnHand": 45,
+      "reorderPoint": 20,
+      "stockStatus": "OK",
+      "asOf": "2026-08-11T00:00:00Z"
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 50,
+    "totalElements": 1,
+    "totalPages": 1,
+    "estimated": false
+  },
+  "_links": {
+    "self": "/api/v1/inventory/stock?page=0&size=50",
+    "next": null,
+    "prev": null
+  },
+  "asOf": "2026-08-11T00:00:00Z"
+}

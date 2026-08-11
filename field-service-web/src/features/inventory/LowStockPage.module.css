@@ -1,0 +1,90 @@
+.page {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.asOf {
+  font: var(--type-body-s);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.updating {
+  color: var(--color-text-tertiary);
+}
+
+/* Status indicators — text + icon + shape, no colour-only encoding (BR-32, BR-34) */
+.statusOut {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  /* Shape: diamond outline frame */
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  color: var(--color-status-error);
+  font: var(--type-body-s);
+  font-weight: var(--font-weight-medium);
+}
+
+.statusLow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  /* Shape: no frame, distinct from OUT's border box */
+  padding: 2px 6px;
+  background: var(--color-surface-warning);
+  border-radius: var(--radius-s);
+  color: var(--color-status-warning);
+  font: var(--type-body-s);
+  font-weight: var(--font-weight-medium);
+}
+
+.statusShape {
+  font-size: 0.75em;
+  line-height: 1;
+}
+
+.statusLabel {
+  /* Always present — never colour-only */
+}
+
+.qty {
+  font-variant-numeric: tabular-nums;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.pageBtn {
+  min-height: 44px;
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
+  cursor: pointer;
+  font: var(--type-body-s);
+  color: var(--color-text-primary);
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageBtn:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.pageInfo {
+  font: var(--type-body-s);
+  color: var(--color-text-secondary);
+}

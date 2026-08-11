@@ -1,0 +1,43 @@
+{
+  "data": [
+    {
+      "id": "alert-001",
+      "partId": "part-002",
+      "partNumber": "BRK-1040",
+      "partDescription": "Brake Pad Set — Front",
+      "locationId": "loc-wh-001",
+      "locationName": "Main Warehouse",
+      "quantityOnHand": 8,
+      "reorderPoint": 10,
+      "stockStatus": "LOW",
+      "raisedAt": "2026-08-10T14:30:00Z",
+      "asOf": "2026-08-11T10:00:00Z"
+    },
+    {
+      "id": "alert-002",
+      "partId": "part-003",
+      "partNumber": "HVA-0055",
+      "partDescription": "HVAC Refrigerant R-410A (Can)",
+      "locationId": "loc-van-001",
+      "locationName": "Van 12 — J. Smith",
+      "quantityOnHand": 0,
+      "reorderPoint": 2,
+      "stockStatus": "OUT",
+      "raisedAt": "2026-08-09T08:00:00Z",
+      "asOf": "2026-08-11T10:00:00Z"
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 50,
+    "totalElements": 2,
+    "totalPages": 1,
+    "estimated": false
+  },
+  "_links": {
+    "self": "/api/v1/inventory/alerts?page=0&size=50",
+    "next": null,
+    "prev": null
+  },
+  "asOf": "2026-08-11T10:00:00Z"
+}

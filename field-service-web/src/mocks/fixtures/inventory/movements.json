@@ -1,0 +1,40 @@
+{
+  "data": [
+    {
+      "id": "mv-001",
+      "partId": "part-002",
+      "partNumber": "BRK-1040",
+      "locationId": "loc-wh-001",
+      "movementType": "CONSUMPTION",
+      "quantity": 4,
+      "reasonCode": "CONSUMED_ON_JOB",
+      "workOrderId": "wo-001",
+      "occurredAt": "2026-08-11T09:15:00Z",
+      "performedBy": "J. Smith"
+    },
+    {
+      "id": "mv-002",
+      "partId": "part-002",
+      "partNumber": "BRK-1040",
+      "locationId": "loc-wh-001",
+      "movementType": "RECEIPT",
+      "quantity": 20,
+      "reasonCode": "PO_RECEIPT",
+      "workOrderId": null,
+      "occurredAt": "2026-08-10T08:00:00Z",
+      "performedBy": "System"
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 50,
+    "totalElements": 2,
+    "totalPages": 1,
+    "estimated": false
+  },
+  "_links": {
+    "self": "/api/v1/inventory/movements?page=0&size=50",
+    "next": null,
+    "prev": null
+  }
+}

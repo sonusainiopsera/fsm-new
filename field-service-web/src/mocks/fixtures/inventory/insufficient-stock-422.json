@@ -1,0 +1,15 @@
+{
+  "status": 422,
+  "code": "INSUFFICIENT_STOCK",
+  "message": "One or more lines could not be fulfilled — no lines were applied.",
+  "fieldErrors": [
+    {
+      "field": "part-003",
+      "message": "Requested 5 but only 0 available.",
+      "partNumber": "HVA-0055",
+      "requested": 5,
+      "available": 0
+    }
+  ],
+  "traceId": "test-trace-insufficient"
+}
