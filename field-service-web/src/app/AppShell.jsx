@@ -1,10 +1,11 @@
-import React, { Suspense, useCallback } from 'react';
+import React, { Suspense, useCallback, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar/Sidebar.jsx';
 import { TopBar } from './TopBar/TopBar.jsx';
 import { ErrorBoundary } from './ErrorBoundary.jsx';
 import { LoadingState } from '../components/index.js';
 import { useSidebarCollapse } from './Sidebar/useSidebarCollapse.js';
+import { useAuth } from './AuthContext.js';
 
 import styles from './AppShell.module.css';
 
@@ -22,11 +23,22 @@ import styles from './AppShell.module.css';
  *
  * Route-level code splitting is handled upstream in router.jsx — each surface
  * renders through React.lazy + Suspense before reaching this shell.
+ *
+ * Authentication guard: waits for boot-time refresh to complete, then redirects
+ * to /sign-in if the session could not be resumed. This handles both the initial
+ * page-load case and mid-session token expiry where the refresh cookie is gone.
  */
 export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated, isBootComplete } = useAuth();
   const { collapsed, toggle, isDrawerMode } = useSidebarCollapse();
+
+  useEffect(() => {
+    if (isBootComplete && !isAuthenticated) {
+      navigate('/sign-in', { replace: true });
+    }
+  }, [isAuthenticated, isBootComplete, navigate]);
 
   const handleNavigation = useCallback((path) => {
     navigate(path);

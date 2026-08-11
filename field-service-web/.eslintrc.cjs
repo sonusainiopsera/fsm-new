@@ -49,5 +49,44 @@ module.exports = {
         'no-console': 'off',
       },
     },
+    {
+      // Security control: web storage is forbidden in auth and token-handling
+      // modules so no code path can write the access token to a persistent store.
+      // appearanceMirror.js intentionally uses localStorage for appearance only
+      // and is explicitly excluded.
+      files: [
+        'src/surfaces/auth/**/*.{js,jsx}',
+        'src/api/tokenStore.js',
+        'src/api/http.js',
+        'src/app/AuthContext.js',
+      ],
+      excludedFiles: ['**/__tests__/**', '**/*.test.{js,jsx}'],
+      rules: {
+        'no-restricted-globals': [
+          'error',
+          {
+            name: 'localStorage',
+            message: 'Store tokens in tokenStore (src/api/tokenStore.js), never in web storage.',
+          },
+          {
+            name: 'sessionStorage',
+            message: 'Store tokens in tokenStore (src/api/tokenStore.js), never in web storage.',
+          },
+        ],
+        'no-restricted-properties': [
+          'error',
+          {
+            object: 'window',
+            property: 'localStorage',
+            message: 'Store tokens in tokenStore (src/api/tokenStore.js), never in web storage.',
+          },
+          {
+            object: 'window',
+            property: 'sessionStorage',
+            message: 'Store tokens in tokenStore (src/api/tokenStore.js), never in web storage.',
+          },
+        ],
+      },
+    },
   ],
 };

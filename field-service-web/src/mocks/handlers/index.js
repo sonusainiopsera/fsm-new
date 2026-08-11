@@ -70,16 +70,42 @@ export function seedEtag(path, etag) {
 
 // ---- Default route table ------------------------------------------------
 
+// Mock access token — header.payload.signature where payload decodes to user claims.
+// Payload JSON: {"sub":"user-001","roles":["ADMIN"],"displayName":"Admin User","exp":9999999999}
+const MOCK_ACCESS_TOKEN =
+  'eyJhbGciOiJSUzI1NiJ9.' +
+  'eyJzdWIiOiJ1c2VyLTAwMSIsInJvbGVzIjpbIkFETUlOIl0sImRpc3BsYXlOYW1lIjoiQWRtaW4gVXNlciIsImV4cCI6OTk5OTk5OTk5OX0.' +
+  'fakesig';
+
+// Refreshed token — same payload, different signature marker.
+const MOCK_REFRESHED_TOKEN =
+  'eyJhbGciOiJSUzI1NiJ9.' +
+  'eyJzdWIiOiJ1c2VyLTAwMSIsInJvbGVzIjpbIkFETUlOIl0sImRpc3BsYXlOYW1lIjoiQWRtaW4gVXNlciIsImV4cCI6OTk5OTk5OTk5OX0.' +
+  'refreshedsig';
+
 const DEFAULT_ROUTES = {
-  // Auth
+  // Auth — 200 success
   'POST:/api/v1/auth/login': {
     status: 200,
-    body: { accessToken: 'mock-access-token', expiresIn: 900 },
+    body: {
+      accessToken: MOCK_ACCESS_TOKEN,
+      tokenType: 'Bearer',
+      expiresIn: 900,
+      user: {
+        id: 'user-001',
+        displayName: 'Admin User',
+        roles: ['ADMIN'],
+      },
+    },
     headers: { 'Set-Cookie': 'refresh_token=mock-refresh; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth' },
   },
   'POST:/api/v1/auth/refresh': {
     status: 200,
-    body: { accessToken: 'mock-refreshed-token', expiresIn: 900 },
+    body: { accessToken: MOCK_REFRESHED_TOKEN, expiresIn: 900 },
+  },
+  'POST:/api/v1/auth/logout': {
+    status: 204,
+    body: null,
   },
   'POST:/api/v1/auth/stream-ticket': {
     status: 200,
@@ -137,6 +163,106 @@ function _msgForStatus(status) {
   const m = { 400:'Bad request.',401:'Unauthenticated.',403:'Forbidden.',404:'Not found.',409:'Conflict.',422:'Unprocessable.',429:'Rate limited.',503:'Unavailable.' };
   return m[status] ?? 'Error.';
 }
+
+// ---- Auth-specific fixture helpers ------------------------------------
+
+/**
+ * Returns a contract-accurate 401 INVALID_CREDENTIALS fixture for the login
+ * endpoint (POST /api/v1/auth/login).  The message is intentionally generic
+ * and does not disclose whether the account exists (BR-12).
+ * @returns {{ status: number, body: unknown }}
+ */
+export function loginUnauthorizedFixture() {
+  return {
+    status: 401,
+    body: {
+      status: 401,
+      code: 'INVALID_CREDENTIALS',
+      message: 'Incorrect email or password.',
+      fieldErrors: [],
+      traceId: 'test-trace-id',
+    },
+  };
+}
+
+/**
+ * Returns a contract-accurate 400 VALIDATION_FAILED fixture with field errors.
+ * @param {Array<{ field: string, message: string }>} [fieldErrors]
+ * @returns {{ status: number, body: unknown }}
+ */
+export function loginBadRequestFixture(fieldErrors = [
+  { field: 'email', message: 'must be a valid email address' },
+]) {
+  return {
+    status: 400,
+    body: {
+      status: 400,
+      code: 'VALIDATION_FAILED',
+      message: 'The request contained invalid data.',
+      fieldErrors,
+      traceId: 'test-trace-id',
+    },
+  };
+}
+
+/**
+ * Returns a contract-accurate 429 RATE_LIMITED fixture with an optional
+ * Retry-After header value in seconds.
+ * @param {number} [retryAfterSeconds]
+ * @returns {{ status: number, body: unknown, headers?: Record<string, string> }}
+ */
+export function loginRateLimitedFixture(retryAfterSeconds = 60) {
+  return {
+    status: 429,
+    body: {
+      status: 429,
+      code: 'RATE_LIMITED',
+      message: 'Too many sign-in attempts. Please wait before trying again.',
+      fieldErrors: [],
+      traceId: 'test-trace-id',
+    },
+    headers: { 'Retry-After': String(retryAfterSeconds) },
+  };
+}
+
+/**
+ * Returns a contract-accurate 503 SERVICE_UNAVAILABLE fixture for the login
+ * endpoint, e.g. when the auth backend is unreachable.
+ * @returns {{ status: number, body: unknown }}
+ */
+export function loginServiceUnavailableFixture() {
+  return {
+    status: 503,
+    body: {
+      status: 503,
+      code: 'SERVICE_UNAVAILABLE',
+      message: 'The authentication service is temporarily unavailable. Please try again shortly.',
+      fieldErrors: [],
+      traceId: 'test-trace-id',
+    },
+  };
+}
+
+/**
+ * Returns a 401 REAUTHENTICATION_REQUIRED fixture for the refresh endpoint,
+ * indicating the refresh cookie has expired or was revoked.
+ * @returns {{ status: number, body: unknown }}
+ */
+export function refreshExpiredFixture() {
+  return {
+    status: 401,
+    body: {
+      status: 401,
+      code: 'REAUTHENTICATION_REQUIRED',
+      message: 'Reauthentication required.',
+      fieldErrors: [],
+      traceId: 'test-trace-id',
+    },
+  };
+}
+
+/** The mock access token used in success responses. */
+export { MOCK_ACCESS_TOKEN, MOCK_REFRESHED_TOKEN };
 
 // ---- Multi-page paginated fixture --------------------------------------
 

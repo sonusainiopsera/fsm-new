@@ -117,6 +117,16 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    // Forgot-password flow is deferred — customer identity model not yet ratified (WO-116).
+    path: '/forgot-password',
+    element: (
+      <ErrorState
+        title="Password reset unavailable"
+        description="Self-service password reset is coming soon. Please contact your administrator."
+      />
+    ),
+  },
+  {
     path: '*',
     element: <NotFound />,
   },
