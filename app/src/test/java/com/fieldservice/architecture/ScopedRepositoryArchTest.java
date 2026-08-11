@@ -60,7 +60,10 @@ class ScopedRepositoryArchTest {
                     // scope-resolution mechanism itself (not a row-scoped query target);
                     // PortalInvitationRepository is accessed only by InvitationService under
                     // method-security; row scope is enforced via CustomerAccessScope predicate
-                    + "PortalAccountUserRepository|PortalInvitationRepository";
+                    + "PortalAccountUserRepository|PortalInvitationRepository|"
+                    // WO-189: retention policy and purge run tables are compliance metadata with
+                    // no per-user row scope; access controlled at API layer by PRIVACY_ADMIN/ADMIN
+                    + "RetentionPolicyRepository|PurgeRunRepository";
 
     /**
      * Production rule: domain JPA repositories that are not in the non-scoped allow-list

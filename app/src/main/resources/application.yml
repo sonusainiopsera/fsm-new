@@ -135,6 +135,19 @@ app:
   workforce:
     position-retention-days: ${APP_WORKFORCE_POSITION_RETENTION_DAYS:90}
 
+  privacy:
+    purge:
+      # Master kill-switch: must be explicitly enabled after Q7 DPO ratification (AC-7)
+      execution-enabled: ${PRIVACY_PURGE_EXECUTION_ENABLED:false}
+      # Number of eligible IDs retrieved and disposed per batch
+      batch-size: ${PRIVACY_PURGE_BATCH_SIZE:100}
+      # Maximum wall-clock seconds per sweep run
+      time-budget-seconds: ${PRIVACY_PURGE_TIME_BUDGET_SECONDS:300}
+      # Spring cron expression for sweep schedule (worker profile only)
+      cron: ${PRIVACY_PURGE_CRON:0 0 2 * * *}
+      # Time zone for cut-off instant computation
+      zone-id: ${PRIVACY_PURGE_ZONE_ID:UTC}
+
   idempotency:
     # How long an IN_PROGRESS record holds its lease before it can be reclaimed (crash recovery)
     lease-duration: ${APP_IDEMPOTENCY_LEASE_DURATION:PT30S}
