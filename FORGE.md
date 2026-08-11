@@ -336,3 +336,10 @@
 - **Files:** 15 (+1598/-2)
 - **Duration:** 1315ss
 - **Approach:** Implemented first-time fix rate quality metrics by adding fault_code/fault_category columns to work_order, a new analytics_closure_projection table for cohort tracking, and a repeat_visit_link table for repeat-visit detection. Core domain components (FaultKeyDeriver, RepeatVisitLinker, CohortMaturityResolver) are placed in analytics.internal.quality subpackage as public classes. Components requiring access to package-private MetricDebounceRegistry (FirstTimeFixCalculator, QualityMetricKeys, QualityKpiOutboxConsumer, MaturationSweepJob) are in analytics.internal. The OutboxDrainService single-handler constraint is respected by routing WorkOrderStateChanged events through the existing KpiEventHandlers.WorkOrderStateChangedHandler which also dispatches to QualityKpiOutboxConsumer. KpiProjectionService is extended with FirstTimeFixCalculator injection and quality metric cases in runAggregation(). The FTF_PROVISIONAL metric is stored with segment_key=PROVISIONAL per BR-30.
+
+## WO-165: User Story: WO-165 - Backlog and workload balance guardrail projections
+- **Status:** completed
+- **Commit:** `0712c8c`
+- **Files:** 12 (+1082/-2)
+- **Duration:** 790ss
+- **Approach:** Extended the analytics KPI substrate (WO-161) with three new metrics: backlog.open.count (total open work orders segmented by state/priority/hold_reason), backlog.on_hold.count, and workforce.workload_balance.cv (population coefficient of variation of assigned hours per active technician). Added a kpi_trend_point table for immutable daily backlog snapshots. Open states are derived at class-init time via EnumSet.complementOf(TERMINAL_STATES) so any future lifecycle state addition automatically adjusts counts. The CV computation uses population stddev (divides by N, not N-1) as the entire active team is measured, not a sample. NOT_MEANINGFUL is returned as a typed enum reason (not null or magic number) when N < 3 or mean = 0. Trend points use ON CONFLICT DO NOTHING so the first write of a given calendar day is immutable.

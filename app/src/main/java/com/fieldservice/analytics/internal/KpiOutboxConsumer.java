@@ -42,11 +42,15 @@ class KpiOutboxConsumer {
 
     private static final Map<String, List<String>> EVENT_TO_METRICS = Map.of(
             WorkOrderCreatedPayload.EVENT_TYPE, List.of(
-                    KpiAggregationQueries.METRIC_WO_BACKLOG_COUNT),
+                    KpiAggregationQueries.METRIC_WO_BACKLOG_COUNT,
+                    BacklogMetricKeys.BACKLOG_OPEN_COUNT),
             WorkOrderStateChangedPayload.EVENT_TYPE, List.of(
                     KpiAggregationQueries.METRIC_WO_BACKLOG_COUNT,
                     KpiAggregationQueries.METRIC_WO_COMPLETION_RATE_7D,
-                    KpiAggregationQueries.METRIC_WO_SLA_COMPLIANCE_7D),
+                    KpiAggregationQueries.METRIC_WO_SLA_COMPLIANCE_7D,
+                    BacklogMetricKeys.BACKLOG_OPEN_COUNT,
+                    BacklogMetricKeys.BACKLOG_ON_HOLD_COUNT,
+                    BacklogMetricKeys.WORKLOAD_BALANCE_CV),
             PartsConsumedPayload.EVENT_TYPE, List.of(
                     KpiAggregationQueries.METRIC_WO_COMPLETION_RATE_7D)
     );

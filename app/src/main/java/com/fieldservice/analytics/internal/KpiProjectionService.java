@@ -44,6 +44,9 @@ class KpiProjectionService implements KpiProjectionQuery {
     private final KpiProjectionRepository repository;
     private final KpiAggregationQueries aggregationQueries;
     private final FirstTimeFixCalculator ftfCalculator;
+    private final BacklogCalculator backlogCalculator;
+    private final WorkloadBalanceCalculator workloadCalculator;
+    private final TrendPointWriter trendPointWriter;
     private final DegradationPolicy degradationPolicy;
     private final AnalyticsMetrics metrics;
     private final Clock clock;
@@ -55,6 +58,9 @@ class KpiProjectionService implements KpiProjectionQuery {
             KpiProjectionRepository repository,
             KpiAggregationQueries aggregationQueries,
             FirstTimeFixCalculator ftfCalculator,
+            BacklogCalculator backlogCalculator,
+            WorkloadBalanceCalculator workloadCalculator,
+            TrendPointWriter trendPointWriter,
             DegradationPolicy degradationPolicy,
             AnalyticsMetrics metrics,
             Clock clock,
@@ -63,6 +69,9 @@ class KpiProjectionService implements KpiProjectionQuery {
         this.repository = repository;
         this.aggregationQueries = aggregationQueries;
         this.ftfCalculator = ftfCalculator;
+        this.backlogCalculator = backlogCalculator;
+        this.workloadCalculator = workloadCalculator;
+        this.trendPointWriter = trendPointWriter;
         this.degradationPolicy = degradationPolicy;
         this.metrics = metrics;
         this.clock = clock;
@@ -197,11 +206,50 @@ class KpiProjectionService implements KpiProjectionQuery {
             case QualityMetricKeys.FTF_PROVISIONAL                  -> ftfCalculator.queryProvisionalRate();
             case QualityMetricKeys.REPEAT_VISIT_COUNT               -> ftfCalculator.queryRepeatVisitCount();
             case QualityMetricKeys.UNCLASSIFIABLE_COUNT             -> ftfCalculator.queryUnclassifiableCount();
+            case BacklogMetricKeys.BACKLOG_OPEN_COUNT               -> runBacklogOpenCount();
+            case BacklogMetricKeys.BACKLOG_ON_HOLD_COUNT            -> runBacklogOnHoldCount();
+            case BacklogMetricKeys.WORKLOAD_BALANCE_CV              -> runWorkloadBalanceCv();
             default -> {
                 log.warn("analytics.recompute.unknown_metric: metricKey={}", metricKey);
                 yield null;
             }
         };
+    }
+
+    @Nullable
+    private KpiAggregationQueries.AggregateResult runBacklogOpenCount() {
+        KpiAggregationQueries.AggregateResult result = backlogCalculator.queryOpenBacklogTotal();
+        if (result != null) {
+            trendPointWriter.writeTodayIfAbsent(
+                    BacklogMetricKeys.BACKLOG_OPEN_COUNT,
+                    KpiAggregationQueries.SEGMENT_ALL,
+                    result.value(),
+                    result.sampleCount());
+        }
+        return result;
+    }
+
+    @Nullable
+    private KpiAggregationQueries.AggregateResult runBacklogOnHoldCount() {
+        KpiAggregationQueries.AggregateResult result = backlogCalculator.queryOnHoldCount();
+        if (result != null) {
+            trendPointWriter.writeTodayIfAbsent(
+                    BacklogMetricKeys.BACKLOG_ON_HOLD_COUNT,
+                    KpiAggregationQueries.SEGMENT_ALL,
+                    result.value(),
+                    result.sampleCount());
+        }
+        return result;
+    }
+
+    @Nullable
+    private KpiAggregationQueries.AggregateResult runWorkloadBalanceCv() {
+        WorkloadBalanceCalculator.CvResult cvResult = workloadCalculator.computeCv();
+        if (!cvResult.meaningful()) {
+            log.info("workload.cv.not_meaningful: reason={}", cvResult.reason());
+            return null;
+        }
+        return workloadCalculator.toAggregateResult(cvResult);
     }
 
     private String segmentFor(String metricKey) {
