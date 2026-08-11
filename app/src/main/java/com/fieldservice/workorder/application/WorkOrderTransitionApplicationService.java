@@ -11,6 +11,7 @@ import com.fieldservice.platform.security.ScopedAccessDeniedException;
 import com.fieldservice.platform.util.UuidV7;
 import com.fieldservice.workorder.domain.WorkOrder;
 import com.fieldservice.workorder.domain.WorkOrderStatus;
+import com.fieldservice.workorder.lifecycle.GuardContext;
 import com.fieldservice.workorder.lifecycle.GuardResult;
 import com.fieldservice.workorder.lifecycle.IllegalWorkOrderTransitionException;
 import com.fieldservice.workorder.lifecycle.TransitionDescriptor;
@@ -22,6 +23,7 @@ import com.fieldservice.workorder.lifecycle.WorkOrderVersionConflictException;
 import com.fieldservice.workorder.repository.WorkOrderRepository;
 import com.fieldservice.workorder.web.TransitionRequest;
 import com.fieldservice.workorder.web.TransitionResponse;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +80,20 @@ public class WorkOrderTransitionApplicationService {
         this.entityManager = entityManager;
     }
 
+    @PostConstruct
+    void validateGuardRegistry() {
+        Set<String> registeredIds = guards.stream()
+                .map(TransitionGuard::guardId)
+                .collect(Collectors.toUnmodifiableSet());
+        transitionService.allReferencedGuardIds().forEach(id -> {
+            if (!registeredIds.contains(id)) {
+                throw new IllegalStateException(
+                        "Transition table references guard '" + id + "' but no bean implements it. " +
+                        "Application startup refused.");
+            }
+        });
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN', 'DISPATCHER', 'MANAGER', 'TECHNICIAN')")
     @Transactional
     public TransitionResponse apply(UUID workOrderId,
@@ -125,11 +141,15 @@ public class WorkOrderTransitionApplicationService {
         }
 
         // 5. Run ordered guards (fail closed — any exception is treated as refusal)
-        runGuards(descriptor.guardIds(), fromState, request.event(), request, workOrderId, scope.userId());
+        runGuards(descriptor.guardIds(), fromState, request.event(), request, workOrderId, scope.userId(), occurredAt);
 
         // 6. Apply state transition
         WorkOrderStatus newStatus = WorkOrderStatus.valueOf(descriptor.toState().name());
-        workOrder.applyStateTransition(newStatus);
+        if (request.event() == WorkOrderEvent.ASSIGN && request.technicianId() != null) {
+            workOrder.assignTechnician(request.technicianId());
+        } else {
+            workOrder.applyStateTransition(newStatus);
+        }
         WorkOrderState toState = descriptor.toState();
 
         // 7. Persist and flush to surface any concurrent-modification conflict within this transaction
@@ -174,7 +194,16 @@ public class WorkOrderTransitionApplicationService {
                             WorkOrderEvent event,
                             TransitionRequest request,
                             UUID workOrderId,
-                            UUID actorId) {
+                            UUID actorId,
+                            Instant transitionInstant) {
+        if (guardIds.isEmpty()) return;
+
+        GuardContext ctx = new GuardContext(
+                workOrderId,
+                request.technicianId(),
+                request.holdReasonCode(),
+                transitionInstant);
+
         for (String guardId : guardIds) {
             TransitionGuard guard = guards.stream()
                     .filter(g -> guardId.equals(g.guardId()))
@@ -183,7 +212,7 @@ public class WorkOrderTransitionApplicationService {
 
             GuardResult result;
             try {
-                result = guard.evaluate(fromState, event, request);
+                result = guard.evaluate(fromState, event, ctx);
             } catch (BusinessGuardException e) {
                 throw e;
             } catch (Exception e) {
@@ -195,7 +224,7 @@ public class WorkOrderTransitionApplicationService {
             if (result instanceof GuardResult.Refused refused) {
                 log.info("guard_refused work_order_id={} guard_id={} code={} actor={}",
                         workOrderId, guardId, refused.code(), actorId);
-                throw new BusinessGuardException(refused.message());
+                throw new BusinessGuardException(refused.code(), refused.message());
             }
         }
     }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Public lifecycle port. All callers must go through this service; no other class
@@ -53,5 +54,12 @@ public class WorkOrderTransitionService {
 
     public Optional<TransitionDescriptor> resolve(WorkOrderState fromState, WorkOrderEvent event) {
         return WorkOrderTransitionTable.resolve(fromState, event);
+    }
+
+    /** Returns every guard identifier referenced in the transition table — for startup validation. */
+    public Set<String> allReferencedGuardIds() {
+        return WorkOrderTransitionTable.rawTable().values().stream()
+                .flatMap(d -> d.guardIds().stream())
+                .collect(Collectors.toUnmodifiableSet());
     }
 }

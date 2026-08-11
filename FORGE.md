@@ -189,3 +189,10 @@
 - **Files:** 9 (+1139/-1)
 - **Duration:** 1232ss
 - **Approach:** The stream ticket lifecycle is implemented as four new classes plus modifications to AuthController and SecurityConfiguration. StreamTicketStore (@Component @ConditionalOnBean(StringRedisTemplate.class)) stores a Redis HASH keyed on SHA-256(ticketValue) with a 60-second TTL; the plaintext ticket never touches Redis. Atomic single-use redemption uses a Lua script (HGETALL + DEL in one round-trip) via DefaultRedisScript<List>. StreamTicketService injects optional beans via List<T> pattern (same as JtiDenylist in JwtDecoderConfig), generates 256-bit SecureRandom tickets (base64url, 43 chars), validates IP binding, JTI denylist membership, and account active state at redemption; all failures collapse to StreamTicketRedeemException (generic 401 contract). StreamTicketAuthFilter (NOT @Component) extends OncePerRequestFilter and is created inline inside streamFilterChain() to avoid Spring Boot auto-registration. SecurityConfiguration gains @Order(1) streamFilterChain scoped to /api/v1/streams/**; the existing JWT chain moves to @Order(2). AuthController adds POST /api/v1/auth/stream-ticket with @PreAuthorize('isAuthenticated()'). application.yml configures server.tomcat.accesslog.pattern using %U (URI without query string) to prevent ticket leakage in access logs. The log-capture integration test uses a Logback ListAppender attached to the root logger to assert the ticket value is absent from every log line across the issue + redeem + replay flow.
+
+## WO-125: User Story: WO-125 - Business precondition guards for lifecycle transitions
+- **Status:** completed
+- **Commit:** `094acc7`
+- **Files:** 21 (+1184/-15)
+- **Duration:** 1380ss
+- **Approach:** N/A

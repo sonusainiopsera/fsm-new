@@ -49,11 +49,14 @@ public class WorkOrderExceptionHandler {
     @ExceptionHandler(BusinessGuardException.class)
     public ResponseEntity<ApiErrorResponse> handleBusinessGuard(BusinessGuardException ex) {
         String traceId = resolveTraceId();
+        List<FieldError> details = ex.getGuardSubCode() != null
+                ? List.of(new FieldError("guardSubCode", ex.getGuardSubCode()))
+                : List.of();
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .header("X-Trace-Id", traceId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiErrorResponse.of(ErrorCode.WORK_ORDER_GUARD_REFUSED,
-                        ex.getMessage(), traceId));
+                .body(ApiErrorResponse.withFieldErrors(ErrorCode.WORK_ORDER_GUARD_REFUSED,
+                        ex.getMessage(), details, traceId));
     }
 
     @ExceptionHandler(WorkOrderVersionConflictException.class)

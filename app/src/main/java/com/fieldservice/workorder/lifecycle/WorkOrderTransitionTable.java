@@ -22,7 +22,8 @@ final class WorkOrderTransitionTable {
             Collections.unmodifiableMap(Map.ofEntries(
                     // ---- NEW -------------------------------------------------------
                     entry(NEW, ASSIGN, ASSIGNED,
-                            Set.of("DISPATCHER", "ADMIN"), List.of()),
+                            Set.of("DISPATCHER", "ADMIN"),
+                            List.of("certification.current")),
                     entry(NEW, CANCEL, CANCELLED,
                             Set.of("DISPATCHER", "ADMIN", "MANAGER"), List.of()),
 
@@ -42,9 +43,11 @@ final class WorkOrderTransitionTable {
 
                     // ---- IN_PROGRESS -----------------------------------------------
                     entry(IN_PROGRESS, HOLD, ON_HOLD,
-                            Set.of("TECHNICIAN", "DISPATCHER", "ADMIN"), List.of()),
+                            Set.of("TECHNICIAN", "DISPATCHER", "ADMIN"),
+                            List.of("hold.reason.required")),
                     entry(IN_PROGRESS, COMPLETE, COMPLETED,
-                            Set.of("TECHNICIAN", "DISPATCHER", "ADMIN"), List.of()),
+                            Set.of("TECHNICIAN", "DISPATCHER", "ADMIN"),
+                            List.of("labour.time.recorded")),
                     entry(IN_PROGRESS, CANCEL, CANCELLED,
                             Set.of("DISPATCHER", "ADMIN", "MANAGER"), List.of()),
 
@@ -56,7 +59,8 @@ final class WorkOrderTransitionTable {
 
                     // ---- COMPLETED -------------------------------------------------
                     entry(COMPLETED, CLOSE, CLOSED,
-                            Set.of("DISPATCHER", "ADMIN", "MANAGER"), List.of())
+                            Set.of("DISPATCHER", "ADMIN", "MANAGER"),
+                            List.of("parts.reconciled"))
                     // CLOSED and CANCELLED are terminal — zero outbound entries
             ));
 
