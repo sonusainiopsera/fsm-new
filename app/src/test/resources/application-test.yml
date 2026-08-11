@@ -33,6 +33,11 @@ spring:
 app:
   api:
     public-base-url: http://localhost:8080
+  auth:
+    issuer: https://auth.fieldservice.local
+    audience: field-service-api
+    access-token-ttl: PT15M
+    refresh-token-ttl: P7D
   pagination:
     cursor-hmac-key: test-hmac-key-for-unit-tests
     offset-threshold: 20

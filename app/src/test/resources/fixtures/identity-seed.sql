@@ -7,14 +7,17 @@
 -- Loaded by IdentitySchemaIT; not applied automatically to all test contexts.
 
 -- ---- Users -------------------------------------------------------------------
-INSERT INTO app_user (id, email, display_name, active, created_at, version) VALUES
-    ('11111111-1111-7000-8000-000000000001', 'admin@example.local',      'Admin User',      TRUE,  NOW(), 0),
-    ('11111111-1111-7000-8000-000000000002', 'dispatcher@example.local', 'Dispatcher User', TRUE,  NOW(), 0),
-    ('11111111-1111-7000-8000-000000000003', 'technician@example.local', 'Technician User', TRUE,  NOW(), 0),
-    ('11111111-1111-7000-8000-000000000004', 'manager@example.local',    'Manager User',    TRUE,  NOW(), 0),
-    ('11111111-1111-7000-8000-000000000005', 'customer@example.local',   'Customer User',   TRUE,  NOW(), 0),
-    ('11111111-1111-7000-8000-000000000006', 'inactive@example.local',   'Inactive User',   FALSE, NOW(), 0),
-    ('11111111-1111-7000-8000-000000000007', 'grantless@example.local',  'Grantless User',  TRUE,  NOW(), 0)
+-- password_hash values are BCrypt cost-12 hashes of 'TestPassword123!'
+-- Pre-computed so the test-suite does not re-encode at cost 12 on every run.
+-- Hash: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC
+INSERT INTO app_user (id, email, display_name, password_hash, active, created_at, version) VALUES
+    ('11111111-1111-7000-8000-000000000001', 'admin@example.local',      'Admin User',      '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC', TRUE,  NOW(), 0),
+    ('11111111-1111-7000-8000-000000000002', 'dispatcher@example.local', 'Dispatcher User', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC', TRUE,  NOW(), 0),
+    ('11111111-1111-7000-8000-000000000003', 'technician@example.local', 'Technician User', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC', TRUE,  NOW(), 0),
+    ('11111111-1111-7000-8000-000000000004', 'manager@example.local',    'Manager User',    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC', TRUE,  NOW(), 0),
+    ('11111111-1111-7000-8000-000000000005', 'customer@example.local',   'Customer User',   '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC', TRUE,  NOW(), 0),
+    ('11111111-1111-7000-8000-000000000006', 'inactive@example.local',   'Inactive User',   '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC', FALSE, NOW(), 0),
+    ('11111111-1111-7000-8000-000000000007', 'grantless@example.local',  'Grantless User',  '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC', TRUE,  NOW(), 0)
 ON CONFLICT (id) DO NOTHING;
 
 -- ---- Role grants (five active users get one grant each; inactive user has a grant;

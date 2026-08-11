@@ -58,6 +58,7 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/api-docs", "/api-docs/**").permitAll()
+                .requestMatchers("/api/v1/auth/login").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2

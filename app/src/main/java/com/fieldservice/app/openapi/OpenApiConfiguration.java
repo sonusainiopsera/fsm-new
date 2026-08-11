@@ -36,7 +36,7 @@ public class OpenApiConfiguration {
      * Health check is served by Actuator and does not appear in the API doc.
      * Future login/refresh operations should be added here.
      */
-    public static final Set<String> PUBLIC_OPERATION_IDS = Set.of();
+    public static final Set<String> PUBLIC_OPERATION_IDS = Set.of("login");
 
     static final String SECURITY_SCHEME_NAME = "bearerAuth";
     static final String IDEMPOTENCY_KEY_PARAM = "IdempotencyKey";

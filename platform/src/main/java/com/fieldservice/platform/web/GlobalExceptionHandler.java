@@ -14,6 +14,8 @@ import com.fieldservice.platform.api.exception.InvalidSortException;
 import com.fieldservice.platform.api.exception.NotFoundException;
 import com.fieldservice.platform.api.exception.AiCapExceededException;
 import com.fieldservice.platform.api.exception.AiUnavailableException;
+import com.fieldservice.platform.api.exception.AuthDependencyUnavailableException;
+import com.fieldservice.platform.api.exception.InvalidCredentialsException;
 import com.fieldservice.platform.api.exception.PayloadTooLargeException;
 import com.fieldservice.platform.api.exception.ProviderDegradedException;
 import com.fieldservice.platform.api.exception.RateLimitedException;
@@ -134,6 +136,29 @@ public class GlobalExceptionHandler {
                         "Pagination cursor is invalid.",
                         List.of(new FieldError("cursor", ex.getMessage())),
                         traceId));
+    }
+
+    // ---- 401 Invalid Credentials (login failures) ----------------------------
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
+        String traceId = resolveTraceId();
+        log.warn("invalid_credentials trace_id={}", traceId);
+        return errorResponse(HttpStatus.UNAUTHORIZED,
+                ApiErrorResponse.withFieldErrors(ErrorCode.INVALID_CREDENTIALS,
+                        "Invalid credentials.", List.of(), traceId));
+    }
+
+    // ---- 503 Auth Dependency Unavailable -------------------------------------
+
+    @ExceptionHandler(AuthDependencyUnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthDependencyUnavailable(
+            AuthDependencyUnavailableException ex) {
+        String traceId = resolveTraceId();
+        log.error("auth_dependency_unavailable trace_id={}", traceId, ex);
+        return errorResponse(HttpStatus.SERVICE_UNAVAILABLE,
+                ApiErrorResponse.of(ErrorCode.AUTH_DEPENDENCY_UNAVAILABLE,
+                        "Authentication service is temporarily unavailable. Please retry later.", traceId));
     }
 
     // ---- 401 Unauthenticated ---------------------------------------------------
