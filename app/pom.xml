@@ -23,6 +23,10 @@
             <artifactId>domain</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>aigateway</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
@@ -62,6 +66,16 @@
         <dependency>
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>redis</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

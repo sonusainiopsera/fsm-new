@@ -69,6 +69,34 @@ fieldservice:
     purge-batch-size: 1000
     require-key: false
 
+ai:
+  copilot:
+    enabled: false
+    daily-cap-per-user: 100
+  provider:
+    endpoint: ${AI_PROVIDER_ENDPOINT:}
+    api-key-env: AI_PROVIDER_API_KEY
+    allowed-hosts: ${AI_PROVIDER_ALLOWED_HOSTS:}
+    model: ${AI_PROVIDER_MODEL:gpt-4o}
+    max-tokens: 2000
+    connect-timeout: 2s
+    read-timeout: 10s
+  resilience:
+    failure-rate-threshold: 50
+    sliding-window-size: 20
+    wait-duration-open: 30s
+    half-open-calls: 3
+    max-concurrent-calls: 16
+    time-limit-duration: 10s
+  metrics:
+    token-cost-per-thousand: 0.00003
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
 logging:
   level:
     com.fieldservice: INFO

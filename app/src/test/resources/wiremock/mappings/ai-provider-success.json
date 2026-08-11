@@ -1,0 +1,28 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/v1/chat/completions.*",
+    "headers": {
+      "Authorization": { "matches": "Bearer .*" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "id": "chatcmpl-test-success",
+      "model": "gpt-4o",
+      "choices": [
+        {
+          "message": { "role": "assistant", "content": "The technician should check the pressure gauge first." },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 10,
+        "completion_tokens": 12,
+        "total_tokens": 22
+      }
+    }
+  }
+}

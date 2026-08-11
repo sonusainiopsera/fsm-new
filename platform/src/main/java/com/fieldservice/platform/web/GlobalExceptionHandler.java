@@ -127,6 +127,29 @@ public class GlobalExceptionHandler {
                 ErrorResponse.of(ErrorCode.PROVIDER_DEGRADED, ex.getMessage(), traceId()));
     }
 
+    @ExceptionHandler(AiUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleAiUnavailable(AiUnavailableException ex, WebRequest req) {
+        // Log the internal cause without propagating it to the response
+        log.error("AI provider unavailable [traceId={}]: {}", traceId(), ex.getMessage(),
+                ex.getCause() != null ? ex.getCause() : ex);
+        return response(HttpStatus.SERVICE_UNAVAILABLE,
+                ErrorResponse.of(ErrorCode.AI_PROVIDER_UNAVAILABLE,
+                        "AI assistance is temporarily unavailable. You can continue without it.",
+                        traceId()));
+    }
+
+    @ExceptionHandler(AiDailyCapExceededException.class)
+    public ResponseEntity<ErrorResponse> handleAiDailyCap(AiDailyCapExceededException ex, WebRequest req) {
+        log.info("AI daily cap exceeded [traceId={}]", traceId());
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()));
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .headers(headers)
+                .body(ErrorResponse.of(ErrorCode.AI_DAILY_LIMIT_REACHED,
+                        "Daily AI interaction limit reached.",
+                        traceId()));
+    }
+
     // ── Pagination exceptions ─────────────────────────────────────────────
 
     @ExceptionHandler(InvalidSortException.class)
