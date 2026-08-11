@@ -31,6 +31,8 @@ spring:
           jwk-set-uri:
 
 app:
+  api:
+    public-base-url: http://localhost:8080
   pagination:
     cursor-hmac-key: test-hmac-key-for-unit-tests
     offset-threshold: 20
@@ -61,6 +63,13 @@ spring:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    enabled: false
 
 logging:
   level:

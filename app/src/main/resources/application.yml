@@ -61,6 +61,8 @@ app:
     purge-interval-ms: 900000
   outbox:
     max-payload-bytes: 65536
+  api:
+    public-base-url: ${APP_API_PUBLIC_BASE_URL:http://localhost:8080}
 
 ai:
   copilot:
@@ -86,6 +88,14 @@ ai:
   metrics:
     cost-per-1k-tokens: 0.002
 
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    enabled: false
+  show-actuator: false
+
 management:
   endpoints:
     web:
@@ -102,3 +112,13 @@ server:
     include-binding-errors: never
     include-stacktrace: never
     include-exception: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+springdoc:
+  swagger-ui:
+    enabled: true

@@ -98,6 +98,13 @@
       <version>0.10.2</version>
       <scope>test</scope>
     </dependency>
+    <!-- OpenAPI contract publication -->
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.6.0</version>
+    </dependency>
+
     <!-- Resilience4j: circuit breaker, bulkhead, retry, time limiter -->
     <dependency>
       <groupId>io.github.resilience4j</groupId>
@@ -137,6 +144,32 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+
+      <!-- Publish generated OpenAPI spec as a named build artifact -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-openapi-spec</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/openapi</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/test/resources</directory>
+                  <includes>
+                    <include>openapi-snapshot.json</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
