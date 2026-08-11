@@ -280,3 +280,10 @@
 - **Files:** 28 (+1509/-4)
 - **Duration:** 1026ss
 - **Approach:** N/A
+
+## WO-195: User Story: WO-195 - Resilient notification delivery port with degraded in-app fallback
+- **Status:** completed
+- **Commit:** `1f56c89`
+- **Files:** 29 (+1753/-0)
+- **Duration:** 1058ss
+- **Approach:** N/A
