@@ -411,6 +411,90 @@ Current frozen violations (as of 2026-08-11, backlog BL-2026-001):
 
 ---
 
+## API Contract Conformance Suite (WO-204)
+
+The `com.fieldservice.contract` package contains a reusable suite that validates the live
+HTTP contract for all P0 endpoint groups (auth, work orders, transitions, parts consumption).
+
+### Overview
+
+| Class | P0 Group | Key Coverage |
+|-------|----------|-------------|
+| `AuthContractIT` | Auth | Happy-path login shape, 401 non-disclosure, 400 field errors, stream-ticket reachability |
+| `WorkOrderContractIT` | Work Orders | Empty/populated PagedResponse envelope, final-page no-next-link, size clamping, pagination stability under concurrent mutations |
+| `TransitionContractIT` | Transitions | Full response shape, 409 illegal-transition envelope, 409 version-conflict, idempotent replay with exactly-one Envers revision, concurrent 409 |
+| `PartsConsumptionContractIT` | Parts | Full response shape, 422 insufficient-stock envelope, balance unchanged on refusal, idempotent replay with exactly-one `stock_ledger` row, idempotency key persisted |
+| `OpenApiConformanceTest` | All P0 | Runtime response payloads validated against live `/api-docs` schema: required fields present, field types match declaration, all P0 operation paths present |
+
+### Reusable assertion helpers — `ApiAssertions`
+
+`com.fieldservice.contract.support.ApiAssertions` provides static helpers shared across
+all contract tests. Import and use them directly:
+
+```java
+import static com.fieldservice.contract.support.ApiAssertions.*;
+
+// Collection envelope (data, page, links)
+assertPageEnvelope(result.getResponse());
+assertPageMeta(result.getResponse(), 0, 10, 100L);
+assertNoNextLink(result.getResponse());
+assertEmptyCollection(result.getResponse());
+
+// Error envelope (code, message, fieldErrors, traceId)
+assertErrorShape(result.getResponse(), "VALIDATION_FAILED");
+assertErrorShape(result.getResponse(), "VALIDATION_FAILED", "email", "password");
+
+// Security — no internal class names, stack traces, or SQL fragments
+assertNoInternals(result.getResponse());
+assertNoInternals(mvcResult);
+```
+
+### Idempotency proofs
+
+AC7 is proven with side-effect counting, not just HTTP status:
+
+| Endpoint | Side-effect table | Assertion |
+|----------|-------------------|-----------|
+| `POST /work-orders/{id}/transitions` | `work_order_aud` (Envers) | `COUNT(*) = 1` after replay |
+| `POST /work-orders/{id}/transitions` | `work_order.version` | `version = 1` after replay |
+| `POST /work-orders/{id}/parts` | `stock_ledger` | `COUNT(*) = 1` after replay |
+| `POST /work-orders/{id}/parts` | `stock_balance.quantity_on_hand` | exact expected decrement after replay |
+
+### Pagination stability proof (AC5)
+
+`WorkOrderContractIT.pagination_stability_under_concurrent_mutations` inserts 20 work
+orders, starts a background `ExecutorService` that inserts 5 more and updates 2 existing
+rows during page iteration, then asserts:
+
+- No duplicate IDs appear across any page
+- Every original ID appears exactly once in the aggregated result set
+
+### Running the conformance suite
+
+```bash
+# Full conformance suite (requires Docker for Testcontainers)
+./mvnw verify -pl app -Dgroups=integration -Dtest="*ContractIT,OpenApiConformanceTest"
+
+# Single class
+./mvnw verify -pl app -Dit.test=TransitionContractIT
+./mvnw test  -pl app -Dtest=OpenApiConformanceTest   # H2 — no Docker needed
+
+# OpenAPI conformance only (no Docker)
+./mvnw test -pl app -Dtest=OpenApiConformanceTest
+```
+
+### Test isolation
+
+Each `*ContractIT` class owns an isolated PostgreSQL 16 Testcontainers database
+(`@Container static PostgreSQLContainer<?>`) with a unique `withDatabaseName(...)` value
+so classes can run in parallel without sharing state. `@BeforeEach` inserts fresh rows
+with random UUIDs; `@AfterEach` deletes them without truncating the whole schema.
+
+`OpenApiConformanceTest` and `AuthContractIT` use the H2 in-memory test profile
+(`@ActiveProfiles("test")`) — no Docker required.
+
+---
+
 ## Access Control Test Matrix
 
 The `com.fieldservice.app.security` package contains a declarative, exhaustive test
