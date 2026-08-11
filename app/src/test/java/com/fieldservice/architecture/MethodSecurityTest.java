@@ -61,7 +61,8 @@ class MethodSecurityTest {
                             "com.fieldservice.workorder..",
                             "com.fieldservice.audit..",
                             "com.fieldservice.inventory.application..",
-                            "com.fieldservice.identity.application.UserPreferencesService"
+                            "com.fieldservice.identity.application.UserPreferencesService",
+                            "com.fieldservice.privacy.internal.."
                     )
                     .should().beAnnotatedWith(PreAuthorize.class)
                     .orShould().beAnnotatedWith(PostAuthorize.class)

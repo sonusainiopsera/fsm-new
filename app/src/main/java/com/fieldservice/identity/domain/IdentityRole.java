@@ -14,5 +14,7 @@ public enum IdentityRole {
     DISPATCHER,
     TECHNICIAN,
     MANAGER,
-    CUSTOMER
+    CUSTOMER,
+    /** Restricted to the Data Protection Officer; grants access to the classification admin API. */
+    PRIVACY_ADMIN
 }

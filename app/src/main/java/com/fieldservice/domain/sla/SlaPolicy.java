@@ -1,6 +1,8 @@
 package com.fieldservice.domain.sla;
 
 import com.fieldservice.platform.util.GeneratedUuidV7;
+import com.fieldservice.privacy.api.ClassificationTier;
+import com.fieldservice.privacy.api.DataClassification;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -22,6 +24,7 @@ import java.util.UUID;
  * <p>Not a scoped entity: SLA policies are configuration data read by any authenticated
  * principal to derive deadline information.
  */
+@DataClassification(tier = ClassificationTier.PUBLIC, note = "Published SLA deadlines — no personal data, regulatory disclosure")
 @Audited
 @Entity
 @Table(name = "sla_policy")

@@ -182,3 +182,45 @@ The substrate is designed to meet the 60-second p95 freshness requirement:
 
 Total worst-case staleness: 15 + 30 + 15 = 60 seconds. The `data_as_of` timestamp
 on every projection allows consumers to measure actual staleness and surface it to users.
+
+---
+
+## Privacy Module — Data Classification Registry (WO-188)
+
+### Unit Tests (no Spring context)
+```bash
+mvn -pl privacy test -Dtest='ClassificationRegistryTest'
+```
+
+### Integration Tests (PostgreSQL Testcontainers)
+```bash
+mvn -pl app test -Dtest='com.fieldservice.privacy.ClassificationApiIT'
+```
+
+### ArchUnit Boundary Tests
+```bash
+mvn -pl app test -Dtest='ScopedRepositoryArchTest,MethodSecurityTest'
+```
+
+### Privacy Runbook
+
+#### Tier Definitions
+| Tier | Description | Examples |
+|------|-------------|---------|
+| RESTRICTED | Cryptographic material, credentials | passwordHash, tokenHash, apiKey |
+| CONFIDENTIAL | PII and commercially sensitive data | email, customer contact, technician profile |
+| INTERNAL | Operational data, no PII | WorkOrder, StockLedger, KPI aggregates |
+| PUBLIC | Reference/catalogue data | SlaPolicy, Part catalogue |
+
+#### Adding a New Classified Entity
+1. Annotate the entity or field with `@DataClassification(tier = ClassificationTier.XXX)`
+2. Add a corresponding row to `data_classification` via a new Flyway migration
+3. Run `mvn -pl app verify` — the `ClassificationConsistencyCheck` will fail if any row is missing
+4. Restart the application to confirm the check passes
+
+#### Interpreting a Failed Startup Consistency Check
+The `ClassificationConsistencyCheck` logs `IllegalStateException: Data classification drift detected:` with:
+- **MISSING**: annotated elements with no registry row → add migration rows
+- **ORPHANED**: registry rows with no annotation → either re-annotate or add a migration to remove the row
+
+The check runs on all profiles EXCEPT `test`. Set `app.privacy.base-packages` to restrict the scan scope.

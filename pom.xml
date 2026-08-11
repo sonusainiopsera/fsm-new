@@ -20,6 +20,7 @@
 
     <modules>
         <module>platform</module>
+        <module>privacy</module>
         <module>app</module>
     </modules>
 
@@ -44,6 +45,11 @@
             <dependency>
                 <groupId>com.fieldservice</groupId>
                 <artifactId>platform</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fieldservice</groupId>
+                <artifactId>privacy</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

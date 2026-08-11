@@ -2,6 +2,8 @@ package com.fieldservice.domain.customer;
 
 import com.fieldservice.platform.entity.BaseEntity;
 import com.fieldservice.platform.persistence.ScopedEntity;
+import com.fieldservice.privacy.api.ClassificationTier;
+import com.fieldservice.privacy.api.DataClassification;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
  *   <li>TECHNICIAN — permit-all (technicians need customer names for work orders).</li>
  * </ul>
  */
+@DataClassification(tier = ClassificationTier.CONFIDENTIAL, note = "Customer aggregate contains contact PII; lawful basis: B2B service contract")
 @Audited
 @Entity
 @Table(name = "customer")

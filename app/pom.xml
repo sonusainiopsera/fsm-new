@@ -21,6 +21,12 @@
             <artifactId>platform</artifactId>
         </dependency>
 
+        <!-- Privacy module — data classification registry and admin API -->
+        <dependency>
+            <groupId>com.fieldservice</groupId>
+            <artifactId>privacy</artifactId>
+        </dependency>
+
         <!-- Spring Boot starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

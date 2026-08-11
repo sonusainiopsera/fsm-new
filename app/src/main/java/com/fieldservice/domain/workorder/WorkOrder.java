@@ -4,6 +4,8 @@ import com.fieldservice.domain.customer.Customer;
 import com.fieldservice.domain.site.Site;
 import com.fieldservice.platform.entity.BaseEntity;
 import com.fieldservice.platform.persistence.ScopedEntity;
+import com.fieldservice.privacy.api.ClassificationTier;
+import com.fieldservice.privacy.api.DataClassification;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,6 +34,7 @@ import java.util.UUID;
  *       customer account IDs linked to their principal.</li>
  * </ul>
  */
+@DataClassification(tier = ClassificationTier.INTERNAL, note = "Work order operational record — no personal data in body fields")
 @Audited
 @Entity
 @Table(name = "work_order")

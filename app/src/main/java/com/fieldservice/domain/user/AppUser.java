@@ -2,6 +2,8 @@ package com.fieldservice.domain.user;
 
 import com.fieldservice.identity.domain.AppearancePreference;
 import com.fieldservice.platform.entity.BaseEntity;
+import com.fieldservice.privacy.api.ClassificationTier;
+import com.fieldservice.privacy.api.DataClassification;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -28,12 +30,14 @@ import org.hibernate.envers.NotAudited;
 @Table(name = "app_user")
 public class AppUser extends BaseEntity {
 
+    @DataClassification(tier = ClassificationTier.CONFIDENTIAL, note = "Email is a direct personal identifier (GDPR Art.4)")
     @Column(name = "email", nullable = false, length = 320)
     private String email;
 
-    // CONFIDENTIAL — excluded from audit tables per BR-21 and SOC 2 requirements.
+    // RESTRICTED — excluded from audit tables per BR-21 and SOC 2 requirements.
     // Nullable: federated users (external_subject) have no local credential.
     // Width 256 holds BCrypt (60 chars), Argon2id, and future algorithm prefix.
+    @DataClassification(tier = ClassificationTier.RESTRICTED, note = "BCrypt credential hash — never log, never export")
     @NotAudited
     @Column(name = "password_hash", nullable = true, length = 256)
     private String passwordHash;

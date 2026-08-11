@@ -83,6 +83,11 @@ public final class TestJwtFactory {
                 Map.of("customerAccountIds", List.of(ACCT_B.toString())));
     }
 
+    /** JWT for a PRIVACY_ADMIN user — grants access to the classification admin API. */
+    public static Jwt privacyAdminJwt() {
+        return buildJwt(ADMIN_USER_ID, List.of("PRIVACY_ADMIN"), Map.of());
+    }
+
     private static Jwt buildJwt(UUID subject, List<String> roles, Map<String, Object> extraClaims) {
         Map<String, Object> allClaims = new java.util.HashMap<>(extraClaims);
         allClaims.put("roles", roles);

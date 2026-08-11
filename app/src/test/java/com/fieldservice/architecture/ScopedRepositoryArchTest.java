@@ -52,7 +52,10 @@ class ScopedRepositoryArchTest {
                     + "WorkOrderPartRepository|"
                     // WO-161: analytics KPI projections are aggregate read-model rows with no
                     // per-user row scope; access is controlled at the API layer by role only
-                    + "KpiProjectionRepository";
+                    + "KpiProjectionRepository|"
+                    // WO-188: data classification rows are metadata with no per-user row scope;
+                    // access is controlled at the API layer via PRIVACY_ADMIN and ADMIN roles
+                    + "ClassificationRepository";
 
     /**
      * Production rule: domain JPA repositories that are not in the non-scoped allow-list
