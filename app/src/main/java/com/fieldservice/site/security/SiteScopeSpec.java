@@ -39,7 +39,7 @@ public class SiteScopeSpec implements EntityScopeSpec<Site> {
                 return denyAll();
             }
             var accountIds = scope.customerAccountIds();
-            return (root, query, cb) -> root.get("customerAccountId").in(accountIds);
+            return (root, query, cb) -> root.get("customerId").in(accountIds);
         }
 
         return denyAll();

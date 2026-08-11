@@ -75,7 +75,7 @@ class ScopedQuerySqlPredicateTest {
     }
 
     @Test
-    @DisplayName("CUSTOMER scope: generated SQL contains customer_account_id IN clause (join)")
+    @DisplayName("CUSTOMER scope: generated SQL contains customer_id IN clause (join)")
     @Transactional
     void customer_scope_sql_contains_customer_account_predicate() {
         AccessScope scope = new AccessScope(
@@ -88,13 +88,13 @@ class ScopedQuerySqlPredicateTest {
         // Acme has 2 work orders (WO-001, WO-003)
         assertThat(page.getTotalElements()).isEqualTo(2);
 
-        // SQL must contain customer_account_id in the WHERE clause (via site join)
+        // SQL must contain customer_id in the WHERE clause (via site join)
         List<String> capturedSql = CaptureStatementInspector.getCaptured();
         assertThat(capturedSql)
                 .isNotEmpty()
                 .anySatisfy(sql ->
                         assertThat(sql.toLowerCase())
-                                .contains("customer_account_id"));
+                                .contains("customer_id"));
     }
 
     @Test

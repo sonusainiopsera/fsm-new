@@ -12,7 +12,8 @@ import java.util.UUID;
 public record WorkOrderResponse(
         UUID id,
         String reference,
-        WorkOrderStatus status,
+        WorkOrderStatus state,
+        String priority,
         UUID siteId,
         UUID assignedTechnicianId,
         Instant createdAt) {
@@ -21,7 +22,8 @@ public record WorkOrderResponse(
         return new WorkOrderResponse(
                 wo.getId(),
                 wo.getReference(),
-                wo.getStatus(),
+                wo.getState(),
+                wo.getPriority(),
                 wo.getSite().getId(),
                 wo.getAssignedTechnicianId(),
                 wo.getCreatedAt());

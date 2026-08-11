@@ -65,7 +65,7 @@ public class WorkOrderScopeSpec implements EntityScopeSpec<WorkOrder> {
             var accountIds = scope.customerAccountIds();
             return (root, query, cb) -> {
                 Join<Object, Object> siteJoin = root.join("site", JoinType.INNER);
-                return siteJoin.get("customerAccountId").in(accountIds);
+                return siteJoin.get("customerId").in(accountIds);
             };
         }
 
