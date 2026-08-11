@@ -82,5 +82,11 @@ public record ErrorEnvelope(
 
         /** 429 — caller has reached their daily AI interaction cap; see Retry-After header. */
         public static final String AI_DAILY_LIMIT_REACHED = "AI_DAILY_LIMIT_REACHED";
+
+        /** 401 — email/password combination is invalid (uniform; does not disclose existence). */
+        public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
+
+        /** 503 — authentication attempt store (Redis) is temporarily unavailable. */
+        public static final String AUTH_DEPENDENCY_UNAVAILABLE = "AUTH_DEPENDENCY_UNAVAILABLE";
     }
 }

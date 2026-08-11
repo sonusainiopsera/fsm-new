@@ -1,0 +1,23 @@
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/fixtures
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwks-uri: http://localhost:0/.well-known/jwks.json
+          issuer-uri: http://localhost:0
+
+# Redis autoconfiguration is NOT excluded here — LoginLockoutRedisTest provides its own container
+logging:
+  level:
+    org.hibernate.SQL: DEBUG

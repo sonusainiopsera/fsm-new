@@ -108,6 +108,18 @@ app:
     # Maximum serialised payload size in bytes; oversized payloads fail the transaction
     max-payload-bytes: ${APP_OUTBOX_MAX_PAYLOAD_BYTES:65536}
 
+  auth:
+    jwt:
+      issuer: ${AUTH_JWT_ISSUER:http://localhost:8080}
+      audience: ${AUTH_JWT_AUDIENCE:field-service-api}
+      access-token-ttl-seconds: ${AUTH_ACCESS_TOKEN_TTL:900}
+      rsa-private-key-pem: ${APP_AUTH_JWT_RSA_PRIVATE_KEY_PEM:}
+    refresh-token:
+      ttl-days: ${AUTH_REFRESH_TOKEN_TTL_DAYS:7}
+    lockout:
+      max-failures: ${AUTH_LOCKOUT_MAX_FAILURES:5}
+      window-seconds: ${AUTH_LOCKOUT_WINDOW_SECONDS:900}
+
   idempotency:
     # How long an IN_PROGRESS record holds its lease before it can be reclaimed (crash recovery)
     lease-duration: ${APP_IDEMPOTENCY_LEASE_DURATION:PT30S}
