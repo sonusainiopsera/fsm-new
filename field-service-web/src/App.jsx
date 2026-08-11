@@ -1,22 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 
 import CatalogueRoute from './catalogue/CatalogueRoute.jsx';
+import AppearanceProvider from './appearance/AppearanceProvider.jsx';
+import { useAppearance } from './appearance/AppearanceContext.js';
 
-/**
- * Root application component.
- * Manages the data-appearance attribute on <html> for light/dark switching.
- */
-export default function App() {
-  const [appearance, setAppearance] = useState(
-    () => document.documentElement.getAttribute('data-appearance') || 'light'
-  );
+function AppShell() {
+  const { appearance, toggleAppearance } = useAppearance();
   const [view, setView] = useState('home');
-
-  const toggleAppearance = useCallback(() => {
-    const next = appearance === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-appearance', next);
-    setAppearance(next);
-  }, [appearance]);
 
   if (view === 'catalogue') {
     return (
@@ -119,5 +109,17 @@ export default function App() {
         </button>
       </div>
     </main>
+  );
+}
+
+/**
+ * Root application component. Wraps the tree with AppearanceProvider so
+ * appearance state is accessible anywhere without prop-drilling.
+ */
+export default function App() {
+  return (
+    <AppearanceProvider>
+      <AppShell />
+    </AppearanceProvider>
   );
 }

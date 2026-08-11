@@ -3,6 +3,8 @@ package com.fieldservice.identity.domain;
 import com.fieldservice.platform.util.UuidV7;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
@@ -53,6 +55,14 @@ public class AppUser {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    /**
+     * User's preferred colour-scheme. Null means no stored preference — resolves to
+     * {@link AppearancePreference#LIGHT} at read time. Data classification: Internal.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "appearance_preference", length = 10)
+    private AppearancePreference appearancePreference;
+
     @Version
     private Integer version;
 
@@ -81,7 +91,13 @@ public class AppUser {
     public String  getExternalSubject()  { return externalSubject; }
     public Instant getCreatedAt()        { return createdAt; }
     public Instant getUpdatedAt()        { return updatedAt; }
-    public Integer getVersion()          { return version; }
+    public AppearancePreference getAppearancePreference() { return appearancePreference; }
+    public Integer getVersion()                           { return version; }
+
+    public void setAppearancePreference(AppearancePreference preference) {
+        this.appearancePreference = preference;
+        this.updatedAt = Instant.now();
+    }
 
     public void setPasswordHash(String hash) {
         this.passwordHash = hash;
