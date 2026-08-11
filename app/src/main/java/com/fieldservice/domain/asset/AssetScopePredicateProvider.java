@@ -13,7 +13,8 @@ import org.springframework.stereotype.Component;
  * Constructs JPA {@link Specification} row-scope predicates for {@link Asset}.
  *
  * <p>Assets are scoped via their owning site. A CUSTOMER sees only assets
- * at sites belonging to their customer accounts.
+ * at sites belonging to their customer accounts. The predicate joins to the
+ * site table and filters by {@code site.customer_id}.
  */
 @Component
 public class AssetScopePredicateProvider implements ScopedEntityPredicateProvider<Asset> {
@@ -35,7 +36,7 @@ public class AssetScopePredicateProvider implements ScopedEntityPredicateProvide
             }
             return (root, query, cb) -> {
                 Join<Asset, Site> site = root.join("site", JoinType.INNER);
-                return site.get("customerAccountId").in(scope.customerAccountIds());
+                return site.get("customerId").in(scope.customerAccountIds());
             };
         }
 

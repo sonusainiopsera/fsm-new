@@ -1,38 +1,27 @@
 package com.fieldservice.domain.asset;
 
 import com.fieldservice.domain.site.Site;
+import com.fieldservice.platform.entity.BaseEntity;
 import com.fieldservice.platform.persistence.ScopedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.Instant;
 import java.util.UUID;
 
 /**
  * A physical asset at a customer site (equipment, machinery, installation).
  *
  * <p>Scoped entity: access scope is derived via the owning {@link Site}'s
- * {@code customerAccountId}. CUSTOMER principals see only assets at sites belonging
+ * {@code customerId}. CUSTOMER principals see only assets at sites belonging
  * to their customer accounts.
  */
 @Entity
 @Table(name = "asset")
-public class Asset implements ScopedEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", nullable = false, updatable = false)
-    private UUID id;
+public class Asset extends BaseEntity implements ScopedEntity {
 
     @Column(name = "site_id", nullable = false, insertable = false, updatable = false)
     private UUID siteId;
@@ -47,23 +36,16 @@ public class Asset implements ScopedEntity {
     @Column(name = "asset_type", length = 100)
     private String assetType;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    @Column(name = "serial_no", length = 100)
+    private String serialNo;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
+    @Column(name = "model", length = 255)
+    private String model;
 
-    @Version
-    @Column(name = "version", nullable = false)
-    private Long version;
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
 
     protected Asset() {
-    }
-
-    public UUID getId() {
-        return id;
     }
 
     public UUID getSiteId() {
@@ -95,15 +77,27 @@ public class Asset implements ScopedEntity {
         this.assetType = assetType;
     }
 
-    public Instant getCreatedAt() {
-        return createdAt;
+    public String getSerialNo() {
+        return serialNo;
     }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
+    public void setSerialNo(String serialNo) {
+        this.serialNo = serialNo;
     }
 
-    public Long getVersion() {
-        return version;
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

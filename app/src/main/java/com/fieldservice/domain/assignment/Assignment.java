@@ -1,12 +1,12 @@
 package com.fieldservice.domain.assignment;
 
 import com.fieldservice.platform.persistence.ScopedEntity;
+import com.fieldservice.platform.util.GeneratedUuidV7;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
@@ -23,15 +23,20 @@ import java.util.UUID;
  * <ul>
  *   <li>TECHNICIAN — sees only assignments for their own {@code technicianId}.</li>
  *   <li>DISPATCHER / ADMIN / MANAGER — permit-all.</li>
- *   <li>CUSTOMER — sees only assignments for work orders on their sites (join to work_order → site).</li>
+ *   <li>CUSTOMER — deny-all (assignments are internal operational data,
+ *       not exposed in the customer portal).</li>
  * </ul>
+ *
+ * <p>Note: this table uses {@code assigned_at} (not {@code created_at}) and has no
+ * {@code updated_at}, so it does not extend {@link com.fieldservice.platform.entity.BaseEntity}.
+ * The version column is present for optimistic locking on the is_current flag update.
  */
 @Entity
 @Table(name = "assignment")
 public class Assignment implements ScopedEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedUuidV7
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
@@ -50,6 +55,13 @@ public class Assignment implements ScopedEntity {
 
     @Column(name = "is_current", nullable = false)
     private boolean current;
+
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Integer version;
 
     protected Assignment() {
     }
@@ -92,5 +104,17 @@ public class Assignment implements ScopedEntity {
 
     public void setCurrent(boolean current) {
         this.current = current;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public Integer getVersion() {
+        return version;
     }
 }

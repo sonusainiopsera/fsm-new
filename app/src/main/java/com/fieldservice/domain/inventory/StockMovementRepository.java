@@ -1,13 +1,8 @@
 package com.fieldservice.domain.inventory;
 
-import com.fieldservice.platform.persistence.ScopedRepository;
-
-import java.util.UUID;
-
 /**
- * Repository for {@link StockMovement} entities.
- *
- * <p>All reads must route through {@link com.fieldservice.platform.persistence.ScopedQueryExecutor}.
+ * @deprecated Replaced by {@link StockLedgerRepository} and {@link StockBalanceRepository}.
  */
-public interface StockMovementRepository extends ScopedRepository<StockMovement, UUID> {
+@Deprecated(forRemoval = true)
+interface StockMovementRepository {
 }

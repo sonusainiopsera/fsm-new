@@ -1,15 +1,10 @@
 package com.fieldservice.domain.inventory;
 
 /**
- * Type of stock movement performed by a technician.
+ * @deprecated Replaced by the {@code movement_type} CHECK constraint in {@code stock_ledger}.
+ * Valid values: CONSUMPTION, RETURN, REPLENISHMENT, ADJUSTMENT, TRANSFER_OUT, TRANSFER_IN.
  */
-public enum StockMovementType {
-    /** Parts consumed on a work order. */
-    CONSUMPTION,
-    /** Parts returned to warehouse. */
-    RETURN,
-    /** Parts received from warehouse replenishment. */
-    REPLENISHMENT,
-    /** Manual adjustment (admin only). */
-    ADJUSTMENT
+@Deprecated(forRemoval = true)
+enum StockMovementType {
+    CONSUMPTION, RETURN, REPLENISHMENT, ADJUSTMENT
 }

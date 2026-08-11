@@ -5,8 +5,6 @@ import com.fieldservice.platform.security.Role;
 import com.fieldservice.platform.security.ScopedAccessDeniedException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +16,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -121,25 +117,24 @@ class WorkOrderScopePredicateProviderTest {
     }
 
     @Test
-    void customerScope_withAccounts_returnsInPredicate() {
+    void customerScope_withAccounts_usesDirectCustomerIdPredicate() {
+        // The new WorkOrder has a direct customer_id FK — no site join needed.
         AccessScope scope = new AccessScope(USER_ID, Set.of(Role.CUSTOMER), null, Set.of(ACCT_ID));
         Specification<WorkOrder> spec = provider.forScope(scope);
 
         CriteriaBuilder cb = mock(CriteriaBuilder.class);
         CriteriaQuery<?> query = mock(CriteriaQuery.class);
         Root<WorkOrder> root = mock(Root.class);
-        Join<WorkOrder, ?> siteJoin = mock(Join.class);
-        var customerAccountIdPath = mock(jakarta.persistence.criteria.Path.class);
+        var customerIdPath = mock(jakarta.persistence.criteria.Path.class);
         Predicate inPredicate = mock(Predicate.class);
 
-        when(root.join("site", JoinType.INNER)).thenReturn(siteJoin);
-        when(siteJoin.get("customerAccountId")).thenReturn(customerAccountIdPath);
-        when(customerAccountIdPath.in(scope.customerAccountIds())).thenReturn(inPredicate);
+        when(root.get("customerId")).thenReturn(customerIdPath);
+        when(customerIdPath.in(scope.customerAccountIds())).thenReturn(inPredicate);
 
         Predicate result = spec.toPredicate(root, query, cb);
 
         assertThat(result).isSameAs(inPredicate);
-        verify(root).join("site", JoinType.INNER);
+        verify(root).get("customerId");
     }
 
     @Test
