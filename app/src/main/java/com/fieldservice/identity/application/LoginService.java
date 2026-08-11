@@ -136,7 +136,9 @@ public class LoginService {
         String refreshHash = sha256Hex(refreshHandle);
 
         Instant now = Instant.now();
-        RefreshTokenFamily family = familyRepository.save(new RefreshTokenFamily(user.getId(), now));
+        Instant familyExpiry = now.plus(authProperties.refreshToken().ttl());
+        RefreshTokenFamily family = familyRepository.save(
+                new RefreshTokenFamily(user.getId(), now, familyExpiry));
         tokenRepository.save(new RefreshToken(
                 family.getId(), refreshHash, now,
                 now.plus(authProperties.refreshToken().ttl())));

@@ -97,5 +97,12 @@ public record ErrorEnvelope(
 
         /** 409 — the supplied expectedVersion is stale or a concurrent commit won the optimistic lock. */
         public static final String WORK_ORDER_VERSION_CONFLICT = "WORK_ORDER_VERSION_CONFLICT";
+
+        /**
+         * 401 — the refresh token is missing, invalid, consumed, revoked or expired;
+         * the client must reauthenticate with full credentials.
+         * All refresh failure modes map to this single code to prevent state probing.
+         */
+        public static final String REAUTHENTICATION_REQUIRED = "REAUTHENTICATION_REQUIRED";
     }
 }

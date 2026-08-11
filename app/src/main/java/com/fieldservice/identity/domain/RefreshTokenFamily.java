@@ -33,6 +33,9 @@ public class RefreshTokenFamily {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(name = "absolute_expires_at", nullable = false)
+    private Instant absoluteExpiresAt;
+
     @Column(name = "revoked_at")
     private Instant revokedAt;
 
@@ -41,9 +44,10 @@ public class RefreshTokenFamily {
 
     protected RefreshTokenFamily() {}
 
-    public RefreshTokenFamily(UUID userId, Instant createdAt) {
+    public RefreshTokenFamily(UUID userId, Instant createdAt, Instant absoluteExpiresAt) {
         this.userId = userId;
         this.createdAt = createdAt;
+        this.absoluteExpiresAt = absoluteExpiresAt;
     }
 
     public UUID getId() { return id; }
@@ -52,11 +56,15 @@ public class RefreshTokenFamily {
 
     public Instant getCreatedAt() { return createdAt; }
 
+    public Instant getAbsoluteExpiresAt() { return absoluteExpiresAt; }
+
     public Instant getRevokedAt() { return revokedAt; }
 
     public String getRevokedReason() { return revokedReason; }
 
     public boolean isRevoked() { return revokedAt != null; }
+
+    public boolean isAbsolutelyExpired(Instant now) { return absoluteExpiresAt.isBefore(now); }
 
     public void revoke(Instant at, String reason) {
         this.revokedAt = at;

@@ -161,3 +161,10 @@
 - **Files:** 14 (+1119/-0)
 - **Duration:** 1329ss
 - **Approach:** Implemented the outbox drain pipeline using a JDBC-first approach to keep FOR UPDATE SKIP LOCKED within proper transactions. OutboxDrainService uses a per-event REQUIRES_NEW TransactionTemplate (not @Transactional, to avoid self-invocation issues) that atomically claims one row, dispatches to the matching handler, and marks success or records failure within the same TX. Handlers implement the EventHandler interface from the platform module and use IdempotencyGuard.claimEvent() as the first operation before side effects — a unique violation against the processed_event table is an already-processed no-op. Jittered exponential backoff is computed by BackoffCalculator and stored as next_attempt_at; after maxAttempts failures the event is dead-lettered (dead_lettered_at set) and permanently excluded from the claim predicate. DatabaseSchedulingLock uses INSERT … ON CONFLICT DO UPDATE … WHERE with database now() for clock-skew-proof leader election. OutboxPoller is the thin @Profile('worker') @Scheduled wrapper; tests call OutboxDrainService directly without needing the worker profile.
+
+## WO-110: User Story: WO-110 - Rotate refresh tokens with family reuse detection
+- **Status:** completed
+- **Commit:** `227f7c0`
+- **Files:** 13 (+1537/-4)
+- **Duration:** 1040ss
+- **Approach:** Refresh-token rotation implemented via a single atomic conditional UPDATE (consumed_at WHERE NULL) to prevent read-then-write races under concurrency. Reuse detection revokes the entire family and publishes a RefreshTokenReuseDetected event through the existing transactional outbox; subsequent reuse on an already-revoked family only increments a Micrometer counter (SIEM deduplication). The V17 migration adds absolute_expires_at (expand-only, backward-compatible default) to refresh_token_family. The AuthController POST /refresh endpoint reads exclusively from the HttpOnly refreshToken cookie, validates the 43-char base64url handle before any DB lookup, and collapses all failure modes to the same 401 REAUTHENTICATION_REQUIRED shape. Plaintext handles never reach the database.
