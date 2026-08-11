@@ -4,7 +4,6 @@ import com.fieldservice.platform.pagination.PageLinks;
 import com.fieldservice.platform.pagination.PageMeta;
 import com.fieldservice.platform.pagination.PagedResponse;
 import com.fieldservice.workforce.internal.CertificationCurrencyService;
-import com.fieldservice.workforce.internal.CertificationTypeEntity;
 import com.fieldservice.workforce.web.dto.CertificationTypeRequest;
 import com.fieldservice.workforce.web.dto.CertificationTypeResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,12 +51,10 @@ public class CertificationTypeController {
             @RequestParam(defaultValue = "25") int size) {
 
         int effectiveSize = Math.min(size, MAX_PAGE_SIZE);
-        Page<CertificationTypeEntity> result = service.listCertificationTypes(page, effectiveSize);
+        Page<CertificationTypeResponse> result = service.listCertificationTypes(page, effectiveSize);
         PageMeta  meta  = PageMeta.of(page, effectiveSize, result.getTotalElements());
         PageLinks links = PageLinks.none();
-        return ResponseEntity.ok(PagedResponse.of(
-                result.getContent().stream().map(CertificationTypeResponse::from).toList(),
-                meta, links));
+        return ResponseEntity.ok(PagedResponse.of(result.getContent(), meta, links));
     }
 
     @Operation(operationId = "createCertificationType", summary = "Create a certification type (ADMIN)")
@@ -67,10 +64,10 @@ public class CertificationTypeController {
             @Valid @RequestBody CertificationTypeRequest req,
             UriComponentsBuilder ucb) {
 
-        CertificationTypeEntity created = service.createCertificationType(req);
+        CertificationTypeResponse created = service.createCertificationType(req);
         var location = ucb.path("/api/v1/certification-types/{id}")
-                .buildAndExpand(created.getId()).toUri();
-        return ResponseEntity.created(location).body(CertificationTypeResponse.from(created));
+                .buildAndExpand(created.id()).toUri();
+        return ResponseEntity.created(location).body(created);
     }
 
     @Operation(operationId = "updateCertificationType", summary = "Update a certification type (ADMIN)")
@@ -80,7 +77,7 @@ public class CertificationTypeController {
             @PathVariable UUID id,
             @Valid @RequestBody CertificationTypeRequest req) {
 
-        CertificationTypeEntity updated = service.updateCertificationType(id, req);
-        return ResponseEntity.ok(CertificationTypeResponse.from(updated));
+        CertificationTypeResponse updated = service.updateCertificationType(id, req);
+        return ResponseEntity.ok(updated);
     }
 }

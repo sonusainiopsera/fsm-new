@@ -14,6 +14,7 @@ import com.fieldservice.workforce.application.CertificationEvaluator;
 import com.fieldservice.workforce.application.CertificationEvaluator.CertSnapshot;
 import com.fieldservice.workforce.web.dto.CertificationLineRequest;
 import com.fieldservice.workforce.web.dto.CertificationTypeRequest;
+import com.fieldservice.workforce.web.dto.CertificationTypeResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -139,24 +140,25 @@ public class CertificationCurrencyService implements CertificationCurrencyPort, 
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','DISPATCHER')")
-    public Page<CertificationTypeEntity> listCertificationTypes(int page, int size) {
-        return typeRepo.findAllByOrderByCodeAsc(PageRequest.of(page, size));
+    public Page<CertificationTypeResponse> listCertificationTypes(int page, int size) {
+        return typeRepo.findAllByOrderByCodeAsc(PageRequest.of(page, size))
+                .map(this::toTypeResponse);
     }
 
     @Transactional
     @PreAuthorize("hasAuthority('ADMIN')")
-    public CertificationTypeEntity createCertificationType(CertificationTypeRequest req) {
+    public CertificationTypeResponse createCertificationType(CertificationTypeRequest req) {
         if (typeRepo.existsByCode(req.code())) {
             throw new ConflictException("CertificationType with code '" + req.code() + "' already exists");
         }
         CertificationTypeEntity entity = new CertificationTypeEntity(
                 req.code(), req.displayName(), req.regulated(), req.defaultValidityMonths());
-        return typeRepo.save(entity);
+        return toTypeResponse(typeRepo.save(entity));
     }
 
     @Transactional
     @PreAuthorize("hasAuthority('ADMIN')")
-    public CertificationTypeEntity updateCertificationType(UUID id, CertificationTypeRequest req) {
+    public CertificationTypeResponse updateCertificationType(UUID id, CertificationTypeRequest req) {
         CertificationTypeEntity entity = typeRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("CertificationType", id));
         entity.setCode(req.code());
@@ -164,7 +166,7 @@ public class CertificationCurrencyService implements CertificationCurrencyPort, 
         entity.setRegulated(req.regulated());
         entity.setDefaultValidityMonths(req.defaultValidityMonths());
         entity.setActive(req.active());
-        return typeRepo.save(entity);
+        return toTypeResponse(typeRepo.save(entity));
     }
 
     @Transactional
@@ -176,14 +178,21 @@ public class CertificationCurrencyService implements CertificationCurrencyPort, 
         typeRepo.save(entity);
     }
 
+    private CertificationTypeResponse toTypeResponse(CertificationTypeEntity e) {
+        return new CertificationTypeResponse(
+                e.getId(), e.getCode(), e.getDisplayName(),
+                e.isRegulated(), e.getDefaultValidityMonths(),
+                e.isActive(), e.getVersion() == null ? null : e.getVersion().intValue());
+    }
+
     // ── Certification write (batch upsert) ───────────────────────────────────
 
     @Transactional
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER')")
-    public List<TechnicianCertificationEntity> upsertCertifications(
+    public List<CertificationRef> upsertCertifications(
             UUID technicianId, List<CertificationLineRequest> items, LocalDate today) {
 
-        List<TechnicianCertificationEntity> results = new ArrayList<>();
+        List<CertificationRef> results = new ArrayList<>();
         for (CertificationLineRequest line : items) {
             CertificationTypeEntity typeEntity = typeRepo.findByCode(line.typeCode())
                     .orElseThrow(() -> new BusinessGuardException(
@@ -222,7 +231,7 @@ public class CertificationCurrencyService implements CertificationCurrencyPort, 
             }
             TechnicianCertificationEntity saved = certRepo.save(entity);
             publishEvent(saved, operation);
-            results.add(saved);
+            results.add(toRef(saved, today));
         }
         return results;
     }

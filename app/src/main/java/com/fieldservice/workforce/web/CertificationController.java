@@ -5,7 +5,6 @@ import com.fieldservice.platform.pagination.PageMeta;
 import com.fieldservice.platform.pagination.PagedResponse;
 import com.fieldservice.workforce.api.CertificationRef;
 import com.fieldservice.workforce.internal.CertificationCurrencyService;
-import com.fieldservice.workforce.internal.TechnicianCertificationEntity;
 import com.fieldservice.workforce.web.dto.CertificationBatchRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -82,11 +81,7 @@ public class CertificationController {
             @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
 
         LocalDate today = LocalDate.now();
-        List<TechnicianCertificationEntity> saved =
-                service.upsertCertifications(id, body.items(), today);
-        List<CertificationRef> refs = saved.stream()
-                .map(tc -> service.toRef(tc, today))
-                .collect(Collectors.toList());
+        List<CertificationRef> refs = service.upsertCertifications(id, body.items(), today);
         return ResponseEntity.ok(refs);
     }
 
