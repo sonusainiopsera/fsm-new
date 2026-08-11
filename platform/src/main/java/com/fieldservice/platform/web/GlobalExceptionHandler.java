@@ -258,6 +258,17 @@ public class GlobalExceptionHandler {
                 ApiErrorResponse.of(ErrorCode.CONFLICT, "A data integrity constraint was violated.", traceId));
     }
 
+    // ---- 422 SLA Policy Unavailable -------------------------------------------
+
+    @ExceptionHandler(com.fieldservice.sla.SlaPolicyUnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> handleSlaPolicyUnavailable(
+            com.fieldservice.sla.SlaPolicyUnavailableException ex) {
+        String traceId = resolveTraceId();
+        log.warn("sla_policy_unavailable priority={} trace_id={}", ex.getPriority(), traceId);
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorResponse.of(ErrorCode.SLA_POLICY_UNAVAILABLE, ex.getMessage(), traceId));
+    }
+
     // ---- 422 Business Guard Refusal -------------------------------------------
 
     @ExceptionHandler(BusinessGuardException.class)

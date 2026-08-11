@@ -62,6 +62,14 @@ public class HoldReasonService {
     }
 
     /**
+     * Returns the HoldReason entity for the given code, or null if not found.
+     * Used by the transition service to check {@code pauses_sla_clock}.
+     */
+    public HoldReason findByCode(String code) {
+        return holdReasonRepository.findById(code).orElse(null);
+    }
+
+    /**
      * Throws {@link HoldReasonValidationException} (HTTP 400) when {@code code} is not
      * in the active vocabulary.
      */

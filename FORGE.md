@@ -252,3 +252,10 @@
 - **Files:** 24 (+1865/-27)
 - **Duration:** 1461ss
 - **Approach:** Added catalog foundation on top of the existing entity stubs. V21 migration is expand-only (ALTER TABLE ADD COLUMN IF NOT EXISTS) adding active/deactivated_at/account_code/legal_name/site_code/asset_tag columns to customer, site and asset tables, plus customer_aud and asset_aud Envers tables and ALTER TABLE site_aud to add new columns. CustomerAccount and Asset entities gained @Audited. Asset gained ScopedEntity, AssetScopeSpec uses a JPQL subquery to join through site.customerId for CUSTOMER principals. AccessScopePredicateConfiguration updated to include Asset.class. ScopedRepository impls created for all three entities. CatalogService owns @PreAuthorize on every public method, hierarchy guards that refuse creation under inactive parents with 422 via BusinessGuardException, cascade deactivation propagating down customer→site→asset, and transactional outbox publication of CustomerChanged/SiteChanged/AssetChanged. CustomerController handles GET/POST on /api/v1/customers and nested sites; SiteController handles GET/DELETE on /api/v1/sites and nested assets. All DTOs use @JsonIgnoreProperties(ignoreUnknown=false) for FAIL_ON_UNKNOWN_PROPERTIES. seed-core.sql extended with 4 customers (1 inactive), 8 sites (1 inactive), 22 assets (4 inactive including deactivated-site cascade examples).
+
+## WO-142: User Story: WO-142 - Runtime-configurable SLA policy and deadline derivation
+- **Status:** completed
+- **Commit:** `6ef6fca`
+- **Files:** 26 (+1091/-12)
+- **Duration:** 818ss
+- **Approach:** N/A

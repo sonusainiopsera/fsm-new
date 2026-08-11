@@ -24,7 +24,10 @@ public record WorkOrderResponse(
         Instant createdAt,
         int cumulativeHoldMinutes,
         String holdReasonCode,
-        Instant holdStartedAt) {
+        Instant holdStartedAt,
+        Instant responseDueAt,
+        Instant resolutionDueAt,
+        Instant atRiskAt) {
 
     /** For list responses — hold detail fields are absent. */
     public static WorkOrderResponse from(WorkOrder wo) {
@@ -38,7 +41,10 @@ public record WorkOrderResponse(
                 wo.getCreatedAt(),
                 wo.getCumulativeHoldMinutes(),
                 null,
-                null);
+                null,
+                wo.getResponseDeadline(),
+                wo.getResolutionDeadline(),
+                wo.getAtRiskAt());
     }
 
     /** For the single-item detail endpoint — includes the currently-open hold if any. */
@@ -53,6 +59,9 @@ public record WorkOrderResponse(
                 wo.getCreatedAt(),
                 wo.getCumulativeHoldMinutes(),
                 openHold != null ? openHold.getReasonCode() : null,
-                openHold != null ? openHold.getStartedAt()  : null);
+                openHold != null ? openHold.getStartedAt()  : null,
+                wo.getResponseDeadline(),
+                wo.getResolutionDeadline(),
+                wo.getAtRiskAt());
     }
 }

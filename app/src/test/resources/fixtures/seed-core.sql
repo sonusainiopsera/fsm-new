@@ -26,6 +26,27 @@ VALUES
     ('00000000-0000-7011-8000-000000000004', 'CRITICAL',  30,   60, 0.80, '2025-01-01T00:00:00Z')
 ON CONFLICT (priority, effective_from) DO NOTHING;
 
+-- Expired MEDIUM policy (superseded by the row above; effective_to in the past)
+INSERT INTO sla_policy (id, priority, response_minutes, resolution_minutes, at_risk_fraction,
+                        effective_from, effective_to, active)
+VALUES (
+    '00000000-0000-7011-8000-000000000011',
+    'MEDIUM', 180, 360, 0.80,
+    '2024-01-01T00:00:00Z',
+    '2025-01-01T00:00:00Z',
+    FALSE
+) ON CONFLICT (priority, effective_from) DO NOTHING;
+
+-- Future HIGH policy (not yet in effect; effective_from is far in the future)
+INSERT INTO sla_policy (id, priority, response_minutes, resolution_minutes, at_risk_fraction,
+                        effective_from, active)
+VALUES (
+    '00000000-0000-7011-8000-000000000012',
+    'HIGH', 30, 90, 0.75,
+    '2099-01-01T00:00:00Z',
+    TRUE
+) ON CONFLICT (priority, effective_from) DO NOTHING;
+
 -- ---- Customers (3 active + 1 inactive) -------------------------------------
 -- UUID prefix 7012 = seed customers
 INSERT INTO customer (id, name, account_code, legal_name, active, contact_email, phone, version)

@@ -19,6 +19,8 @@ import com.fieldservice.workorder.lifecycle.TransitionGuard;
 import com.fieldservice.workorder.lifecycle.WorkOrderEvent;
 import com.fieldservice.workorder.lifecycle.WorkOrderState;
 import com.fieldservice.workorder.lifecycle.WorkOrderTransitionService;
+import com.fieldservice.sla.internal.SlaPolicyService;
+import com.fieldservice.workorder.holds.HoldReason;
 import com.fieldservice.workorder.holds.HoldReasonService;
 import com.fieldservice.workorder.holds.HoldReasonValidationException;
 import com.fieldservice.workorder.holds.WorkOrderHold;
@@ -69,6 +71,7 @@ public class WorkOrderTransitionApplicationService {
     private final EntityManager entityManager;
     private final HoldReasonService holdReasonService;
     private final WorkOrderHoldRepository workOrderHoldRepository;
+    private final SlaPolicyService slaPolicyService;
 
     public WorkOrderTransitionApplicationService(
             ScopedQueryExecutor scopedQueryExecutor,
@@ -79,7 +82,8 @@ public class WorkOrderTransitionApplicationService {
             List<TransitionGuard> guards,
             EntityManager entityManager,
             HoldReasonService holdReasonService,
-            WorkOrderHoldRepository workOrderHoldRepository) {
+            WorkOrderHoldRepository workOrderHoldRepository,
+            SlaPolicyService slaPolicyService) {
         this.scopedQueryExecutor      = scopedQueryExecutor;
         this.workOrderRepository      = workOrderRepository;
         this.accessScope              = accessScope;
@@ -89,6 +93,7 @@ public class WorkOrderTransitionApplicationService {
         this.entityManager            = entityManager;
         this.holdReasonService        = holdReasonService;
         this.workOrderHoldRepository  = workOrderHoldRepository;
+        this.slaPolicyService         = slaPolicyService;
     }
 
     @PostConstruct
@@ -221,6 +226,12 @@ public class WorkOrderTransitionApplicationService {
                     workOrderId, request.holdReasonCode(), request.reason(), occurredAt, actorId);
             workOrderHoldRepository.save(hold);
 
+            // Write SLA clock pause row if this hold reason suspends the SLA clock
+            HoldReason reason = holdReasonService.findByCode(request.holdReasonCode());
+            if (reason != null && reason.isPausesSlaClock()) {
+                slaPolicyService.openPause(workOrderId, request.holdReasonCode(), occurredAt);
+            }
+
         } else if (request.event() == WorkOrderEvent.RESUME) {
             WorkOrderHold openHold = workOrderHoldRepository
                     .findByWorkOrderIdAndEndedAtIsNull(workOrderId)
@@ -231,6 +242,9 @@ public class WorkOrderTransitionApplicationService {
             long elapsed = Duration.between(openHold.getStartedAt(), occurredAt).toMinutes();
             workOrder.incrementCumulativeHoldMinutes((int) elapsed);
 
+            // Close any open SLA clock pause
+            slaPolicyService.closePause(workOrderId, occurredAt);
+
         } else if (fromState == WorkOrderState.ON_HOLD) {
             // Dangling-hold cleanup for any other event from ON_HOLD (e.g., CANCEL)
             workOrderHoldRepository.findByWorkOrderIdAndEndedAtIsNull(workOrderId)
@@ -240,6 +254,7 @@ public class WorkOrderTransitionApplicationService {
                         long elapsed = Duration.between(h.getStartedAt(), occurredAt).toMinutes();
                         workOrder.incrementCumulativeHoldMinutes((int) elapsed);
                     });
+            slaPolicyService.closePause(workOrderId, occurredAt);
         }
     }
 

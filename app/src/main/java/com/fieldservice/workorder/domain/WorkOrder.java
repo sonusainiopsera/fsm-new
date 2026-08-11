@@ -79,6 +79,9 @@ public class WorkOrder implements ScopedEntity {
     @Column(name = "at_risk", nullable = false)
     private boolean atRisk = false;
 
+    @Column(name = "at_risk_at")
+    private Instant atRiskAt;
+
     @Version
     private Integer version;
 
@@ -117,12 +120,16 @@ public class WorkOrder implements ScopedEntity {
     public Instant         getResponseDeadline()    { return responseDeadline; }
     public Instant         getResolutionDeadline()  { return resolutionDeadline; }
     public boolean         isAtRisk()               { return atRisk; }
+    public Instant         getAtRiskAt()            { return atRiskAt; }
     public Integer         getVersion()             { return version; }
 
+    public void setDescription(String description) { this.description = description; }
+
     /** Sets SLA deadlines when a work order is created from a priority policy. */
-    public void applyDeadlines(Instant responseDeadline, Instant resolutionDeadline) {
+    public void applyDeadlines(Instant responseDeadline, Instant resolutionDeadline, Instant atRiskAt) {
         this.responseDeadline   = responseDeadline;
         this.resolutionDeadline = resolutionDeadline;
+        this.atRiskAt           = atRiskAt;
     }
 
     /** Marks the work order at-risk when elapsed time exceeds the SLA at-risk threshold. */

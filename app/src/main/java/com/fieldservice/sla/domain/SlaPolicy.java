@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
@@ -28,7 +29,6 @@ public class SlaPolicy {
     @Column(name = "resolution_minutes", nullable = false)
     private Integer resolutionMinutes;
 
-    /** Fraction of the SLA window at which a work order is flagged at-risk (default 0.80). */
     @Column(name = "at_risk_fraction", nullable = false, precision = 3, scale = 2)
     private BigDecimal atRiskFraction = new BigDecimal("0.80");
 
@@ -38,18 +38,36 @@ public class SlaPolicy {
     @Column(name = "effective_to")
     private Instant effectiveTo;
 
+    @Column(nullable = false)
+    private Boolean active = true;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
+
+    @Version
+    private Integer version;
 
     protected SlaPolicy() {}
 
     public SlaPolicy(String priority, int responseMinutes, int resolutionMinutes,
-                     Instant effectiveFrom) {
+                     BigDecimal atRiskFraction, Instant effectiveFrom) {
         this.id                = UuidV7.generate();
         this.priority          = priority;
         this.responseMinutes   = responseMinutes;
         this.resolutionMinutes = resolutionMinutes;
+        this.atRiskFraction    = atRiskFraction != null ? atRiskFraction : new BigDecimal("0.80");
         this.effectiveFrom     = effectiveFrom;
+    }
+
+    public SlaPolicy(String priority, int responseMinutes, int resolutionMinutes,
+                     Instant effectiveFrom) {
+        this(priority, responseMinutes, resolutionMinutes, new BigDecimal("0.80"), effectiveFrom);
+    }
+
+    /** Supersede: close the effective window on this row when a newer version is created. */
+    public void closeAt(Instant effectiveTo) {
+        this.effectiveTo = effectiveTo;
+        this.active      = false;
     }
 
     public UUID       getId()                { return id; }
@@ -59,5 +77,7 @@ public class SlaPolicy {
     public BigDecimal getAtRiskFraction()    { return atRiskFraction; }
     public Instant    getEffectiveFrom()     { return effectiveFrom; }
     public Instant    getEffectiveTo()       { return effectiveTo; }
+    public boolean    isActive()             { return Boolean.TRUE.equals(active); }
     public Instant    getCreatedAt()         { return createdAt; }
+    public Integer    getVersion()           { return version; }
 }
