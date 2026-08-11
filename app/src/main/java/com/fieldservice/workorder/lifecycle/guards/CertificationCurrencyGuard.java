@@ -1,10 +1,10 @@
 package com.fieldservice.workorder.lifecycle.guards;
 
-import com.fieldservice.domain.technician.TechnicianCertification;
-import com.fieldservice.domain.technician.TechnicianCertificationRepository;
 import com.fieldservice.domain.workorder.WorkOrder;
 import com.fieldservice.domain.workorder.WorkOrderCompetency;
 import com.fieldservice.domain.workorder.WorkOrderCompetencyRepository;
+import com.fieldservice.workforce.api.CertificationGuardPort;
+import com.fieldservice.workforce.api.CertificationNotCurrentException;
 import com.fieldservice.workorder.lifecycle.GuardResult;
 import com.fieldservice.workorder.lifecycle.TransitionContext;
 import com.fieldservice.workorder.lifecycle.TransitionGuard;
@@ -12,22 +12,20 @@ import com.fieldservice.workorder.lifecycle.WorkOrderEvent;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Refuses ASSIGN when the target technician lacks any required competency or holds
- * a certification that expires at or before the transition instant (BR-01, BR-02).
+ * Refuses ASSIGN when the target technician lacks any required regulated competency (BR-01, BR-02).
  *
- * <p>Expiry comparison is strict: a certification with {@code expiresAt} equal to the
- * transition instant is treated as expired. Expired certifications are absent with no
- * grace period for regulated categories.
+ * <p>Currency predicate: {@code expires_on >= atDate} — inclusive, evaluated at query time.
+ * No grace period is applied for any certification type. No override parameter exists.
  *
- * <p>A work order with no required competency rows passes this guard regardless of the
- * technician's certifications.
+ * <p>Fail-safe: any exception from the certification port propagates — the guard never fails open.
  */
 @Component
 public class CertificationCurrencyGuard implements TransitionGuard {
@@ -35,16 +33,16 @@ public class CertificationCurrencyGuard implements TransitionGuard {
     public static final String GUARD_ID = "certification-currency";
 
     private final WorkOrderCompetencyRepository competencyRepository;
-    private final TechnicianCertificationRepository certificationRepository;
+    private final CertificationGuardPort certificationGuardPort;
     private final Clock clock;
 
     public CertificationCurrencyGuard(
             WorkOrderCompetencyRepository competencyRepository,
-            TechnicianCertificationRepository certificationRepository,
+            CertificationGuardPort certificationGuardPort,
             Clock clock) {
-        this.competencyRepository = competencyRepository;
-        this.certificationRepository = certificationRepository;
-        this.clock = clock;
+        this.competencyRepository   = competencyRepository;
+        this.certificationGuardPort = certificationGuardPort;
+        this.clock                  = clock;
     }
 
     @Override
@@ -58,8 +56,8 @@ public class CertificationCurrencyGuard implements TransitionGuard {
         if (technicianId == null) {
             return new GuardResult.Refused(
                     "CERTIFICATION_MISSING",
-                    "Work order " + workOrder.getId() + " cannot be assigned: no technician is set " +
-                    "on the work order. Set the assigned technician before applying ASSIGN.");
+                    "Work order " + workOrder.getId() + " cannot be assigned: no technician is set. " +
+                    "Set the assigned technician before applying ASSIGN.");
         }
 
         List<WorkOrderCompetency> required = competencyRepository.findByWorkOrderId(workOrder.getId());
@@ -67,26 +65,28 @@ public class CertificationCurrencyGuard implements TransitionGuard {
             return new GuardResult.Satisfied();
         }
 
-        Instant transitionInstant = context.transitionInstant() != null
-                ? context.transitionInstant()
-                : clock.instant();
-
-        Set<String> heldCertTypes = certificationRepository
-                .findActiveCertificationsAt(technicianId, transitionInstant)
-                .stream()
-                .map(TechnicianCertification::getCertType)
+        LocalDate atDate = resolveDate(context);
+        Set<String> requiredCodes = required.stream()
+                .map(WorkOrderCompetency::getCompetencyCode)
                 .collect(Collectors.toSet());
 
-        for (WorkOrderCompetency competency : required) {
-            if (!heldCertTypes.contains(competency.getCompetencyCode())) {
-                return new GuardResult.Refused(
-                        "CERTIFICATION_EXPIRED",
-                        "Work order " + workOrder.getId() + " cannot be assigned to technician " +
-                        technicianId + ": required competency '" + competency.getCompetencyCode() +
-                        "' is missing or expired. Assign a technician with a current certification.");
-            }
+        try {
+            certificationGuardPort.assertAssignable(technicianId, requiredCodes, atDate);
+            return new GuardResult.Satisfied();
+        } catch (CertificationNotCurrentException e) {
+            return new GuardResult.Refused(
+                    "CERTIFICATION_NOT_CURRENT",
+                    "Work order " + workOrder.getId() + " cannot be assigned to technician " +
+                    technicianId + ": regulated certification(s) not current: " +
+                    e.getMissingTypeCodes());
         }
+        // Any other exception propagates — guard never fails open
+    }
 
-        return new GuardResult.Satisfied();
+    private LocalDate resolveDate(TransitionContext context) {
+        if (context.transitionInstant() != null) {
+            return context.transitionInstant().atZone(ZoneOffset.UTC).toLocalDate();
+        }
+        return LocalDate.now(clock);
     }
 }

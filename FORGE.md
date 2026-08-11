@@ -385,3 +385,10 @@
 - **Files:** 24 (+1170/-61)
 - **Duration:** 1123ss
 - **Approach:** Delivered the ADMIN-only SLA policy and role matrix admin console. V38 Flyway migration adds ratified BOOLEAN to sla_policy (expand-only, DEFAULT false) and mirrors it into sla_policy_aud; also creates the role_permission_matrix table (UUID PK, role_name UNIQUE, permissions TEXT, version INT for OCC, Envers-audited) seeded with all six IdentityRole entries. Domain SlaPolicy entity gains ratified field + setVersion(). Public SlaPolicy DTO gains ratified. @ValidSlaPolicy cross-field constraint annotation + SlaPolicyConstraintValidator enforces resolutionMinutes >= responseMinutes on both CreateSlaPolicyRequest and UpdateSlaPolicyRequest (no Spring context needed). UpdateSlaPolicyRequest DTO carries responseMinutes, resolutionMinutes, atRiskFraction, ratified, version for OCC. SlaPolicyAdminService public interface in sla package separates admin operations from internal implementation; SlaPolicyService implements it with @CacheEvict on writes + DomainEventPublisher for SlaPolicyChanged outbox event. AdminSlaPolicyController refactored: injects SlaPolicyAdminService, PUT does direct in-place update (not supersede), GET returns PagedResponse<SlaPolicyResponse> with server-enforced max page size 50. RolePermissionMatrix entity + repository added to identity.domain (@Audited for Envers). RoleMatrixAdminService in identity.application provides ADMIN-only listMatrix/updateMatrix with BusinessGuardException guard preventing removal of role-matrix:write from ADMIN. RoleMatrixAdminController at /api/v1/admin/role-matrix provides GET (paginated) + PUT. ArchUnit rule AdminSlaPolicyArchTest asserts workorder has no dependency on sla.internal or sla.web.
+
+## WO-119: User Story: WO-119 - Certification registry with query-time currency evaluation
+- **Status:** completed
+- **Commit:** `9cce32c`
+- **Files:** 25 (+1701/-145)
+- **Duration:** 887ss
+- **Approach:** N/A
