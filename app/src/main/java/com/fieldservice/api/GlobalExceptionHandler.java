@@ -2,6 +2,8 @@ package com.fieldservice.api;
 
 import com.fieldservice.aigateway.api.AiCapExceededException;
 import com.fieldservice.aigateway.api.AiUnavailableException;
+import com.fieldservice.inventory.api.InsufficientStockException;
+import com.fieldservice.inventory.api.InvalidMovementException;
 import com.fieldservice.platform.api.ErrorEnvelope;
 import com.fieldservice.platform.api.FieldError;
 import com.fieldservice.platform.error.ScopeDenialTranslator;
@@ -307,6 +309,37 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.CONFLICT,
                 ErrorEnvelope.Code.CONFLICT,
                 "The operation violates a data integrity constraint.");
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ErrorEnvelope> handleInsufficientStock(
+            InsufficientStockException ex,
+            HttpServletRequest request) {
+
+        log.info("Insufficient stock: lineCount={}, traceId={}, path={}",
+                ex.getLines().size(), traceId(), request.getRequestURI());
+        List<FieldError> fieldErrors = ex.getLines().stream()
+                .map(l -> new FieldError(l.field(), l.message()))
+                .collect(Collectors.toList());
+        String tid = traceId();
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .header(TRACE_HEADER, tid)
+                .body(new ErrorEnvelope(
+                        ErrorEnvelope.Code.INSUFFICIENT_STOCK,
+                        "Insufficient stock for one or more requested lines.",
+                        fieldErrors,
+                        tid,
+                        Instant.now()));
+    }
+
+    @ExceptionHandler(InvalidMovementException.class)
+    public ResponseEntity<ErrorEnvelope> handleInvalidMovement(
+            InvalidMovementException ex,
+            HttpServletRequest request) {
+
+        log.info("Invalid movement: traceId={}, path={}", traceId(), request.getRequestURI());
+        List<FieldError> fieldErrors = List.of(new FieldError("request", ex.getMessage()));
+        return validationResponse(fieldErrors);
     }
 
     @ExceptionHandler(BusinessGuardException.class)

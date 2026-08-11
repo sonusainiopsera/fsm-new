@@ -104,5 +104,8 @@ public record ErrorEnvelope(
          * All refresh failure modes map to this single code to prevent state probing.
          */
         public static final String REAUTHENTICATION_REQUIRED = "REAUTHENTICATION_REQUIRED";
+
+        /** 422 — insufficient stock to fulfil one or more consumption lines; see fieldErrors for per-line detail. */
+        public static final String INSUFFICIENT_STOCK = "INSUFFICIENT_STOCK";
     }
 }

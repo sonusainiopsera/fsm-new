@@ -210,3 +210,10 @@
 - **Files:** 10 (+1186/-0)
 - **Duration:** 1017ss
 - **Approach:** Implemented a paginated, row-scoped work order search endpoint at GET /api/v1/work-orders. WorkOrderSearchCriteria captures all optional filters; WorkOrderSearchService composes them into a JPA Specification via buildFilterSpec(), delegates to SpecificationPageService which ANDs the AccessScope predicate (via ScopedQueryExecutor) so out-of-scope rows are never loaded. SortAllowList gates all sort fields and rejects unknowns with 400. WorkOrderBoardRow is a projection DTO; entities are never returned. Page size is clamped to 50 in PageQuery. ETag/If-None-Match conditional GET is handled in the controller. Expand-only migration V20 adds composite and partial indexes. A MethodArgumentTypeMismatchException handler was added to GlobalExceptionHandler to return 400 with field-level errors for invalid enum values in request params.
+
+## WO-149: User Story: WO-149 - Atomic parts consumption enforcing non-negative stock
+- **Status:** completed
+- **Commit:** `a357ccf`
+- **Files:** 21 (+1744/-1)
+- **Duration:** 1031ss
+- **Approach:** N/A

@@ -46,7 +46,10 @@ class ScopedRepositoryArchTest {
                     + "WorkOrderPartConsumptionRepository|TechnicianCertificationRepository|"
                     // WO-126: hold reference data and interval tables are not scoped entities;
                     // hold operations run inside an already-scoped work order transaction
-                    + "HoldReasonRepository|WorkOrderHoldRepository";
+                    + "HoldReasonRepository|WorkOrderHoldRepository|"
+                    // WO-149: work_order_part ledger is not a scoped entity; access is controlled
+                    // at the service layer which already enforces work-order ownership
+                    + "WorkOrderPartRepository";
 
     /**
      * Production rule: domain JPA repositories that are not in the non-scoped allow-list
