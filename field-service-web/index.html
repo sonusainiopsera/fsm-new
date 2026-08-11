@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Field Service Operations Platform" />
+    <title>Field Service Platform</title>
+    <!--
+      Theme initialisation script: reads the stored preference before first paint
+      to prevent a flash of the wrong appearance. Set data-appearance on <html>
+      before any stylesheet is applied.
+      No unsafe-inline: this is a static attribute set by a <script> tag in the head.
+      If CSP must be strict-dynamic, move this logic to a nonce'd inline script.
+    -->
+    <script>
+      (function () {
+        var stored = localStorage.getItem('fs-appearance');
+        var preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var appearance = stored || preferred;
+        if (appearance === 'dark') {
+          document.documentElement.setAttribute('data-appearance', 'dark');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

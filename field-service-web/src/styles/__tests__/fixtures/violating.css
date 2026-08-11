@@ -1,0 +1,18 @@
+/*
+ * VIOLATING fixture — contains deliberate lint violations.
+ * The Stylelint lint-gate test runs over this file and expects at least 3 warnings:
+ *   1. color: #ff0000    → hardcoded hex colour
+ *   2. border-radius: 6px → hardcoded px radius
+ *   3. transition-duration: 120ms → hardcoded ms duration
+ */
+.violation-color {
+  color: #ff0000;
+}
+
+.violation-radius {
+  border-radius: 6px;
+}
+
+.violation-duration {
+  transition-duration: 120ms;
+}

@@ -1,0 +1,25 @@
+/*
+ * COMPLIANT fixture — uses only var(--token-*) references.
+ * The Stylelint lint-gate test runs over this file and expects zero warnings.
+ */
+.card {
+  color: var(--token-text-primary);
+  background-color: var(--token-surface-card);
+  border-radius: var(--token-radius-card);
+  padding: var(--token-space-4);
+  margin: var(--token-space-2);
+  box-shadow: var(--token-elevation-1);
+  border: var(--token-elevation-border);
+  transition-duration: var(--token-duration-enter);
+}
+
+.badge {
+  color: var(--token-text-on-accent);
+  background-color: var(--token-accent-500);
+  border-radius: var(--token-radius-pill);
+  padding: var(--token-space-1) var(--token-space-2);
+}
+
+.numeric-cell {
+  font-variant-numeric: var(--token-numeric);
+}

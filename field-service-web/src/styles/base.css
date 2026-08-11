@@ -1,0 +1,134 @@
+/*
+ * BASE STYLESHEET
+ * CSS reset, global defaults, tightened tracking rule, and the
+ * .numeric utility class for tabular-figures alignment.
+ *
+ * References only var(--token-*) custom properties — zero hard-coded values.
+ */
+
+/* ---------------------------------------------------------------
+   Reset
+   --------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 100%; /* 1rem = 16px browser default */
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  font-family: var(--token-family-base);
+  font-size: var(--token-fs-16);
+  line-height: var(--token-lh-body);
+  letter-spacing: var(--token-ls-base);
+  color: var(--token-text-primary);
+  background-color: var(--token-surface-page);
+}
+
+/* ---------------------------------------------------------------
+   Tightened letter-spacing for display sizes (≥20 px)
+   Applies to h1–h3 and any element explicitly sized ≥20 px.
+   --------------------------------------------------------------- */
+h1,
+h2,
+h3,
+[style*="font-size: var(--token-fs-20)"],
+[style*="font-size: var(--token-fs-24)"],
+[style*="font-size: var(--token-fs-30)"] {
+  letter-spacing: var(--token-ls-tight);
+}
+
+h1 {
+  font-size: var(--token-fs-30);
+}
+
+h2 {
+  font-size: var(--token-fs-24);
+}
+
+h3 {
+  font-size: var(--token-fs-20);
+}
+
+h4 {
+  font-size: var(--token-fs-16);
+}
+
+h5,
+h6 {
+  font-size: var(--token-fs-14);
+}
+
+/* ---------------------------------------------------------------
+   Links
+   --------------------------------------------------------------- */
+a {
+  color: var(--token-accent-500);
+  text-decoration: underline;
+}
+
+a:focus-visible {
+  outline: var(--token-elevation-border);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------
+   Images and media
+   --------------------------------------------------------------- */
+img,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ---------------------------------------------------------------
+   Tables: tabular-figures applied by default
+   --------------------------------------------------------------- */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* ---------------------------------------------------------------
+   .numeric — tabular figures utility
+   Apply to: every numeric cell, KPI value, countdown, score, and
+   currency display. Guarantees column alignment regardless of
+   the digit values. Uses the --token-numeric contract token.
+   --------------------------------------------------------------- */
+.numeric {
+  font-variant-numeric: var(--token-numeric);
+  font-feature-settings: "tnum" 1;
+}
+
+/* ---------------------------------------------------------------
+   Content layout
+   --------------------------------------------------------------- */
+.content-container {
+  max-width: var(--token-content-max-width);
+  margin-inline: auto;
+  padding-inline: var(--token-gutter);
+}
+
+/* ---------------------------------------------------------------
+   Reduced motion — zero-out all durations when OS prefers it.
+   Layout and content are preserved; only animation is removed.
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

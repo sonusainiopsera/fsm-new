@@ -1,0 +1,11 @@
+/*
+ * Style aggregator — load order matters:
+ *   1. contract  → declares token vocabulary (parsed by generate script)
+ *   2. light     → binds all tokens at :root (default appearance)
+ *   3. dark      → overrides tokens under [data-appearance="dark"]
+ *   4. base      → reset, defaults, utility classes (consumes only var(--token-*))
+ */
+@import './tokens.contract.css';
+@import './tokens.light.css';
+@import './tokens.dark.css';
+@import './base.css';

@@ -1,0 +1,117 @@
+/*
+ * LIGHT VALUE SET
+ * Binds every token declared in tokens.contract.css to a light-mode value.
+ * Applied at :root — these are the default values.
+ * The dark override is in tokens.dark.css ([data-appearance="dark"]).
+ */
+:root {
+  /* --- Typography --- */
+  --token-fs-12: 0.75rem;
+  --token-fs-13: 0.8125rem;
+  --token-fs-14: 0.875rem;
+  --token-fs-16: 1rem;
+  --token-fs-20: 1.25rem;
+  --token-fs-24: 1.5rem;
+  --token-fs-30: 1.875rem;
+
+  --token-lh-body: 1.5;
+
+  --token-ls-base: 0em;
+  --token-ls-tight: -0.02em;
+
+  /* Q13 PLACEHOLDER — system font stack until brand typeface is ratified */
+  --token-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --token-family-brand: var(--token-family-base);
+
+  --token-numeric: tabular-nums;
+
+  /* --- Spacing --- */
+  --token-space-1: 4px;
+  --token-space-2: 8px;
+  --token-space-3: 12px;
+  --token-space-4: 16px;
+  --token-space-6: 24px;
+  --token-space-8: 32px;
+  --token-content-max-width: 1440px;
+  --token-gutter: 24px;
+
+  /* --- Radius --- */
+  --token-radius-control: 6px;
+  --token-radius-card: 10px;
+  --token-radius-overlay: 14px;
+  --token-radius-pill: 9999px;
+
+  /* --- Elevation (light: subtle shadows + hairline border) --- */
+  --token-elevation-1: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  --token-elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --token-elevation-border: 1px solid #e5e7eb;
+  --token-elevation-scrim: rgba(0, 0, 0, 0.5);
+
+  /* --- Motion --- */
+  --token-duration-micro: 120ms;
+  --token-duration-enter: 180ms;
+  --token-duration-overlay: 240ms;
+  --token-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Neutral greyscale ramp --- */
+  --token-neutral-0: #ffffff;
+  --token-neutral-50: #f9fafb;
+  --token-neutral-100: #f3f4f6;
+  --token-neutral-200: #e5e7eb;
+  --token-neutral-300: #d1d5db;
+  --token-neutral-400: #9ca3af;
+  --token-neutral-500: #6b7280;
+  --token-neutral-600: #4b5563;
+  --token-neutral-700: #374151;
+  --token-neutral-800: #1f2937;
+  --token-neutral-900: #111827;
+  --token-neutral-950: #030712;
+
+  /* --- Accent — Q13 placeholder (neutral enterprise blue) --- */
+  --token-accent-50: #eff6ff;
+  --token-accent-100: #dbeafe;
+  --token-accent-200: #bfdbfe;
+  --token-accent-300: #93c5fd;
+  --token-accent-400: #60a5fa;
+  --token-accent-500: #3b82f6;
+  --token-accent-600: #2563eb;
+  --token-accent-700: #1d4ed8;
+  --token-accent-800: #1e40af;
+  --token-accent-900: #1e3a8a;
+
+  /* --- Semantic: informational --- */
+  --token-info-subtle: #eff6ff;
+  --token-info-default: #3b82f6;
+  --token-info-emphasis: #1d4ed8;
+
+  /* --- Semantic: success --- */
+  --token-success-subtle: #f0fdf4;
+  --token-success-default: #22c55e;
+  --token-success-emphasis: #16a34a;
+
+  /* --- Semantic: warning --- */
+  --token-warning-subtle: #fffbeb;
+  --token-warning-default: #f59e0b;
+  --token-warning-emphasis: #d97706;
+
+  /* --- Semantic: danger --- */
+  --token-danger-subtle: #fef2f2;
+  --token-danger-default: #ef4444;
+  --token-danger-emphasis: #dc2626;
+
+  /* --- Surfaces --- */
+  --token-surface-page: #f9fafb;
+  --token-surface-card: #ffffff;
+  --token-surface-elevated: #ffffff;
+  --token-surface-overlay: rgba(255, 255, 255, 0.95);
+
+  /* --- Text --- */
+  --token-text-primary: #111827;
+  --token-text-secondary: #6b7280;
+  --token-text-disabled: #9ca3af;
+  --token-text-on-accent: #ffffff;
+
+  /* --- Border --- */
+  --token-border-default: #e5e7eb;
+  --token-border-focus: #3b82f6;
+}

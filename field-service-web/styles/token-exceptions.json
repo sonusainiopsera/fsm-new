@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Documented exceptions to the zero-hardcoded-values lint rule. Each exception must name the file pattern it applies to, the reason, and the date it was approved. This file is validated by a unit test — entries without reason and date fields will fail the build.",
+  "exceptions": []
+}

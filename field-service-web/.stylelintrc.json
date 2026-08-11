@@ -1,0 +1,29 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "ignoreFiles": [
+    "src/styles/tokens.contract.css",
+    "src/styles/tokens.light.css",
+    "src/styles/tokens.dark.css",
+    "src/styles/__tests__/fixtures/compliant.css",
+    "node_modules/**",
+    "dist/**"
+  ],
+  "rules": {
+    "color-named": "never",
+    "declaration-property-value-disallowed-list": {
+      "color": ["/#[0-9a-fA-F]/", "/^rgb/", "/^hsl/"],
+      "background-color": ["/#[0-9a-fA-F]/", "/^rgb/", "/^hsl/"],
+      "background": ["/#[0-9a-fA-F]/", "/^rgb/", "/^hsl/", "/^linear-gradient/", "/^radial-gradient/"],
+      "border-color": ["/#[0-9a-fA-F]/", "/^rgb/", "/^hsl/"],
+      "outline-color": ["/#[0-9a-fA-F]/", "/^rgb/", "/^hsl/"],
+      "fill": ["/#[0-9a-fA-F]/", "/^rgb/", "/^hsl/"],
+      "stroke": ["/#[0-9a-fA-F]/", "/^rgb/", "/^hsl/"],
+      "box-shadow": ["/\\s+[1-9][0-9]*px/", "/^[1-9][0-9]*px/"],
+      "border-radius": ["/^[1-9][0-9]*(px|em|rem)/"],
+      "transition-duration": ["/^[0-9]+(ms|s)/"],
+      "animation-duration": ["/^[0-9]+(ms|s)/"]
+    },
+    "comment-empty-line-before": null,
+    "no-descending-specificity": null
+  }
+}

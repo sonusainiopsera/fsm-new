@@ -1,0 +1,200 @@
+/*
+ * ============================================================
+ * DESIGN TOKEN CONTRACT — vocabulary declaration only
+ * ============================================================
+ * This file names every CSS custom property used by the
+ * field-service platform. Values are NOT set here; they are
+ * bound in tokens.light.css (:root) and tokens.dark.css
+ * ([data-appearance="dark"]).
+ *
+ * Two rules:
+ *  1. A token that does not appear here does not exist.
+ *  2. Both value-set files MUST declare every token named here.
+ *
+ * The generate-token-contract.mjs script parses this file and
+ * emits tokens.contract.json — the machine-readable mirror
+ * consumed by parity unit tests and lint rules.
+ *
+ * Q13 PLACEHOLDER tokens are marked with "<!-- Q13 -->" and
+ * must be ratified (value changed from placeholder) before
+ * the Phase 2 component library freeze. Changing a Q13 token
+ * value is a value swap only — no rebuild required.
+ * ============================================================
+ */
+
+/* ===========================================================
+   TYPOGRAPHY
+   =========================================================== */
+
+/* Type scale — 12 / 13 / 14 / 16 / 20 / 24 / 30 px */
+:root {
+  --token-fs-12: ;
+  --token-fs-13: ;
+  --token-fs-14: ;
+  --token-fs-16: ;
+  --token-fs-20: ;
+  --token-fs-24: ;
+  --token-fs-30: ;
+
+  /* Body line-height: 1.5 × font-size */
+  --token-lh-body: ;
+
+  /* Letter-spacing: base (normal) and tight (for ≥20 px) */
+  --token-ls-base: ;
+  --token-ls-tight: ;
+
+  /* Font families
+     Q13: --token-family-brand must be ratified before Phase 2 freeze.
+     System font stack is the committed default for fastest first paint.
+     When ratified, replace the placeholder with the licensed typeface
+     name and add subset-and-preload link tags to index.html. */
+  --token-family-base: ; /* system font stack — never blocks first paint */
+  --token-family-brand: ; /* Q13 PLACEHOLDER — awaiting brand ratification */
+
+  /* Tabular figures — apply via font-variant-numeric on numeric cells,
+     KPI values, countdowns and scores to guarantee column alignment */
+  --token-numeric: ;
+}
+
+/* ===========================================================
+   SPACING (4 px base rhythm)
+   =========================================================== */
+:root {
+  --token-space-1: ; /* 4 px */
+  --token-space-2: ; /* 8 px */
+  --token-space-3: ; /* 12 px */
+  --token-space-4: ; /* 16 px */
+  --token-space-6: ; /* 24 px */
+  --token-space-8: ; /* 32 px */
+
+  /* Layout grid */
+  --token-content-max-width: ; /* 1440 px cap */
+  --token-gutter: ;             /* 24 px page gutter */
+}
+
+/* ===========================================================
+   RADIUS
+   =========================================================== */
+:root {
+  --token-radius-control: ; /* 6 px — inputs, buttons, tags */
+  --token-radius-card: ;    /* 10 px — cards, panels */
+  --token-radius-overlay: ; /* 14 px — modals, drawers, popovers */
+  --token-radius-pill: ;    /* 9999 px — avatars, status badges */
+}
+
+/* ===========================================================
+   ELEVATION
+   At most two levels. Structural separation uses
+   --token-elevation-border (1 px hairline), not shadow.
+   =========================================================== */
+:root {
+  --token-elevation-1: ; /* Level 1 — cards, dropdowns */
+  --token-elevation-2: ; /* Level 2 — modals, drawers */
+  --token-elevation-border: ; /* 1 px hairline — panels, table rows, dividers */
+  --token-elevation-scrim: ;  /* modal / drawer backdrop colour */
+}
+
+/* ===========================================================
+   MOTION
+   All durations ≤ 300 ms. One standard easing curve.
+   Respect prefers-reduced-motion: reduce in base.css.
+   =========================================================== */
+:root {
+  --token-duration-micro: ;   /* 120 ms — icon swaps, checkbox, toggle */
+  --token-duration-enter: ;   /* 180 ms — page-level element entry */
+  --token-duration-overlay: ; /* 240 ms — modal / drawer open */
+  --token-easing-standard: ;  /* cubic-bezier(0.4, 0, 0.2, 1) */
+}
+
+/* ===========================================================
+   COLOUR — Neutral greyscale ramp
+   Enterprise-neutral: cool grey, never warm or blue-shifted.
+   =========================================================== */
+:root {
+  --token-neutral-0: ;
+  --token-neutral-50: ;
+  --token-neutral-100: ;
+  --token-neutral-200: ;
+  --token-neutral-300: ;
+  --token-neutral-400: ;
+  --token-neutral-500: ;
+  --token-neutral-600: ;
+  --token-neutral-700: ;
+  --token-neutral-800: ;
+  --token-neutral-900: ;
+  --token-neutral-950: ;
+}
+
+/* ===========================================================
+   COLOUR — Accent (single family)
+   Q13: hue pending brand ratification. Placeholder is a
+   neutral enterprise blue. Replace --token-accent-* values
+   in tokens.light.css and tokens.dark.css after ratification.
+   =========================================================== */
+:root {
+  --token-accent-50: ;  /* Q13 PLACEHOLDER */
+  --token-accent-100: ; /* Q13 PLACEHOLDER */
+  --token-accent-200: ; /* Q13 PLACEHOLDER */
+  --token-accent-300: ; /* Q13 PLACEHOLDER */
+  --token-accent-400: ; /* Q13 PLACEHOLDER */
+  --token-accent-500: ; /* Q13 PLACEHOLDER — primary accent colour */
+  --token-accent-600: ; /* Q13 PLACEHOLDER */
+  --token-accent-700: ; /* Q13 PLACEHOLDER */
+  --token-accent-800: ; /* Q13 PLACEHOLDER */
+  --token-accent-900: ; /* Q13 PLACEHOLDER */
+}
+
+/* ===========================================================
+   COLOUR — Semantic families (exactly four)
+   Adding a fifth semantic family is a contract-breaking change
+   and will fail the semantic-family-count unit test.
+   =========================================================== */
+:root {
+  /* Informational */
+  --token-info-subtle: ;
+  --token-info-default: ;
+  --token-info-emphasis: ;
+
+  /* Success */
+  --token-success-subtle: ;
+  --token-success-default: ;
+  --token-success-emphasis: ;
+
+  /* Warning */
+  --token-warning-subtle: ;
+  --token-warning-default: ;
+  --token-warning-emphasis: ;
+
+  /* Danger */
+  --token-danger-subtle: ;
+  --token-danger-default: ;
+  --token-danger-emphasis: ;
+}
+
+/* ===========================================================
+   COLOUR — Surfaces
+   =========================================================== */
+:root {
+  --token-surface-page: ;
+  --token-surface-card: ;
+  --token-surface-elevated: ;
+  --token-surface-overlay: ;
+}
+
+/* ===========================================================
+   COLOUR — Text
+   =========================================================== */
+:root {
+  --token-text-primary: ;
+  --token-text-secondary: ;
+  --token-text-disabled: ;
+  --token-text-on-accent: ;
+}
+
+/* ===========================================================
+   COLOUR — Border
+   =========================================================== */
+:root {
+  --token-border-default: ;
+  --token-border-focus: ;
+}

@@ -1,0 +1,123 @@
+/*
+ * DARK VALUE SET
+ * Overrides every token declared in tokens.contract.css for dark appearance.
+ * Applied when [data-appearance="dark"] is set on the <html> element.
+ *
+ * Dark mode philosophy:
+ * - Near-black graphite base (#111827) for page surface.
+ * - Surfaces separate by exactly one elevation step via the hairline border
+ *   token (--token-elevation-border), never by additional shadow depth.
+ * - Semantic colours are lightened/muted variants for contrast on dark backgrounds.
+ * - Q13 accent tokens are inverted (light steps become dark steps).
+ */
+[data-appearance="dark"] {
+  /* --- Typography (scale and spacing unchanged across appearances) --- */
+  --token-fs-12: 0.75rem;
+  --token-fs-13: 0.8125rem;
+  --token-fs-14: 0.875rem;
+  --token-fs-16: 1rem;
+  --token-fs-20: 1.25rem;
+  --token-fs-24: 1.5rem;
+  --token-fs-30: 1.875rem;
+
+  --token-lh-body: 1.5;
+
+  --token-ls-base: 0em;
+  --token-ls-tight: -0.02em;
+
+  /* Q13 PLACEHOLDER — unchanged; swap when brand typeface is ratified */
+  --token-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --token-family-brand: var(--token-family-base);
+
+  --token-numeric: tabular-nums;
+
+  /* --- Spacing (layout values unchanged across appearances) --- */
+  --token-space-1: 4px;
+  --token-space-2: 8px;
+  --token-space-3: 12px;
+  --token-space-4: 16px;
+  --token-space-6: 24px;
+  --token-space-8: 32px;
+  --token-content-max-width: 1440px;
+  --token-gutter: 24px;
+
+  /* --- Radius (unchanged across appearances) --- */
+  --token-radius-control: 6px;
+  --token-radius-card: 10px;
+  --token-radius-overlay: 14px;
+  --token-radius-pill: 9999px;
+
+  /* --- Elevation (dark: slightly more visible shadows + dark hairline) --- */
+  --token-elevation-1: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --token-elevation-2: 0 4px 12px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --token-elevation-border: 1px solid #374151;
+  --token-elevation-scrim: rgba(0, 0, 0, 0.7);
+
+  /* --- Motion (unchanged; reduced-motion handled by prefers-reduced-motion) --- */
+  --token-duration-micro: 120ms;
+  --token-duration-enter: 180ms;
+  --token-duration-overlay: 240ms;
+  --token-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Neutral greyscale ramp (absolute colours; same scale, different usage) --- */
+  --token-neutral-0: #ffffff;
+  --token-neutral-50: #f9fafb;
+  --token-neutral-100: #f3f4f6;
+  --token-neutral-200: #e5e7eb;
+  --token-neutral-300: #d1d5db;
+  --token-neutral-400: #9ca3af;
+  --token-neutral-500: #6b7280;
+  --token-neutral-600: #4b5563;
+  --token-neutral-700: #374151;
+  --token-neutral-800: #1f2937;
+  --token-neutral-900: #111827;
+  --token-neutral-950: #030712;
+
+  /* --- Accent — Q13 placeholder inverted for dark backgrounds --- */
+  --token-accent-50: #1e3a8a;
+  --token-accent-100: #1e40af;
+  --token-accent-200: #1d4ed8;
+  --token-accent-300: #2563eb;
+  --token-accent-400: #3b82f6;
+  --token-accent-500: #60a5fa;
+  --token-accent-600: #93c5fd;
+  --token-accent-700: #bfdbfe;
+  --token-accent-800: #dbeafe;
+  --token-accent-900: #eff6ff;
+
+  /* --- Semantic: informational (dark) --- */
+  --token-info-subtle: #1e3a5f;
+  --token-info-default: #60a5fa;
+  --token-info-emphasis: #93c5fd;
+
+  /* --- Semantic: success (dark) --- */
+  --token-success-subtle: #14532d;
+  --token-success-default: #4ade80;
+  --token-success-emphasis: #86efac;
+
+  /* --- Semantic: warning (dark) --- */
+  --token-warning-subtle: #451a03;
+  --token-warning-default: #fbbf24;
+  --token-warning-emphasis: #fde68a;
+
+  /* --- Semantic: danger (dark) --- */
+  --token-danger-subtle: #450a0a;
+  --token-danger-default: #f87171;
+  --token-danger-emphasis: #fca5a5;
+
+  /* --- Surfaces (dark: graphite ramp, one step per level) --- */
+  --token-surface-page: #111827;
+  --token-surface-card: #1f2937;
+  --token-surface-elevated: #374151;
+  --token-surface-overlay: rgba(0, 0, 0, 0.8);
+
+  /* --- Text (dark: inverted from light) --- */
+  --token-text-primary: #f9fafb;
+  --token-text-secondary: #9ca3af;
+  --token-text-disabled: #6b7280;
+  --token-text-on-accent: #ffffff;
+
+  /* --- Border (dark: softer than light) --- */
+  --token-border-default: #374151;
+  --token-border-focus: #60a5fa;
+}
