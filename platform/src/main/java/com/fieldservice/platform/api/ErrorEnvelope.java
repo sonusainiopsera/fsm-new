@@ -116,5 +116,11 @@ public record ErrorEnvelope(
 
         /** 422 — the referenced asset is not located at the referenced site. */
         public static final String ASSET_SITE_MISMATCH = "ASSET_SITE_MISMATCH";
+
+        /** 409 — the CSAT survey has already received a response. */
+        public static final String CSAT_ALREADY_ANSWERED = "CSAT_ALREADY_ANSWERED";
+
+        /** 422 — the CSAT survey response window has expired. */
+        public static final String CSAT_WINDOW_EXPIRED = "CSAT_WINDOW_EXPIRED";
     }
 }

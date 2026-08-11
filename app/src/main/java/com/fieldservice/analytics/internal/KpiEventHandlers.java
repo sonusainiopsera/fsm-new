@@ -5,6 +5,7 @@ import com.fieldservice.outbox.payload.WorkOrderCreatedPayload;
 import com.fieldservice.outbox.payload.WorkOrderStateChangedPayload;
 import com.fieldservice.platform.outbox.EventHandler;
 import com.fieldservice.platform.outbox.EventHandlerContext;
+import com.fieldservice.portal.csat.CsatIssuanceConsumer;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,12 +34,15 @@ class KpiEventHandlers {
     static class WorkOrderStateChangedHandler implements EventHandler {
         private final KpiOutboxConsumer consumer;
         private final QualityKpiOutboxConsumer qualityConsumer;
+        private final CsatIssuanceConsumer csatIssuanceConsumer;
 
         WorkOrderStateChangedHandler(
                 KpiOutboxConsumer consumer,
-                QualityKpiOutboxConsumer qualityConsumer) {
-            this.consumer = consumer;
-            this.qualityConsumer = qualityConsumer;
+                QualityKpiOutboxConsumer qualityConsumer,
+                CsatIssuanceConsumer csatIssuanceConsumer) {
+            this.consumer             = consumer;
+            this.qualityConsumer      = qualityConsumer;
+            this.csatIssuanceConsumer = csatIssuanceConsumer;
         }
 
         @Override
@@ -48,8 +52,12 @@ class KpiEventHandlers {
         public void handle(EventHandlerContext ctx) {
             consumer.consume(ctx);
             qualityConsumer.consume(ctx);
+            csatIssuanceConsumer.consume(ctx);
         }
     }
+
+    // CsatKpiConsumer (analytics.internal) is registered directly as an EventHandler bean
+    // for CsatResponseRecorded — no adapter needed here.
 
     @Component
     static class PartsConsumedHandler implements EventHandler {
