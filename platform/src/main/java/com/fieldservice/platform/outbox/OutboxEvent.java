@@ -64,6 +64,12 @@ class OutboxEvent {
     @Column(name = "last_error")
     private String lastError;
 
+    @Column(name = "next_attempt_at", nullable = false)
+    private Instant nextAttemptAt = Instant.now();
+
+    @Column(name = "dead_lettered_at")
+    private Instant deadLetteredAt;
+
     protected OutboxEvent() {
     }
 
@@ -91,4 +97,6 @@ class OutboxEvent {
     Instant getPublishedAt() { return publishedAt; }
     int getAttemptCount() { return attemptCount; }
     String getLastError() { return lastError; }
+    Instant getNextAttemptAt() { return nextAttemptAt; }
+    Instant getDeadLetteredAt() { return deadLetteredAt; }
 }

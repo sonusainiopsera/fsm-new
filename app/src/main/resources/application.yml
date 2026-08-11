@@ -107,6 +107,14 @@ app:
   outbox:
     # Maximum serialised payload size in bytes; oversized payloads fail the transaction
     max-payload-bytes: ${APP_OUTBOX_MAX_PAYLOAD_BYTES:65536}
+    poller:
+      batch-size: ${APP_OUTBOX_POLLER_BATCH_SIZE:100}
+      poll-interval-ms: ${APP_OUTBOX_POLLER_INTERVAL_MS:500}
+      max-attempts: ${APP_OUTBOX_POLLER_MAX_ATTEMPTS:5}
+      backoff-base-ms: ${APP_OUTBOX_POLLER_BACKOFF_BASE_MS:1000}
+      backoff-cap-ms: ${APP_OUTBOX_POLLER_BACKOFF_CAP_MS:300000}
+      jitter-fraction: ${APP_OUTBOX_POLLER_JITTER_FRACTION:0.2}
+      dispatch-timeout-ms: ${APP_OUTBOX_POLLER_DISPATCH_TIMEOUT_MS:30000}
 
   auth:
     jwt:
