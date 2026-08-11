@@ -43,6 +43,7 @@ class KpiProjectionService implements KpiProjectionQuery {
 
     private final KpiProjectionRepository repository;
     private final KpiAggregationQueries aggregationQueries;
+    private final FirstTimeFixCalculator ftfCalculator;
     private final DegradationPolicy degradationPolicy;
     private final AnalyticsMetrics metrics;
     private final Clock clock;
@@ -53,6 +54,7 @@ class KpiProjectionService implements KpiProjectionQuery {
     KpiProjectionService(
             KpiProjectionRepository repository,
             KpiAggregationQueries aggregationQueries,
+            FirstTimeFixCalculator ftfCalculator,
             DegradationPolicy degradationPolicy,
             AnalyticsMetrics metrics,
             Clock clock,
@@ -60,6 +62,7 @@ class KpiProjectionService implements KpiProjectionQuery {
             AnalyticsRedisCache redisCache) {
         this.repository = repository;
         this.aggregationQueries = aggregationQueries;
+        this.ftfCalculator = ftfCalculator;
         this.degradationPolicy = degradationPolicy;
         this.metrics = metrics;
         this.clock = clock;
@@ -136,7 +139,7 @@ class KpiProjectionService implements KpiProjectionQuery {
         log.info("analytics.recompute.start: metricKey={}", metricKey);
 
         KpiProjectionEntity entity = findOrCreate(metricKey,
-                KpiAggregationQueries.SEGMENT_ALL, windowFor(metricKey), now);
+                segmentFor(metricKey), windowFor(metricKey), now);
 
         try {
             KpiAggregationQueries.AggregateResult result = runAggregation(metricKey);
@@ -190,11 +193,21 @@ class KpiProjectionService implements KpiProjectionQuery {
             case KpiAggregationQueries.METRIC_WO_BACKLOG_COUNT      -> aggregationQueries.queryBacklogCount();
             case KpiAggregationQueries.METRIC_WO_COMPLETION_RATE_7D -> aggregationQueries.queryCompletionRate7d();
             case KpiAggregationQueries.METRIC_WO_SLA_COMPLIANCE_7D  -> aggregationQueries.querySlaCompliance7d();
+            case QualityMetricKeys.FTF_MATURED                      -> ftfCalculator.queryMaturedRate();
+            case QualityMetricKeys.FTF_PROVISIONAL                  -> ftfCalculator.queryProvisionalRate();
+            case QualityMetricKeys.REPEAT_VISIT_COUNT               -> ftfCalculator.queryRepeatVisitCount();
+            case QualityMetricKeys.UNCLASSIFIABLE_COUNT             -> ftfCalculator.queryUnclassifiableCount();
             default -> {
                 log.warn("analytics.recompute.unknown_metric: metricKey={}", metricKey);
                 yield null;
             }
         };
+    }
+
+    private String segmentFor(String metricKey) {
+        return QualityMetricKeys.FTF_PROVISIONAL.equals(metricKey)
+                ? QualityMetricKeys.SEGMENT_PROVISIONAL
+                : KpiAggregationQueries.SEGMENT_ALL;
     }
 
     private KpiProjectionEntity findOrCreate(

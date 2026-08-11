@@ -32,7 +32,14 @@ class KpiEventHandlers {
     @Component
     static class WorkOrderStateChangedHandler implements EventHandler {
         private final KpiOutboxConsumer consumer;
-        WorkOrderStateChangedHandler(KpiOutboxConsumer consumer) { this.consumer = consumer; }
+        private final QualityKpiOutboxConsumer qualityConsumer;
+
+        WorkOrderStateChangedHandler(
+                KpiOutboxConsumer consumer,
+                QualityKpiOutboxConsumer qualityConsumer) {
+            this.consumer = consumer;
+            this.qualityConsumer = qualityConsumer;
+        }
 
         @Override
         public String getSupportedEventType() { return WorkOrderStateChangedPayload.EVENT_TYPE; }
@@ -40,6 +47,7 @@ class KpiEventHandlers {
         @Override
         public void handle(EventHandlerContext ctx) {
             consumer.consume(ctx);
+            qualityConsumer.consume(ctx);
         }
     }
 
