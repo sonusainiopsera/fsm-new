@@ -1,8 +1,11 @@
 package com.fieldservice.domain.user;
 
+import com.fieldservice.identity.domain.AppearancePreference;
 import com.fieldservice.platform.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -47,6 +50,12 @@ public class AppUser extends BaseEntity {
     @Column(name = "external_subject", length = 500)
     private String externalSubject;
 
+    // INTERNAL classification (BR-23). Nullable: NULL resolves to LIGHT client-side.
+    // Audited by Envers (no @NotAudited): preference changes are tracked in app_user_aud.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "appearance_preference", length = 10)
+    private AppearancePreference appearancePreference;
+
     protected AppUser() {
     }
 
@@ -66,4 +75,10 @@ public class AppUser extends BaseEntity {
     /** CONFIDENTIAL — OIDC/SAML subject identifier; null until federation is enabled. */
     public String getExternalSubject() { return externalSubject; }
     public void setExternalSubject(String externalSubject) { this.externalSubject = externalSubject; }
+
+    /** INTERNAL — nullable; NULL resolves to LIGHT. Updated via PUT /api/v1/users/me/preferences. */
+    public AppearancePreference getAppearancePreference() { return appearancePreference; }
+    public void setAppearancePreference(AppearancePreference appearancePreference) {
+        this.appearancePreference = appearancePreference;
+    }
 }

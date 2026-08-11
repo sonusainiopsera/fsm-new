@@ -126,3 +126,10 @@
 - **Files:** 16 (+1292/-23)
 - **Duration:** 958ss
 - **Approach:** N/A
+
+## WO-184: User Story: WO-184 - Per-account appearance preference persistence and flash-free restore
+- **Status:** completed
+- **Commit:** `4c150ad`
+- **Files:** 15 (+1057/-0)
+- **Duration:** 788ss
+- **Approach:** Expand-only V15 migration adds nullable appearance_preference VARCHAR(10) with a CHECK(IN ('LIGHT','DARK','SYSTEM')) to app_user and mirrors the column in app_user_aud for Envers. AppUser gains an @Enumerated(STRING) AppearancePreference field (Envers-audited, INTERNAL classification). UserPreferencesService derives the subject exclusively from AccessScopeResolver (no client-supplied ID, IDOR-closed), loads the user by ID, and reads/writes the preference within @Transactional boundaries so Envers revision and domain update are atomic. UserPreferencesController exposes GET/PUT /api/v1/users/me/preferences with @Valid Bean Validation; invalid enum values produce 400 via GlobalExceptionHandler (HttpMessageNotReadableException); unknown properties are rejected by the global fail-on-unknown-properties=true Jackson config. On the web side: appearanceMirror.js reads/writes/clears the fs-appearance localStorage key with tampered-value fallback; resolveAppearance.js maps LIGHT→light, DARK→dark, SYSTEM→OS, null→light; AppearanceProvider.jsx mutates only data-appearance on <html> (no stylesheet swap, <100ms budget); preferences.js provides the API client; appearance.test.js covers all unit cases; index.html already has a CSP-compatible pre-paint bootstrap using the same key.

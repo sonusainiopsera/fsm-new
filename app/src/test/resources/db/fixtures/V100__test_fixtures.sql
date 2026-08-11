@@ -168,3 +168,17 @@ INSERT INTO stock_balance (id, part_id, location_id, quantity_on_hand, version) 
     -- Tech 2 Van A: working stock
     ('70000000-0000-0000-0000-000000000014', '50000000-0000-0000-0000-000000000002', '60000000-0000-0000-0000-000000000014', 6, 0),
     ('70000000-0000-0000-0000-000000000015', '50000000-0000-0000-0000-000000000005', '60000000-0000-0000-0000-000000000014', 1, 0);
+
+-- =============================================================================
+-- appearance preference fixtures (WO-184)
+-- Sets appearance_preference on two of the existing users so tests can cover
+-- LIGHT-explicit, DARK, SYSTEM, and null (→resolves-to-LIGHT) cases.
+-- =============================================================================
+-- dispatcher: explicit LIGHT preference
+UPDATE app_user SET appearance_preference = 'LIGHT' WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001';
+-- tech1: DARK preference
+UPDATE app_user SET appearance_preference = 'DARK'  WHERE id = 'aaaaaaaa-0000-0000-0000-000000000011';
+-- tech2: SYSTEM preference
+UPDATE app_user SET appearance_preference = 'SYSTEM' WHERE id = 'aaaaaaaa-0000-0000-0000-000000000012';
+-- manager and customer: null (resolve-to-LIGHT default)
+-- (manager = aaaaaaaa-0000-0000-0000-000000000002, customer = aaaaaaaa-0000-0000-0000-000000000021)
