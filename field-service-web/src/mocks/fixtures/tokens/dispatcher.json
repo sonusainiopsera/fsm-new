@@ -1,0 +1,9 @@
+{
+  "sub": "11111111-1111-7000-8000-000000000002",
+  "roles": ["DISPATCHER"],
+  "displayName": "Dispatcher User",
+  "iss": "https://api.fieldservice.example",
+  "aud": "fieldservice-api",
+  "iat": 1700000000,
+  "exp": 9999999999
+}

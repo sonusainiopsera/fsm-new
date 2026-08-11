@@ -1,0 +1,153 @@
+/* Sidebar dimensions — not design tokens, these are structural layout constants */
+:root {
+  --sidebar-width-expanded: 240px;
+  --sidebar-width-collapsed: 64px;
+  --sidebar-transition: var(--duration-quick, 150ms) var(--easing-standard, ease);
+  --topbar-height: 56px;
+}
+
+.sidebar {
+  position: fixed;
+  inset-block: var(--topbar-height) 0;
+  inset-inline-start: 0;
+  width: var(--sidebar-width-expanded);
+  background: var(--color-surface-raised);
+  border-inline-end: var(--elevation-hairline);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow: hidden;
+  transition: width var(--sidebar-transition);
+}
+
+.collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+/* Off-canvas drawer for viewports < 768px */
+.drawer {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: var(--sidebar-width-expanded);
+  height: 100dvh;
+  transform: translateX(-100%);
+  transition: transform var(--sidebar-transition);
+  z-index: 300;
+}
+
+.drawerOpen {
+  transform: translateX(0);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-elevation-scrim);
+  z-index: 299;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-3);
+  min-height: var(--topbar-height);
+  border-block-end: var(--elevation-hairline);
+  gap: var(--space-2);
+  overflow: hidden;
+}
+
+.brand {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.collapseBtn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-control);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: var(--fs-lg);
+  transition: background var(--duration-micro) var(--easing-standard);
+}
+
+.collapseBtn:hover,
+.collapseBtn:focus-visible {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+.collapseBtn:focus-visible {
+  box-shadow: var(--elevation-focus-ring, 0 0 0 2px var(--color-accent-base));
+}
+
+.navList {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2) 0;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  margin: 1px var(--space-2);
+  border-radius: var(--radius-control);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: var(--fs-base);
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background var(--duration-micro) var(--easing-standard),
+              color var(--duration-micro) var(--easing-standard);
+  min-height: 40px;
+}
+
+.navItem:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-primary);
+}
+
+.navItem:focus-visible {
+  outline: none;
+  box-shadow: var(--elevation-focus-ring, 0 0 0 2px var(--color-accent-base));
+}
+
+.navItemActive {
+  background: var(--color-surface-sunken);
+  color: var(--color-accent-base);
+  font-weight: var(--fw-medium);
+}
+
+.icon {
+  font-size: var(--fs-lg);
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+  line-height: 1;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}

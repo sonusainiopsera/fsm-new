@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import App from './App.jsx';
+import AppProviders from './app/AppProviders.jsx';
 import './styles/index.css';
 import { resolveFromMirror } from './appearance/resolveAppearance.js';
 
@@ -12,6 +12,6 @@ document.documentElement.setAttribute('data-appearance', resolveFromMirror());
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <AppProviders />
   </React.StrictMode>
 );

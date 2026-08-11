@@ -1,0 +1,64 @@
+:root {
+  --topbar-height: 56px;
+  --sidebar-width-expanded: 240px;
+  --sidebar-width-collapsed: 64px;
+  --content-max-width: 1440px;
+}
+
+.shell {
+  display: grid;
+  grid-template-areas:
+    "topbar topbar"
+    "sidebar main";
+  grid-template-columns: var(--sidebar-width-expanded) 1fr;
+  grid-template-rows: var(--topbar-height) 1fr;
+  min-height: 100dvh;
+  background: var(--color-surface-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+/* Collapsed icon rail — sidebar sends a data-collapsed attribute change;
+   we react to the sidebar's own width transition via the fixed positioning.
+   The grid column reacts to the sidebar-width custom property. */
+.shell[data-drawer-mode] {
+  grid-template-columns: 0 1fr;
+}
+
+.main {
+  grid-area: main;
+  overflow-y: auto;
+  padding: var(--space-6) var(--gutter, var(--space-4));
+  /* The content cap keeps wide-screen layouts readable */
+  max-width: var(--content-max-width);
+  width: 100%;
+  /* Ensure the skip link target is reachable via keyboard */
+  outline: none;
+  scroll-padding-block-start: var(--space-4);
+}
+
+.main:focus {
+  outline: none;
+}
+
+.loadingWrapper {
+  padding-block: var(--space-8);
+  display: flex;
+  justify-content: center;
+}
+
+/* Responsive: below 768px the sidebar becomes a drawer, grid uses full width */
+@media (max-width: 767px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "topbar"
+      "main";
+  }
+
+  .main {
+    padding-inline: var(--space-3);
+    padding-block: var(--space-4);
+    max-width: 100%;
+  }
+}

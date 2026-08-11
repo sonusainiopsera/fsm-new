@@ -1,0 +1,10 @@
+{
+  "_comment": "Per-role navigation expectation fixtures. Each entry lists the expected nav item paths for that role. Used by navigation unit tests.",
+  "ADMIN": ["/dispatch", "/operations"],
+  "DISPATCHER": ["/dispatch"],
+  "TECHNICIAN": ["/field"],
+  "MANAGER": ["/dispatch", "/operations"],
+  "CUSTOMER": ["/portal"],
+  "DISPATCHER_AND_MANAGER": ["/dispatch", "/operations"],
+  "UNKNOWN_ROLE": []
+}
