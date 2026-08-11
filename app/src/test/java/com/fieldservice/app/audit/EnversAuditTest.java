@@ -340,10 +340,10 @@ class EnversAuditTest extends AbstractIntegrationTest {
                 .with(user("endpoint-test-user").roles("ADMIN"))
                 .param("size", "10"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.totalElements").value(2))
-            .andExpect(jsonPath("$.content").isArray())
-            .andExpect(jsonPath("$.content[0].revisionType").value("UPDATE"))
-            .andExpect(jsonPath("$.content[1].revisionType").value("CREATE"));
+            .andExpect(jsonPath("$.page.totalElements").value(2))
+            .andExpect(jsonPath("$.data").isArray())
+            .andExpect(jsonPath("$.data[0].revisionType").value("UPDATE"))
+            .andExpect(jsonPath("$.data[1].revisionType").value("CREATE"));
     }
 
     @Test
@@ -363,7 +363,7 @@ class EnversAuditTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/v1/audit/work-orders/{id}/revisions", UUID.randomUUID())
                 .with(user("admin-user").roles("ADMIN")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.totalElements").value(0));
+            .andExpect(jsonPath("$.page.totalElements").value(0));
     }
 
     @Test

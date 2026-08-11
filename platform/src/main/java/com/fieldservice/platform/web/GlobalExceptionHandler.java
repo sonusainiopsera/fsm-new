@@ -3,6 +3,8 @@ package com.fieldservice.platform.web;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fieldservice.platform.api.*;
+import com.fieldservice.platform.pagination.InvalidCursorException;
+import com.fieldservice.platform.pagination.InvalidSortException;
 import com.fieldservice.platform.security.ScopedAccessDeniedException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -123,6 +125,24 @@ public class GlobalExceptionHandler {
         log.error("Provider degraded [traceId={}]: {}", traceId(), ex.getMessage(), ex);
         return response(HttpStatus.SERVICE_UNAVAILABLE,
                 ErrorResponse.of(ErrorCode.PROVIDER_DEGRADED, ex.getMessage(), traceId()));
+    }
+
+    // ── Pagination exceptions ─────────────────────────────────────────────
+
+    @ExceptionHandler(InvalidSortException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidSort(InvalidSortException ex, WebRequest req) {
+        log.warn("Invalid sort field '{}' [traceId={}]", ex.getField(), traceId());
+        var fieldErr = new com.fieldservice.platform.api.FieldError(
+                "sort", "Sort field not allowed: " + ex.getField());
+        return response(HttpStatus.BAD_REQUEST, ErrorResponse.ofFields(traceId(), List.of(fieldErr)));
+    }
+
+    @ExceptionHandler(InvalidCursorException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCursor(InvalidCursorException ex, WebRequest req) {
+        log.warn("Invalid pagination cursor [traceId={}]: {}", traceId(), ex.getMessage());
+        var fieldErr = new com.fieldservice.platform.api.FieldError(
+                "cursor", "Pagination cursor is invalid or expired");
+        return response(HttpStatus.BAD_REQUEST, ErrorResponse.ofFields(traceId(), List.of(fieldErr)));
     }
 
     // ── Spring framework exceptions ───────────────────────────────────────

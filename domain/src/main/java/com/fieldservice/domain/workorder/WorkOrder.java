@@ -1,6 +1,7 @@
 package com.fieldservice.domain.workorder;
 
 import com.fieldservice.domain.site.Site;
+import com.fieldservice.platform.pagination.KeysetAware;
 import com.fieldservice.platform.persistence.ScopedEntity;
 import com.fieldservice.platform.util.UuidV7;
 import jakarta.persistence.*;
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "work_order")
 @Audited
-public class WorkOrder implements ScopedEntity {
+public class WorkOrder implements ScopedEntity, KeysetAware {
 
     @Id
     private UUID id;

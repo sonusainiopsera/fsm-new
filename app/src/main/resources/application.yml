@@ -58,6 +58,11 @@ management:
     health:
       show-details: never
 
+fieldservice:
+  pagination:
+    cursor-hmac-secret: ${CURSOR_HMAC_SECRET:changeme-not-for-production}
+    keyset-offset-threshold: 20
+
 logging:
   level:
     com.fieldservice: INFO

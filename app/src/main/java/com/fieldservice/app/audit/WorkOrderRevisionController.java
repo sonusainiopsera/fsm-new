@@ -2,6 +2,8 @@ package com.fieldservice.app.audit;
 
 import com.fieldservice.domain.workorder.RevisionDto;
 import com.fieldservice.domain.workorder.WorkOrderRevisionService;
+import com.fieldservice.platform.pagination.PagedResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -29,10 +31,11 @@ public class WorkOrderRevisionController {
      * Restricted to DISPATCHER, ADMIN, and MANAGER roles.
      */
     @GetMapping("/{id}/revisions")
-    public ResponseEntity<PageResponse<RevisionDto>> getRevisions(
+    public ResponseEntity<PagedResponse<RevisionDto>> getRevisions(
             @PathVariable UUID id,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20) Pageable pageable,
+            HttpServletRequest httpRequest) {
         Page<RevisionDto> page = revisionService.getRevisions(id, pageable);
-        return ResponseEntity.ok(PageResponse.of(page));
+        return ResponseEntity.ok(PagedResponse.of(page, httpRequest));
     }
 }
