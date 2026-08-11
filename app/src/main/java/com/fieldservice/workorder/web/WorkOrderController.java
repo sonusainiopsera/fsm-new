@@ -11,6 +11,10 @@ import com.fieldservice.platform.persistence.ScopedQueryExecutor;
 import com.fieldservice.platform.security.RequestScopedAccessScope;
 import com.fieldservice.platform.security.ScopeDenialTranslator;
 import com.fieldservice.workorder.domain.WorkOrder;
+import com.fieldservice.workorder.holds.HoldReasonResponse;
+import com.fieldservice.workorder.holds.HoldReasonService;
+import com.fieldservice.workorder.holds.WorkOrderHold;
+import com.fieldservice.workorder.holds.WorkOrderHoldRepository;
 import com.fieldservice.workorder.repository.WorkOrderRepository;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
@@ -59,19 +63,25 @@ public class WorkOrderController {
     private final PaginationProperties     paginationProperties;
     private final KeysetCursor             keysetCursor;
     private final ScopeDenialTranslator    scopeDenialTranslator;
+    private final HoldReasonService        holdReasonService;
+    private final WorkOrderHoldRepository  workOrderHoldRepository;
 
     public WorkOrderController(WorkOrderRepository workOrderRepository,
                                ScopedQueryExecutor scopedQueryExecutor,
                                RequestScopedAccessScope accessScope,
                                PaginationProperties paginationProperties,
                                KeysetCursor keysetCursor,
-                               ScopeDenialTranslator scopeDenialTranslator) {
-        this.workOrderRepository  = workOrderRepository;
-        this.scopedQueryExecutor  = scopedQueryExecutor;
-        this.accessScope          = accessScope;
-        this.paginationProperties = paginationProperties;
-        this.keysetCursor         = keysetCursor;
+                               ScopeDenialTranslator scopeDenialTranslator,
+                               HoldReasonService holdReasonService,
+                               WorkOrderHoldRepository workOrderHoldRepository) {
+        this.workOrderRepository   = workOrderRepository;
+        this.scopedQueryExecutor   = scopedQueryExecutor;
+        this.accessScope           = accessScope;
+        this.paginationProperties  = paginationProperties;
+        this.keysetCursor          = keysetCursor;
         this.scopeDenialTranslator = scopeDenialTranslator;
+        this.holdReasonService     = holdReasonService;
+        this.workOrderHoldRepository = workOrderHoldRepository;
     }
 
     /**
@@ -155,7 +165,22 @@ public class WorkOrderController {
             scopeDenialTranslator.deny(accessScope.get(), "work_order", id);
         }
 
-        return ResponseEntity.ok(WorkOrderResponse.from(result.get()));
+        WorkOrder wo = result.get();
+        WorkOrderHold openHold = workOrderHoldRepository.findByWorkOrderIdAndEndedAtIsNull(wo.getId())
+                .orElse(null);
+        return ResponseEntity.ok(WorkOrderResponse.fromDetail(wo, openHold));
+    }
+
+    /**
+     * Returns the active hold reason vocabulary in sort order.
+     * Clients must use this endpoint to discover valid reason codes; no hard-coding.
+     */
+    @GetMapping("/hold-reasons")
+    @PreAuthorize("hasAnyRole('DISPATCHER', 'ADMIN', 'MANAGER', 'TECHNICIAN', 'CUSTOMER')")
+    public ResponseEntity<PagedResponse<HoldReasonResponse>> listHoldReasons() {
+        List<HoldReasonResponse> reasons = holdReasonService.activeReasons();
+        PageMeta meta = PageMeta.of(0, reasons.size(), reasons.size());
+        return ResponseEntity.ok(PagedResponse.of(reasons, meta, PageLinks.of(null, null)));
     }
 
     // ---- Response builders -------------------------------------------------

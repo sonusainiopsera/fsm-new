@@ -7,7 +7,6 @@ import com.fieldservice.workorder.lifecycle.GuardContext;
 import com.fieldservice.workorder.lifecycle.GuardResult;
 import com.fieldservice.workorder.lifecycle.TransitionGuard;
 import com.fieldservice.workorder.lifecycle.WorkOrderEvent;
-import com.fieldservice.workorder.lifecycle.WorkOrderHoldReasonCode;
 import com.fieldservice.workorder.lifecycle.WorkOrderState;
 import com.fieldservice.workorder.repository.LabourEntryRepository;
 import com.fieldservice.workorder.repository.WorkOrderRequiredCompetencyRepository;
@@ -55,8 +54,7 @@ class GuardChainTest {
     @DisplayName("HoldReasonRequiredGuard: satisfied when holdReasonCode is present")
     void holdReasonGuard_satisfied() {
         HoldReasonRequiredGuard guard = new HoldReasonRequiredGuard();
-        GuardContext ctx = new GuardContext(WO_ID, null,
-                WorkOrderHoldReasonCode.WAITING_FOR_PARTS, NOW);
+        GuardContext ctx = new GuardContext(WO_ID, null, "AWAITING_PARTS", NOW);
 
         assertThat(guard.evaluate(WorkOrderState.IN_PROGRESS, WorkOrderEvent.HOLD, ctx))
                 .isInstanceOf(GuardResult.Satisfied.class);

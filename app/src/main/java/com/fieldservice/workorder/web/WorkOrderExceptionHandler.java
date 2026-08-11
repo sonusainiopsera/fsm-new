@@ -4,6 +4,7 @@ import com.fieldservice.platform.api.ApiErrorResponse;
 import com.fieldservice.platform.api.ErrorCode;
 import com.fieldservice.platform.api.FieldError;
 import com.fieldservice.platform.api.exception.BusinessGuardException;
+import com.fieldservice.workorder.holds.HoldReasonValidationException;
 import com.fieldservice.workorder.lifecycle.IllegalWorkOrderTransitionException;
 import com.fieldservice.workorder.lifecycle.WorkOrderVersionConflictException;
 import org.slf4j.MDC;
@@ -57,6 +58,18 @@ public class WorkOrderExceptionHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiErrorResponse.withFieldErrors(ErrorCode.WORK_ORDER_GUARD_REFUSED,
                         ex.getMessage(), details, traceId));
+    }
+
+    @ExceptionHandler(HoldReasonValidationException.class)
+    public ResponseEntity<ApiErrorResponse> handleHoldReasonValidation(HoldReasonValidationException ex) {
+        String traceId = resolveTraceId();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .header("X-Trace-Id", traceId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiErrorResponse.withFieldErrors(ErrorCode.HOLD_REASON_INVALID,
+                        ex.getMessage(),
+                        List.of(new FieldError("holdReasonCode", ex.getSubmittedCode())),
+                        traceId));
     }
 
     @ExceptionHandler(WorkOrderVersionConflictException.class)

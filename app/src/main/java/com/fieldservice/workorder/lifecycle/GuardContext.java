@@ -8,9 +8,11 @@ import java.util.UUID;
  *
  * <p>Carries only the primitive data that guards need — no reference to the
  * web layer — so the lifecycle package stays free of inbound dependencies.
+ * {@code holdReasonCode} is a plain String because the vocabulary is runtime-configurable
+ * reference data rather than a compiled enum.
  */
 public record GuardContext(
         UUID workOrderId,
         UUID technicianId,
-        WorkOrderHoldReasonCode holdReasonCode,
+        String holdReasonCode,
         Instant transitionInstant) {}

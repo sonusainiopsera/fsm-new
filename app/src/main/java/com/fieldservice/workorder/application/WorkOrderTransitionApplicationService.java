@@ -19,6 +19,10 @@ import com.fieldservice.workorder.lifecycle.TransitionGuard;
 import com.fieldservice.workorder.lifecycle.WorkOrderEvent;
 import com.fieldservice.workorder.lifecycle.WorkOrderState;
 import com.fieldservice.workorder.lifecycle.WorkOrderTransitionService;
+import com.fieldservice.workorder.holds.HoldReasonService;
+import com.fieldservice.workorder.holds.HoldReasonValidationException;
+import com.fieldservice.workorder.holds.WorkOrderHold;
+import com.fieldservice.workorder.holds.WorkOrderHoldRepository;
 import com.fieldservice.workorder.lifecycle.WorkOrderVersionConflictException;
 import com.fieldservice.workorder.repository.WorkOrderRepository;
 import com.fieldservice.workorder.web.TransitionRequest;
@@ -35,6 +39,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -62,6 +67,8 @@ public class WorkOrderTransitionApplicationService {
     private final DomainEventPublisher eventPublisher;
     private final List<TransitionGuard> guards;
     private final EntityManager entityManager;
+    private final HoldReasonService holdReasonService;
+    private final WorkOrderHoldRepository workOrderHoldRepository;
 
     public WorkOrderTransitionApplicationService(
             ScopedQueryExecutor scopedQueryExecutor,
@@ -70,14 +77,18 @@ public class WorkOrderTransitionApplicationService {
             WorkOrderTransitionService transitionService,
             DomainEventPublisher eventPublisher,
             List<TransitionGuard> guards,
-            EntityManager entityManager) {
-        this.scopedQueryExecutor = scopedQueryExecutor;
-        this.workOrderRepository = workOrderRepository;
-        this.accessScope = accessScope;
-        this.transitionService = transitionService;
-        this.eventPublisher = eventPublisher;
-        this.guards = guards;
-        this.entityManager = entityManager;
+            EntityManager entityManager,
+            HoldReasonService holdReasonService,
+            WorkOrderHoldRepository workOrderHoldRepository) {
+        this.scopedQueryExecutor      = scopedQueryExecutor;
+        this.workOrderRepository      = workOrderRepository;
+        this.accessScope              = accessScope;
+        this.transitionService        = transitionService;
+        this.eventPublisher           = eventPublisher;
+        this.guards                   = guards;
+        this.entityManager            = entityManager;
+        this.holdReasonService        = holdReasonService;
+        this.workOrderHoldRepository  = workOrderHoldRepository;
     }
 
     @PostConstruct
@@ -140,8 +151,17 @@ public class WorkOrderTransitionApplicationService {
                     "Role not permitted for event " + request.event() + " from state " + fromState);
         }
 
+        // 4.5 Vocabulary validation for HOLD — must precede guards so invalid codes return 400, not 422
+        if (request.event() == WorkOrderEvent.HOLD) {
+            holdReasonService.validate(request.holdReasonCode());
+        }
+
         // 5. Run ordered guards (fail closed — any exception is treated as refusal)
         runGuards(descriptor.guardIds(), fromState, request.event(), request, workOrderId, scope.userId(), occurredAt);
+
+        // 5.5 Hold interval management (all within this transaction)
+        applyHoldIntervalChanges(request, workOrderId, fromState, scope.userId(), occurredAt,
+                workOrder, legalEvents);
 
         // 6. Apply state transition
         WorkOrderStatus newStatus = WorkOrderStatus.valueOf(descriptor.toState().name());
@@ -187,6 +207,40 @@ public class WorkOrderTransitionApplicationService {
 
         return TransitionResponse.of(workOrder.getId(), fromState, toState,
                 workOrder.getVersion(), legalNextEvents, occurredAt);
+    }
+
+    private void applyHoldIntervalChanges(TransitionRequest request,
+                                           UUID workOrderId,
+                                           WorkOrderState fromState,
+                                           UUID actorId,
+                                           Instant occurredAt,
+                                           WorkOrder workOrder,
+                                           Set<WorkOrderEvent> legalEvents) {
+        if (request.event() == WorkOrderEvent.HOLD) {
+            WorkOrderHold hold = new WorkOrderHold(
+                    workOrderId, request.holdReasonCode(), request.reason(), occurredAt, actorId);
+            workOrderHoldRepository.save(hold);
+
+        } else if (request.event() == WorkOrderEvent.RESUME) {
+            WorkOrderHold openHold = workOrderHoldRepository
+                    .findByWorkOrderIdAndEndedAtIsNull(workOrderId)
+                    .orElseThrow(() -> new IllegalWorkOrderTransitionException(
+                            fromState, WorkOrderEvent.RESUME, legalEvents));
+            openHold.close(occurredAt, actorId);
+            workOrderHoldRepository.save(openHold);
+            long elapsed = Duration.between(openHold.getStartedAt(), occurredAt).toMinutes();
+            workOrder.incrementCumulativeHoldMinutes((int) elapsed);
+
+        } else if (fromState == WorkOrderState.ON_HOLD) {
+            // Dangling-hold cleanup for any other event from ON_HOLD (e.g., CANCEL)
+            workOrderHoldRepository.findByWorkOrderIdAndEndedAtIsNull(workOrderId)
+                    .ifPresent(h -> {
+                        h.close(occurredAt, actorId);
+                        workOrderHoldRepository.save(h);
+                        long elapsed = Duration.between(h.getStartedAt(), occurredAt).toMinutes();
+                        workOrder.incrementCumulativeHoldMinutes((int) elapsed);
+                    });
+        }
     }
 
     private void runGuards(List<String> guardIds,

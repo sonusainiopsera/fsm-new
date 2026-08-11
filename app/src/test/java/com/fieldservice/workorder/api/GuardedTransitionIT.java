@@ -3,7 +3,6 @@ package com.fieldservice.workorder.api;
 import com.fieldservice.app.Application;
 import com.fieldservice.app.security.TestSecurityConfig;
 import com.fieldservice.workorder.domain.WorkOrderStatus;
-import com.fieldservice.workorder.lifecycle.WorkOrderHoldReasonCode;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

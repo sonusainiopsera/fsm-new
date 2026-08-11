@@ -67,6 +67,9 @@ public class WorkOrder implements ScopedEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
+    @Column(name = "cumulative_hold_minutes", nullable = false)
+    private int cumulativeHoldMinutes = 0;
+
     @Version
     private Integer version;
 
@@ -100,7 +103,8 @@ public class WorkOrder implements ScopedEntity {
     public Site            getSite()                { return site; }
     public UUID            getAssignedTechnicianId() { return assignedTechnicianId; }
     public String          getDescription()         { return description; }
-    public Instant         getCreatedAt()           { return createdAt; }
+    public Instant         getCreatedAt()            { return createdAt; }
+    public int             getCumulativeHoldMinutes(){ return cumulativeHoldMinutes; }
     public Integer         getVersion()             { return version; }
 
     /** Assigns a technician to this work order. */
@@ -121,5 +125,12 @@ public class WorkOrder implements ScopedEntity {
      */
     public void applyStateTransition(WorkOrderStatus newState) {
         this.state = newState;
+    }
+
+    /** Adds elapsed hold minutes at resume time. Negative values are ignored (clock skew guard). */
+    public void incrementCumulativeHoldMinutes(int minutes) {
+        if (minutes > 0) {
+            this.cumulativeHoldMinutes += minutes;
+        }
     }
 }
