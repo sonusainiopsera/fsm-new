@@ -1,0 +1,4 @@
+{
+  "name": "Valid Name",
+  "unknownField": "should be rejected"
+}
