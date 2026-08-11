@@ -6,10 +6,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import org.hibernate.envers.Audited;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Audited
 @Entity
 @Table(name = "assignment")
 public class Assignment {

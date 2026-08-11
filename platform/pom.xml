@@ -40,6 +40,11 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
+    <!-- Hibernate Envers — custom revision entity and listener live in platform -->
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-envers</artifactId>
+    </dependency>
     <!-- Test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

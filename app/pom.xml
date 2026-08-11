@@ -39,6 +39,12 @@
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
+    <!-- Hibernate Envers — immutable audit trail -->
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-envers</artifactId>
+    </dependency>
+
     <!-- Database -->
     <dependency>
       <groupId>org.postgresql</groupId>

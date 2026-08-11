@@ -6,10 +6,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Audited
 @Entity
 @Table(name = "app_user")
 public class AppUser {
@@ -20,7 +23,8 @@ public class AppUser {
     @Column(nullable = false, length = 255, unique = true)
     private String email;
 
-    /** BCrypt hash — VARCHAR(72) holds 60-char BCrypt output plus algorithm prefix headroom. */
+    /** BCrypt hash — excluded from audit trail (Restricted classification). */
+    @NotAudited
     @Column(name = "password_hash", nullable = false, length = 72)
     private String passwordHash;
 

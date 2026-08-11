@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import org.hibernate.envers.Audited;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -34,6 +35,7 @@ import java.util.UUID;
  * {@code @ManyToOne}) to keep the TECHNICIAN scope predicate a simple equality check
  * without an additional join.
  */
+@Audited
 @Entity
 @Table(name = "work_order")
 public class WorkOrder implements ScopedEntity {

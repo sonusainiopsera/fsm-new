@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import org.hibernate.envers.Audited;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import java.util.UUID;
  * stored as a plain UUID rather than a JPA association to keep the scope predicate simple
  * and to avoid N+1 joins.
  */
+@Audited
 @Entity
 @Table(name = "site")
 public class Site implements ScopedEntity {
