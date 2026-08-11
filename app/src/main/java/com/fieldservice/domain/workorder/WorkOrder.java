@@ -189,4 +189,10 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
 
     public Instant getAtRiskAt() { return atRiskAt; }
     public void setAtRiskAt(Instant atRiskAt) { this.atRiskAt = atRiskAt; }
+
+    @Column(name = "no_parts_required", nullable = false)
+    private boolean noPartsRequired = false;
+
+    public boolean isNoPartsRequired() { return noPartsRequired; }
+    public void setNoPartsRequired(boolean noPartsRequired) { this.noPartsRequired = noPartsRequired; }
 }

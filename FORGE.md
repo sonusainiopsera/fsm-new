@@ -259,3 +259,10 @@
 - **Files:** 31 (+1164/-5)
 - **Duration:** 1084ss
 - **Approach:** N/A
+
+## WO-150: User Story: WO-150 - Append-only stock ledger and reconciliation integrity check
+- **Status:** completed
+- **Commit:** `fe15fed`
+- **Files:** 15 (+1260/-9)
+- **Duration:** 1071ss
+- **Approach:** Expand-only V26 migration adds 7 new columns to stock_ledger plus REVOKE UPDATE/DELETE for the fieldservice DB role, and adds no_parts_required to work_order. StockLedger entity gains those fields with getters only (no setters for immutable fields). StockMovementServiceImpl.buildLedgerEntry is overloaded to populate all enrichment fields; transferStock generates a shared correlationId for paired TRANSFER_OUT/TRANSFER_IN entries and calls InventoryMetrics.incrementLedgerEntriesWritten() per entry. StockReconciliationService sums ledger deltas via JPQL projection and compares to stock_balance via JdbcTemplate, logging ERROR on discrepancy without auto-correction. StockReconciliationJob runs on the worker profile behind a DatabaseSchedulingLock. MovementQueryService enforces CUSTOMER 403 and serves the paginated/filterable movement history via ScopedQueryExecutor. InventoryMovementsController exposes GET /api/v1/inventory/movements. ArchUnit rule in InventoryBoundaryTest prevents any class from calling delete* on StockLedgerRepository. StockLedgerMutationIT verifies DB permission denial for UPDATE/DELETE (skips under superuser). StockReconciliationServiceTest covers all reconcile() and completeness ratio paths with a fixed Clock and no Spring context. V112 fixtures provide 30 days of synthetic ledger history, a mismatched balance row, and three completed WOs for completeness metric testing.

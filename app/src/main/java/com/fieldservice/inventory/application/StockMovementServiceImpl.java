@@ -89,6 +89,7 @@ class StockMovementServiceImpl implements StockMovementService {
     private final ScopedQueryExecutor scopedQueryExecutor;
     private final AccessScopeResolver scopeResolver;
     private final DomainEventPublisher eventPublisher;
+    private final InventoryMetrics inventoryMetrics;
 
     StockMovementServiceImpl(
             StockBalanceRepository stockBalanceRepository,
@@ -99,7 +100,8 @@ class StockMovementServiceImpl implements StockMovementService {
             StockLocationRepository stockLocationRepository,
             ScopedQueryExecutor scopedQueryExecutor,
             AccessScopeResolver scopeResolver,
-            DomainEventPublisher eventPublisher) {
+            DomainEventPublisher eventPublisher,
+            InventoryMetrics inventoryMetrics) {
         this.stockBalanceRepository = stockBalanceRepository;
         this.stockLedgerRepository = stockLedgerRepository;
         this.workOrderPartRepository = workOrderPartRepository;
@@ -109,6 +111,7 @@ class StockMovementServiceImpl implements StockMovementService {
         this.scopedQueryExecutor = scopedQueryExecutor;
         this.scopeResolver = scopeResolver;
         this.eventPublisher = eventPublisher;
+        this.inventoryMetrics = inventoryMetrics;
     }
 
     @Override
@@ -299,10 +302,11 @@ class StockMovementServiceImpl implements StockMovementService {
         stockBalanceRepository.increment(partId, destinationLocationId, quantity);
 
         Instant now = Instant.now();
-        stockLedgerRepository.save(buildLedgerEntry(partId, sourceLocationId, null,
-                actorUserId, -quantity, "TRANSFER_OUT", now));
-        stockLedgerRepository.save(buildLedgerEntry(partId, destinationLocationId, null,
-                actorUserId, quantity, "TRANSFER_IN", now));
+        UUID correlationId = UUID.randomUUID();
+        stockLedgerRepository.save(buildLedgerEntry(partId, sourceLocationId, destinationLocationId,
+                null, actorUserId, -quantity, "TRANSFER_OUT", null, correlationId, now));
+        stockLedgerRepository.save(buildLedgerEntry(partId, destinationLocationId, sourceLocationId,
+                null, actorUserId, quantity, "TRANSFER_IN", null, correlationId, now));
     }
 
     @Override
@@ -373,15 +377,31 @@ class StockMovementServiceImpl implements StockMovementService {
     }
 
     private StockLedger buildLedgerEntry(UUID partId, UUID locationId,
-                                          UUID workOrderId, UUID technicianId,
+                                          UUID workOrderId, UUID actorUserId,
                                           int delta, String movementType, Instant at) {
+        return buildLedgerEntry(partId, locationId, null, workOrderId, actorUserId,
+                delta, movementType, null, null, at);
+    }
+
+    private StockLedger buildLedgerEntry(UUID partId, UUID fromLocationId, UUID toLocationId,
+                                          UUID workOrderId, UUID actorUserId,
+                                          int delta, String movementType,
+                                          Integer resultingQuantity, UUID correlationId,
+                                          Instant at) {
         StockLedger entry = new StockLedger();
         entry.setPartId(partId);
-        entry.setLocationId(locationId);
+        entry.setLocationId(fromLocationId != null ? fromLocationId : toLocationId);
+        entry.setFromLocationId(fromLocationId);
+        entry.setToLocationId(toLocationId);
         entry.setWorkOrderId(workOrderId);
-        entry.setTechnicianId(technicianId);
+        entry.setTechnicianId(actorUserId);
+        entry.setActorUserId(actorUserId);
         entry.setQuantityDelta(delta);
         entry.setMovementType(movementType);
+        entry.setResultingQuantity(resultingQuantity);
+        entry.setCorrelationId(correlationId);
+        entry.setOccurredAt(at);
+        inventoryMetrics.incrementLedgerEntriesWritten();
         return entry;
     }
 

@@ -59,6 +59,27 @@ public class StockLedger implements ScopedEntity {
     @Column(name = "reference_no", length = 100)
     private String referenceNo;
 
+    @Column(name = "from_location_id")
+    private UUID fromLocationId;
+
+    @Column(name = "to_location_id")
+    private UUID toLocationId;
+
+    @Column(name = "resulting_quantity")
+    private Integer resultingQuantity;
+
+    @Column(name = "actor_user_id")
+    private UUID actorUserId;
+
+    @Column(name = "correlation_id")
+    private UUID correlationId;
+
+    @Column(name = "idempotency_key", length = 255)
+    private String idempotencyKey;
+
+    @Column(name = "occurred_at")
+    private Instant occurredAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -88,6 +109,27 @@ public class StockLedger implements ScopedEntity {
 
     public String getReferenceNo() { return referenceNo; }
     public void setReferenceNo(String referenceNo) { this.referenceNo = referenceNo; }
+
+    public UUID getFromLocationId() { return fromLocationId; }
+    public void setFromLocationId(UUID fromLocationId) { this.fromLocationId = fromLocationId; }
+
+    public UUID getToLocationId() { return toLocationId; }
+    public void setToLocationId(UUID toLocationId) { this.toLocationId = toLocationId; }
+
+    public Integer getResultingQuantity() { return resultingQuantity; }
+    public void setResultingQuantity(Integer resultingQuantity) { this.resultingQuantity = resultingQuantity; }
+
+    public UUID getActorUserId() { return actorUserId; }
+    public void setActorUserId(UUID actorUserId) { this.actorUserId = actorUserId; }
+
+    public UUID getCorrelationId() { return correlationId; }
+    public void setCorrelationId(UUID correlationId) { this.correlationId = correlationId; }
+
+    public String getIdempotencyKey() { return idempotencyKey; }
+    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
+
+    public Instant getOccurredAt() { return occurredAt; }
+    public void setOccurredAt(Instant occurredAt) { this.occurredAt = occurredAt; }
 
     public Instant getCreatedAt() { return createdAt; }
 }
