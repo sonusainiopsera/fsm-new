@@ -131,6 +131,8 @@ app:
   crypto:
     # AES-256 field encryption key (base64-encoded 32 bytes). Supply via APP_CRYPTO_FIELD_ENCRYPTION_KEY.
     field-encryption-key: ${APP_CRYPTO_FIELD_ENCRYPTION_KEY:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+    # Envelope encryption blind-index HMAC key (base64-encoded 32 bytes). Supply via APP_CRYPTO_BLIND_INDEX_KEY.
+    blind-index-key: ${APP_CRYPTO_BLIND_INDEX_KEY:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
 
   workforce:
     position-retention-days: ${APP_WORKFORCE_POSITION_RETENTION_DAYS:90}

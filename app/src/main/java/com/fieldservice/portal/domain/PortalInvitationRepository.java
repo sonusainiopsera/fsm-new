@@ -16,4 +16,12 @@ import java.util.UUID;
 public interface PortalInvitationRepository extends JpaRepository<PortalInvitation, UUID> {
 
     Optional<PortalInvitation> findByTokenHash(String tokenHash);
+
+    /**
+     * Finds an invitation by the HMAC-SHA-256 blind index of the contact email.
+     * Use {@link com.fieldservice.platform.crypto.BlindIndex#compute(String)} to derive the index
+     * from a normalised plaintext email before calling this method.
+     * Range/prefix/sort searches over encrypted email are unsupported.
+     */
+    Optional<PortalInvitation> findByContactEmailIdx(String contactEmailIdx);
 }

@@ -92,3 +92,46 @@ rules:
       include:
         - "src/main/java/com/fieldservice/**/*Payload.java"
         - "src/main/java/com/fieldservice/**/*Event.java"
+
+  # ─── WO-193: Envelope encryption key-material protection gates ──────────────
+
+  # Rule 4: No key material should be passed to a Logger.
+  # DataKey.keyMaterial() returns raw DEK bytes; logging this would expose key material.
+  - id: envelope-key-material-logged
+    languages: [java]
+    severity: ERROR
+    message: >
+      '$CALL' passes key material to a logger in '$CLASS'. DataKey.keyMaterial() returns
+      raw DEK bytes that must never appear in logs. Use DataKey.toString() which omits the
+      key bytes. (WO-193, AC-9)
+    metadata:
+      category: security
+      cwe: "CWE-532: Insertion of Sensitive Information into Log File"
+      owasp: "A02:2021 - Cryptographic Failures"
+      confidence: HIGH
+    patterns:
+      - pattern: $LOGGER.$LEVEL(..., $KEY.keyMaterial(), ...)
+      - metavariable-regex:
+          metavariable: $LEVEL
+          regex: (trace|debug|info|warn|error)
+    paths:
+      include:
+        - "src/main/java/com/fieldservice/**"
+
+  # Rule 5: No DataKey serialisation to JSON or String outside the crypto package.
+  # DataKey objects must never be serialised to JSON (e.g. via ObjectMapper).
+  - id: envelope-datakey-serialised
+    languages: [java]
+    severity: ERROR
+    message: >
+      '$MAPPER.writeValue...' serialises '$KEY' (DataKey) in '$CLASS'. DataKey contains
+      plaintext key material and must never be serialised, included in event payloads, or
+      returned in API responses. (WO-193, AC-9)
+    metadata:
+      category: security
+      cwe: "CWE-312: Cleartext Storage of Sensitive Information"
+      confidence: HIGH
+    pattern: $MAPPER.writeValueAsString($KEY)
+    paths:
+      include:
+        - "src/main/java/com/fieldservice/**"

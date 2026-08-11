@@ -1,15 +1,18 @@
 package com.fieldservice.portal.domain;
 
+import com.fieldservice.platform.crypto.BlindIndex;
+import com.fieldservice.platform.crypto.EnvelopeEncryptedStringConverter;
+import com.fieldservice.platform.crypto.SubjectKeyContextListener;
+import com.fieldservice.platform.crypto.SubjectKeyContextProvider;
 import com.fieldservice.platform.entity.BaseEntity;
-import com.fieldservice.platform.persistence.EncryptedStringConverter;
 import com.fieldservice.privacy.api.ClassificationTier;
 import com.fieldservice.privacy.api.DataClassification;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Table;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -22,34 +25,43 @@ import java.util.UUID;
  * to the invitee's email and never stored.
  *
  * <p>{@code contactEmail} and {@code contactName} are field-encrypted using
- * AES-256-GCM ({@link EncryptedStringConverter}) and classified Confidential per
- * BR-23. They must never appear in logs, event payloads, or audit tables.
+ * per-subject AES-256-GCM envelope encryption ({@link EnvelopeEncryptedStringConverter})
+ * and classified Confidential per BR-23. Destroying the subject key renders all
+ * ciphertext copies — live rows, audit history, replicas, backups — permanently
+ * unreadable, satisfying the right-to-erasure requirement (WO-095).
  *
- * <p>The Envers audit mirrors {@code contact_email_enc} and {@code contact_name_enc}
- * intentionally — the audit captures the fact of invitation issuance (accountId,
- * token_hash, expiresAt) without storing the cleartext contact details.
+ * <p>Blind-index columns ({@code contact_email_idx}) support equality lookup without
+ * requiring plaintext decryption of the whole table.
+ *
+ * <p>Both fields are now audited by Envers as ciphertext so audit history is
+ * protected by the same per-subject key.
  */
 @DataClassification(tier = ClassificationTier.CONFIDENTIAL,
-        note = "contactEmail and contactName are PII — encrypted at rest, never logged")
+        note = "contactEmail and contactName are PII — envelope encrypted, key destroyable")
 @Audited
 @Entity
+@EntityListeners(SubjectKeyContextListener.class)
 @Table(name = "portal_invitation")
-public class PortalInvitation extends BaseEntity {
+public class PortalInvitation extends BaseEntity implements SubjectKeyContextProvider {
 
     @Column(name = "account_id", nullable = false, updatable = false)
     private UUID accountId;
 
-    // contact_email_enc in DB — AES-256-GCM ciphertext; never logged
-    @NotAudited
-    @Convert(converter = EncryptedStringConverter.class)
+    @Convert(converter = EnvelopeEncryptedStringConverter.class)
     @Column(name = "contact_email_enc", nullable = false, length = 512)
     private String contactEmail;
 
-    // contact_name_enc in DB — AES-256-GCM ciphertext; never logged
-    @NotAudited
-    @Convert(converter = EncryptedStringConverter.class)
+    @Convert(converter = EnvelopeEncryptedStringConverter.class)
     @Column(name = "contact_name_enc", length = 512)
     private String contactName;
+
+    /** HMAC-SHA-256 blind index for contactEmail equality lookup (range/sort unsupported). */
+    @Column(name = "contact_email_idx", length = 64)
+    private String contactEmailIdx;
+
+    /** HMAC-SHA-256 blind index for contactName equality lookup (range/sort unsupported). */
+    @Column(name = "contact_name_idx", length = 64)
+    private String contactNameIdx;
 
     @Column(name = "token_hash", nullable = false, unique = true, length = 64, updatable = false)
     private String tokenHash;
@@ -72,6 +84,18 @@ public class PortalInvitation extends BaseEntity {
         this.expiresAt = expiresAt;
     }
 
+    @Override
+    public String getEnvelopeSubjectType() { return "CUSTOMER_ACCOUNT"; }
+
+    @Override
+    public UUID getEnvelopeSubjectId() { return accountId; }
+
+    @Override
+    public void recomputeBlindIndices() {
+        this.contactEmailIdx = BlindIndex.compute(contactEmail);
+        this.contactNameIdx  = BlindIndex.compute(contactName);
+    }
+
     public UUID getAccountId() {
         return accountId;
     }
@@ -82,6 +106,10 @@ public class PortalInvitation extends BaseEntity {
 
     public String getContactName() {
         return contactName;
+    }
+
+    public String getContactEmailIdx() {
+        return contactEmailIdx;
     }
 
     public String getTokenHash() {
