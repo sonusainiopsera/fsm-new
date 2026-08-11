@@ -87,6 +87,10 @@ app:
     keyset:
       threshold: ${APP_PAGINATION_KEYSET_THRESHOLD:20}
 
+  outbox:
+    # Maximum serialised payload size in bytes; oversized payloads fail the transaction
+    max-payload-bytes: ${APP_OUTBOX_MAX_PAYLOAD_BYTES:65536}
+
   idempotency:
     # How long an IN_PROGRESS record holds its lease before it can be reclaimed (crash recovery)
     lease-duration: ${APP_IDEMPOTENCY_LEASE_DURATION:PT30S}

@@ -84,3 +84,10 @@
 - **Files:** 36 (+3022/-10)
 - **Duration:** 897ss
 - **Approach:** Implemented the frozen Phase 2 primitive inventory as a flat component tree under field-service-web/src/components/. Each primitive uses var(--token-*) exclusively for styling — enforced by the existing no-hardcoded-visual-literals ESLint rule. DensityContext (comfortable/compact) is a React context consumed by DataTable, Chip, and FormField. Modal and DetailDrawer share the same focus-trap pattern (Tab cycle, Escape, scrim click, trigger-restore on close). StateSurface drives all five named state exports from a single implementation. ToastProvider maintains separate polite/assertive DOM regions and throttles non-danger toasts to 1 visible. ScorePresentation is fully monochrome (BR-33). Chips carry icon+text+color for greyscale support (BR-34). The mock transport is fixture-backed with configurable latency, error-code injection, and staleness. The catalogue route is wired into main.jsx behind VITE_CATALOGUE=true and a build:catalogue npm script was added for CI smoke-checking.
+
+## WO-004: User Story: WO-004 - Transactional outbox with atomic state, revision and event write
+- **Status:** completed
+- **Commit:** `683d58a`
+- **Files:** 19 (+1301/-0)
+- **Duration:** 747ss
+- **Approach:** Implemented the transactional outbox seam as a two-layer design. The platform module public API exposes DomainEvent (record with eventId/eventType/aggregateType/aggregateId/occurredAt/traceId/actorUserId/payload) and DomainEventPublisher (interface). The platform module outbox package contains OutboxEvent (JPA entity with @JdbcTypeCode(JSON) for jsonb column), JpaDomainEventPublisher (@Component, @Transactional(MANDATORY) — throws IllegalTransactionStateException if no active transaction), PayloadSerializer (isolated ObjectMapper with ISO-8601 dates and size bounding), PiiRedactionUtility (reflection-based @Restricted/@Confidential check), and the two annotation types. Flyway V13 creates outbox_event with a partial drain index (WHERE published_at IS NULL). The app module adds WorkOrderStateChangedPayload as the prototype payload record and WorkOrderEventFixtureBuilder for reuse by WO-005.

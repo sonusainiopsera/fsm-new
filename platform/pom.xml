@@ -63,6 +63,18 @@
             <artifactId>hibernate-envers</artifactId>
         </dependency>
 
+        <!-- Micrometer — metrics for event publishing (domain_event_published_total) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+
+        <!-- Jackson JSON for payload serialisation (JavaTimeModule for Instant/LocalDate) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
         <!-- Tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
