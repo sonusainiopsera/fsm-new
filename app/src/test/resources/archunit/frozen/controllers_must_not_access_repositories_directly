@@ -1,0 +1,7 @@
+# Frozen layering violations — WO-200 baseline (2026-08-11)
+# Justification: WorkOrderController was written before the layering rule was enforced.
+# It directly injects WorkOrderRepository and WorkOrderHoldRepository for a scoped
+# read pattern (ScopedQueryExecutor). Extraction to a dedicated query service is tracked
+# as a follow-up refactor. DO NOT add new violations to this file.
+Field <com.fieldservice.workorder.api.WorkOrderController.workOrderRepository> has type <com.fieldservice.domain.workorder.WorkOrderRepository>
+Field <com.fieldservice.workorder.api.WorkOrderController.workOrderHoldRepository> has type <com.fieldservice.domain.workorder.WorkOrderHoldRepository>

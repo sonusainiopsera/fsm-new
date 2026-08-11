@@ -224,3 +224,99 @@ The `ClassificationConsistencyCheck` logs `IllegalStateException: Data classific
 - **ORPHANED**: registry rows with no annotation → either re-annotate or add a migration to remove the row
 
 The check runs on all profiles EXCEPT `test`. Set `app.privacy.base-packages` to restrict the scan scope.
+
+---
+
+## ArchUnit Fitness Suite (WO-200)
+
+The ArchUnit suite runs as part of `mvn verify` and enforces structural invariants that are
+too subtle or too widespread to catch in code review. All rules produce precise, class-and-method-level
+failure messages. The suite completes in well under 30 seconds using a single cached
+`ClassFileImporter` per test class.
+
+### Running the Suite
+
+```bash
+# Full suite
+mvn -pl app verify
+
+# Individual test class
+mvn -pl app test -Dtest="LayeredArchitectureTest"
+mvn -pl app test -Dtest="ModuleBoundaryTest"
+mvn -pl app test -Dtest="MethodSecurityTest"
+mvn -pl app test -Dtest="ScopedRepositoryArchTest"
+mvn -pl app test -Dtest="InjectionAndCryptoRulesTest"
+mvn -pl app test -Dtest="DtoBoundaryTest"
+
+# All architecture tests together
+mvn -pl app test -Dtest="*ArchTest,*BoundaryTest,LayeredArchitectureTest,InjectionAndCryptoRulesTest,DtoBoundaryTest"
+```
+
+### Rule Catalogue
+
+| Test class | Rule | Covered by AC |
+|---|---|---|
+| `LayeredArchitectureTest` | No `@RestController` may directly depend on `JpaRepository` | AC-1 |
+| `ModuleBoundaryTest` | No class outside module X may access `X.internal` package | AC-2 |
+| `MethodSecurityTest` | Every public `@Service` method in business-logic packages has `@PreAuthorize`/`@PostAuthorize` | AC-3 |
+| `ScopedRepositoryArchTest` | Repositories over `@ScopedEntity` types must extend `ScopedRepository` | AC-4 |
+| `InjectionAndCryptoRulesTest` | No `EntityManager.createNativeQuery`; no `MessageDigest.getInstance` outside approved packages | AC-5, AC-6 |
+| `DtoBoundaryTest` | No `@RestController` method may use a `@Entity` type as return or parameter | AC-7 |
+
+### Freeze Store — Pre-existing Exception Process
+
+Some rules have pre-existing violations that were introduced before the rule was enacted.
+These are frozen (tolerated) in the freeze store so only **new** violations break the build.
+
+**Store location:** `src/test/resources/archunit/frozen/`
+
+**Frozen violations (baseline 2026-08-11):**
+
+| File | Class | Justification |
+|---|---|---|
+| `controllers_must_not_access_repositories_directly` | `WorkOrderController` | Predates layering rule; uses `ScopedQueryExecutor` pattern with direct repo injection. Extraction tracked as follow-up. |
+
+#### Adding a New Frozen Exception
+
+> **This process requires explicit team approval.** Frozen exceptions are permanent technical debt
+> entries. Exhaust all refactoring options before freezing.
+
+1. Run the suite locally — confirm the new violation is truly pre-existing and not fixable now.
+2. Add a dated justification comment in the relevant violation store file.
+3. Update this table with the class name and justification.
+4. Add a ticket to the backlog to address the violation.
+5. Get a second reviewer approval before merging.
+
+#### Repopulating the Store After a Refactor
+
+If a frozen class is refactored (e.g. `WorkOrderController` is split), the freeze store file
+may contain stale entries. Remove them, run the suite, confirm it passes, then commit the cleaned
+file.
+
+### Approved `MessageDigest` Packages
+
+The following packages are explicitly approved to use `MessageDigest.getInstance` (SHA-256 only):
+
+| Package | Algorithm | Justification |
+|---|---|---|
+| `com.fieldservice.identity.application` | SHA-256 | Token hash fingerprinting for refresh-token family tracking |
+| `com.fieldservice.idempotency` | SHA-256 | Idempotency key hashing for request deduplication |
+
+To add a new approved package: open a security review PR, document the algorithm used, and
+add the package to the `APPROVED_DIGEST_PACKAGES` constant in `InjectionAndCryptoRulesTest`.
+
+### Writing a New Rule
+
+1. Add the rule as an `@ArchTest static final ArchRule` field in the appropriate test class.
+2. Write a `@Test` self-test that imports a deliberately violating fixture class and asserts failure.
+3. Add a compliant fixture class (or assert the production code passes with `rule.check(classes)`).
+4. Add a row to the Rule Catalogue table above.
+5. If the rule has pre-existing violations, use `FreezingArchRule.freeze(rule)` and populate
+   the freeze store file (see above).
+
+### Fixture Package
+
+Deliberately non-compliant classes live in `com.fieldservice.architecture.fixture`. They are:
+- In test sources only (excluded from production class scanning via `ImportOption.DoNotIncludeTests`)
+- Named `*Fixture` or have an `⚠️ ARCHITECTURE TEST FIXTURE ONLY` header comment
+- Never wired as Spring beans

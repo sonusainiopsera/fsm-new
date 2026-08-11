@@ -287,3 +287,10 @@
 - **Files:** 29 (+1753/-0)
 - **Duration:** 1058ss
 - **Approach:** N/A
+
+## WO-200: User Story: WO-200 - ArchUnit Fitness Tests For Module And Security Boundaries
+- **Status:** completed
+- **Commit:** `f40c32d`
+- **Files:** 12 (+704/-0)
+- **Duration:** 709ss
+- **Approach:** Extended the existing ArchUnit fitness suite with four new rule classes (LayeredArchitectureTest, ModuleBoundaryTest, InjectionAndCryptoRulesTest, DtoBoundaryTest), five new fixture classes covering each violation type, a configured TextFileBasedViolationStore with a pre-populated freeze entry for WorkOrderController's pre-existing layering violation, and a comprehensive ArchUnit rules section in TESTING.md. All rules use ArchUnit 1.3.0 (already in pom.xml) and the @AnalyzeClasses pattern established by prior WOs.
