@@ -56,3 +56,10 @@
 - **Files:** 14 (+1561/-0)
 - **Duration:** 1017ss
 - **Approach:** Implemented end-to-end idempotency-key protocol using a OncePerRequestFilter (api profile) that validates key format, computes SHA-256 request digest (raw body never stored), claims the key via REQUIRES_NEW transaction, and dispatches a sealed-interface ClaimResult. On Claimed: executes request, captures 2xx responses for replay, releases on 4xx/5xx. On Replay: returns stored response with Idempotency-Replay header. On Conflict/InProgress: returns structured 409 via uniform error envelope. Purge job uses pg_try_advisory_lock for leader election, bounded batch deletes. Keys scoped by (idempotency_key, user_id, endpoint) unique constraint.
+
+## WO-108: User Story: WO-108 - Model users, roles, credentials, and token families
+- **Status:** completed
+- **Commit:** `3920cf0`
+- **Files:** 18 (+1341/-5)
+- **Duration:** 911ss
+- **Approach:** DDL-first approach: authored V8-V12 Flyway migrations, then derived JPA entities. V8 expands app_user with nullable password_hash (widened to VARCHAR(256)), external_subject reserved column, and case-insensitive email unique index. V9 creates role_assignment with FK ON DELETE RESTRICT, CHECK constraint mirroring IdentityRole enum, and UNIQUE(user_id, role_name). V10 creates refresh_token_family and refresh_token storing only SHA-256 hex hashes. V11 creates role_assignment_aud wired to existing REVINFO. V12 grants SELECT/INSERT (withholds UPDATE/DELETE) on role_assignment_aud to the fieldservice runtime role. Updated existing AppUser entity in-place (not duplicated) to avoid dual-entity JPA conflict. Created identity.domain package with RoleAssignment (@Audited), RefreshTokenFamily, RefreshToken entities and package-level repositories.
