@@ -1,0 +1,16 @@
+⚠️ TEST KEY INFORMATION — NOT FOR PRODUCTION USE ⚠️
+
+The test RSA key pair for this project is generated programmatically at JVM startup in:
+
+  src/test/java/com/fieldservice/security/TestRsaKeyPair.java
+
+No static private key material is committed to version control. Each test run generates
+a fresh ephemeral 2048-bit RSA key pair (PRIMARY_KID="test-key-1", SECONDARY_KID="test-key-2")
+used only to sign and verify JWTs within that JVM process.
+
+The test token minter (TestTokenMinter) uses the private key to create signed JWTs.
+The security integration test configuration uses the corresponding public key to configure
+NimbusJwtDecoder so signature verification is exercised end-to-end without a network call.
+
+This approach prevents private key bytes from appearing in version history while still
+exercising the full cryptographic signing-and-verification path in integration tests.

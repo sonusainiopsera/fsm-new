@@ -134,15 +134,21 @@ app:
     # Interval between purge-job runs in milliseconds
     purge-interval: ${APP_IDEMPOTENCY_PURGE_INTERVAL:300000}
 
-# Actuator — health and info only exposed by default
+# Actuator — health and Prometheus only; all other endpoints disabled
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,prometheus
   endpoint:
     health:
       show-details: when_authorized
+    prometheus:
+      enabled: true
+  # Sensitive endpoints explicitly disabled in all profiles
+  endpoint.env.enabled: false
+  endpoint.heapdump.enabled: false
+  endpoint.loggers.enabled: false
 
 # Logging
 logging:
