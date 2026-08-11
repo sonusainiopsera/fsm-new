@@ -6,10 +6,12 @@ import com.fieldservice.identity.api.dto.RefreshResponse;
 import com.fieldservice.identity.api.dto.StreamTicketResponse;
 import com.fieldservice.identity.application.LoginAttemptTracker;
 import com.fieldservice.identity.application.LoginService;
+import com.fieldservice.identity.application.LogoutService;
 import com.fieldservice.identity.application.RefreshTokenService;
 import com.fieldservice.identity.application.StreamTicketService;
 import com.fieldservice.identity.token.StreamTicketStore;
 import com.fieldservice.platform.api.ErrorEnvelope;
+import com.nimbusds.jwt.JWTParser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -49,15 +52,18 @@ public class AuthController {
     private final LoginService loginService;
     private final RefreshTokenService refreshTokenService;
     private final StreamTicketService streamTicketService;
+    private final LogoutService logoutService;
     private final long refreshTokenTtlSeconds;
 
     public AuthController(LoginService loginService,
                           RefreshTokenService refreshTokenService,
                           StreamTicketService streamTicketService,
+                          LogoutService logoutService,
                           com.fieldservice.identity.config.AuthProperties authProperties) {
         this.loginService = loginService;
         this.refreshTokenService = refreshTokenService;
         this.streamTicketService = streamTicketService;
+        this.logoutService = logoutService;
         this.refreshTokenTtlSeconds = authProperties.refreshToken().ttl().getSeconds();
     }
 
@@ -211,6 +217,59 @@ public class AuthController {
     }
 
     // -----------------------------------------------------------------------
+    // Logout
+    // -----------------------------------------------------------------------
+
+    /**
+     * Revokes the refresh-token family and denylists the outstanding access token jti.
+     *
+     * <p>The endpoint is reachable without a valid Bearer token because a client cannot
+     * guarantee token freshness at the moment the user taps sign out. The access token
+     * claims are parsed from the raw {@code Authorization} header without signature
+     * validation — only the {@code jti} and {@code exp} claims are extracted, and only
+     * for the purpose of computing the denylist TTL.
+     *
+     * <p>Returns 204 in all success and idempotency cases (double logout, missing cookie,
+     * already-revoked family, expired access token). Returns 503 only when the denylist
+     * store is unreachable after the family has been committed as revoked.
+     */
+    @Operation(
+            operationId = "logout",
+            summary = "Revoke refresh-token family and denylist access token jti",
+            description = "Idempotent. Clears the refresh cookie regardless of outcome. " +
+                    "Returns 503 only when the Redis denylist is unavailable after the " +
+                    "family revocation has already been committed.")
+    @PostMapping(value = "/logout")
+    public ResponseEntity<?> logout(
+            @CookieValue(value = REFRESH_COOKIE_NAME, required = false) String rawHandle,
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse) {
+
+        String tid = traceId();
+        httpResponse.setHeader("X-Trace-Id", tid);
+
+        // Always clear the refresh cookie regardless of outcome (AC-1).
+        httpResponse.addHeader(HttpHeaders.SET_COOKIE, buildClearRefreshCookie());
+
+        // Extract jti + exp from the raw Authorization header without signature validation.
+        // This works for expired and absent tokens alike, satisfying AC-5.
+        ParsedJwtClaims jwtClaims = extractJwtClaimsLeniently(httpRequest);
+
+        LogoutService.LogoutResult result =
+                logoutService.logout(rawHandle, jwtClaims.jti(), jwtClaims.exp(), tid);
+
+        if (result instanceof LogoutService.LogoutResult.DenylistFailure) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ErrorEnvelope(
+                            ErrorEnvelope.Code.AUTH_DEPENDENCY_UNAVAILABLE,
+                            "Authentication service is temporarily unavailable. Please try again shortly.",
+                            tid, Instant.now()));
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
+    // -----------------------------------------------------------------------
     // Cookie builders
     // -----------------------------------------------------------------------
 
@@ -249,6 +308,28 @@ public class AuthController {
     private static String traceId() {
         String tid = MDC.get("traceId");
         return tid != null ? tid : "none";
+    }
+
+    /** JWT claims needed for denylist TTL computation — no sensitive fields. */
+    private record ParsedJwtClaims(String jti, Instant exp) {}
+
+    /**
+     * Extracts {@code jti} and {@code exp} from the raw Bearer token without signature
+     * or expiry validation. Returns nulls for absent, malformed, or non-Bearer tokens.
+     */
+    private static ParsedJwtClaims extractJwtClaimsLeniently(HttpServletRequest request) {
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new ParsedJwtClaims(null, null);
+        }
+        try {
+            var claims = JWTParser.parse(authHeader.substring(7)).getJWTClaimsSet();
+            Instant exp = claims.getExpirationTime() != null
+                    ? claims.getExpirationTime().toInstant() : null;
+            return new ParsedJwtClaims(claims.getJWTID(), exp);
+        } catch (ParseException e) {
+            return new ParsedJwtClaims(null, null);
+        }
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

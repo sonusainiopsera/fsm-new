@@ -219,6 +219,36 @@ This forces a fresh container even on a developer machine.
 
 ---
 
+## Redis denylist eviction policy — operational risk (AC-9)
+
+The jti denylist stores short-lived keys in Redis with a TTL equal to the remaining access-token
+lifetime. If Redis evicts a denylist key before its TTL expires (e.g. under a `volatile-lru` or
+`allkeys-lru` maxmemory policy), the revoked token is silently re-enabled until the TTL is
+reached naturally.
+
+**Required Redis configuration:**
+
+```
+maxmemory-policy noeviction   # or volatile-ttl — never volatile-lru or allkeys-lru
+```
+
+With `noeviction`, Redis returns errors on new writes when memory is full rather than silently
+dropping denylist entries. Configure a memory alert (e.g., at 75 % utilisation) so the situation
+is addressed before Redis becomes full.
+
+**Monitoring signal for premature eviction:**
+
+The application emits a Micrometer counter `auth.logout.denylist_insert_failure` for every failed
+denylist write. A non-zero rate on this counter indicates that Redis rejected the write — either
+the store is unreachable or it returned an error (which `noeviction` will do when full). Alert on
+`rate(auth.logout.denylist_insert_failure[5m]) > 0`.
+
+Token reuse after logout without a corresponding `denylist_insert_failure` increment would
+indicate silent eviction. Cross-reference against `redis_evicted_keys_total` in Prometheus to
+detect this scenario.
+
+---
+
 ## CI pipeline
 
 The CI environment sets `CI=true`, which disables container reuse. The pipeline runs:
