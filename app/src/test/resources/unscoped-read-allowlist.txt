@@ -1,0 +1,14 @@
+# Allow-list of classes and methods annotated with @UnscopedRead.
+# Each line is a fully-qualified class name or class#methodName.
+# Any @UnscopedRead usage NOT listed here will fail UnscopedReadAllowListTest.
+#
+# !! Adding an entry here requires a code-review approval. !!
+# Update the approvedBy attribute on the @UnscopedRead annotation and this file
+# in the same commit, referencing the PR number.
+#
+# Format: one entry per line, blank lines and lines starting with # are ignored.
+# Example class-level entry:  com.fieldservice.analytics.dashboard.KpiReadModel
+# Example method-level entry: com.fieldservice.analytics.dashboard.KpiReadModel#totalOpenWorkOrders
+#
+# ---- Approved opt-outs -------------------------------------------------------
+# (none yet — first opt-out requires explicit code-review approval)

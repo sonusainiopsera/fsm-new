@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;NON_KEYWORDS=VALUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        # Register statement inspector for SQL assertion tests
+        session_factory:
+          statement_inspector: com.fieldservice.app.security.CaptureStatementInspector
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;NON_KEYWORDS=VALUE
+    user: sa
+    password:
+
+  # Disable OAuth2 issuer validation in tests — JWT decoder is mocked/overridden
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri:
+          jwk-set-uri:
+
+logging:
+  level:
+    com.fieldservice: DEBUG
+    org.springframework.security: DEBUG
