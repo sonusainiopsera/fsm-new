@@ -136,6 +136,15 @@ app:
     position-retention-days: ${APP_WORKFORCE_POSITION_RETENTION_DAYS:90}
 
   privacy:
+    dsar:
+      # SLA window in days — due date = submitted_at + slaDays (BR-26, O7)
+      sla-days: ${PRIVACY_DSAR_SLA_DAYS:30}
+      # Days remaining below which a request is flagged as at-risk
+      at-risk-threshold-days: ${PRIVACY_DSAR_AT_RISK_THRESHOLD_DAYS:5}
+      # Maximum presigned download URL validity (never exceeds 300 seconds)
+      download-url-expiry-seconds: ${PRIVACY_DSAR_DOWNLOAD_URL_EXPIRY_SECONDS:300}
+      # Interval between export assembly job runs in milliseconds (worker profile only)
+      export-job-interval-ms: ${PRIVACY_DSAR_EXPORT_JOB_INTERVAL_MS:60000}
     purge:
       # Master kill-switch: must be explicitly enabled after Q7 DPO ratification (AC-7)
       execution-enabled: ${PRIVACY_PURGE_EXECUTION_ENABLED:false}

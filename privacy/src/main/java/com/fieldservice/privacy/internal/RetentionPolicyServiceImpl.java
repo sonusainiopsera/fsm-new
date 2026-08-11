@@ -107,8 +107,8 @@ class RetentionPolicyServiceImpl implements RetentionPolicyAdminPort {
                 .orElseThrow(() -> new NotFoundException("RetentionPolicy", id));
 
         if (!policy.getVersion().equals(request.version())) {
-            throw new ConflictException("RetentionPolicy", id,
-                    "Stale version: expected " + policy.getVersion() + " but got " + request.version());
+            throw new ConflictException("Stale version for RetentionPolicy " + id
+                    + ": expected " + policy.getVersion() + " but got " + request.version());
         }
 
         if (violatesAuditFloor(policy.getDataCategory(), request.periodValue(), request.periodUnit())) {
