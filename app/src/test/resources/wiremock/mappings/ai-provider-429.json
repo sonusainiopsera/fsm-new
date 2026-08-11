@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v1/chat/completions",
+    "headers": {
+      "X-Stub-Scenario": { "equalTo": "rate-limited" }
+    }
+  },
+  "response": {
+    "status": 429,
+    "headers": {
+      "Content-Type": "application/json",
+      "Retry-After": "60"
+    },
+    "jsonBody": {
+      "error": {
+        "message": "Rate limit exceeded",
+        "type": "requests",
+        "code": "rate_limit_exceeded"
+      }
+    }
+  }
+}

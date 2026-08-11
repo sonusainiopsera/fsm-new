@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    # Overridden by Testcontainers @DynamicPropertySource
+    url: jdbc:postgresql://localhost:5432/test
+    username: test
+    password: test
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    locations: classpath:db/migration,classpath:db/testfixtures
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Disabled in tests — JwtDecoder bean is replaced with a test mock
+          issuer-uri:
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    com.fieldservice: DEBUG

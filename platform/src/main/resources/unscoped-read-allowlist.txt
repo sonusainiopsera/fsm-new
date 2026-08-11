@@ -1,0 +1,10 @@
+# Committed allow-list of @UnscopedRead usages.
+# Each line is the fully-qualified class name (for type-level) or
+# fully-qualified class name + '#' + method name (for method-level).
+# Any @UnscopedRead usage NOT in this file causes UnscopedReadAllowListTest to fail.
+# To add a new entry: add here, supply a non-trivial justification in the annotation,
+# and obtain a code-review approval on this file change.
+#
+# --- APPROVED ENTRIES ---
+com.fieldservice.domain.analytics.AnalyticsRepository
+com.fieldservice.domain.sla.SlaPolicyRepository

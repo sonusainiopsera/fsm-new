@@ -1,0 +1,35 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "color-named": "never",
+    "color-no-invalid-hex": true,
+    "declaration-property-value-allowed-list": {
+      "/^color$/": ["/^var\\(--fs-/", "inherit", "currentColor", "transparent"],
+      "background-color": ["/^var\\(--fs-/", "transparent", "inherit"],
+      "border-color": ["/^var\\(--fs-/", "transparent", "inherit", "currentColor"],
+      "outline-color": ["/^var\\(--fs-/", "transparent", "inherit", "currentColor"],
+      "border-radius": ["/^var\\(--fs-/", "0", "0px"],
+      "/^border-[a-z]+-radius$/": ["/^var\\(--fs-/", "0", "0px"],
+      "/^padding(-[a-z]+)?$/": ["/^var\\(--fs-/", "0", "0px"],
+      "/^margin(-[a-z]+)?$/": ["/^var\\(--fs-/", "0", "0px", "auto"],
+      "/^(row-gap|column-gap|gap)$/": ["/^var\\(--fs-/", "0", "0px", "normal"],
+      "box-shadow": ["/^var\\(--fs-/", "none"],
+      "transition-duration": ["/^var\\(--fs-/"],
+      "animation-duration": ["/^var\\(--fs-/"]
+    },
+    "custom-property-pattern": null,
+    "selector-class-pattern": null,
+    "import-notation": null,
+    "alpha-value-notation": "number"
+  },
+  "overrides": [
+    {
+      "files": ["src/styles/tokens.contract.css", "src/styles/base.css", "src/styles/index.css"],
+      "rules": {
+        "color-named": null,
+        "color-no-invalid-hex": null,
+        "declaration-property-value-allowed-list": null
+      }
+    }
+  ]
+}

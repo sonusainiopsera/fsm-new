@@ -1,0 +1,15 @@
+/*
+ * STYLES AGGREGATOR
+ * =================
+ * Imports token value sets and base styles in dependency order.
+ * This is the single stylesheet loaded in the document head.
+ *
+ * Load order:
+ *   1. tokens.light.css — supplies light values to :root (default)
+ *   2. tokens.dark.css  — overrides with dark values when data-appearance="dark"
+ *   3. base.css         — reset, body defaults, utilities
+ */
+
+@import './tokens.light.css';
+@import './tokens.dark.css';
+@import './base.css';

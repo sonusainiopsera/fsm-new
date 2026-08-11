@@ -1,0 +1,105 @@
+/*
+ * BASE STYLES
+ * ===========
+ * CSS reset, body defaults, and utility classes derived from design tokens.
+ * All visual values reference tokens via var() — no literals permitted here.
+ */
+
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  font-family: var(--fs-font-family);
+  font-size: var(--fs-text-base);
+  line-height: var(--fs-line-height-body);
+  color: var(--fs-color-text-primary);
+  background-color: var(--fs-color-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* ── Display-size tightened tracking ─────────────────────────────────────── */
+/* Applied to elements using text-lg (20 px) and above */
+
+.text-lg,
+.text-xl,
+.text-2xl {
+  letter-spacing: var(--fs-tracking-tight);
+}
+
+/* ── Numeric / tabular figures utility ───────────────────────────────────── */
+/*
+ * The .numeric class applies tabular figures so every numeric cell,
+ * KPI value, countdown and score aligns in columnar layouts.
+ * Driven by the --fs-font-variant-numeric token so the value
+ * is swapped at brand ratification without touching component CSS.
+ */
+
+.numeric {
+  font-variant-numeric: var(--fs-font-variant-numeric);
+  font-feature-settings: "tnum";
+}
+
+/* ── Content layout ───────────────────────────────────────────────────────── */
+
+.content-container {
+  max-width: var(--fs-content-max);
+  padding-inline: var(--fs-gutter);
+  margin-inline: auto;
+}
+
+/* ── Reduced-motion: honour OS preference ────────────────────────────────── */
+/*
+ * When the OS reduced-motion preference is enabled, motion tokens resolve
+ * to 0 ms so users see no animation — without any layout or information change.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

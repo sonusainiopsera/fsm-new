@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v1/chat/completions",
+    "headers": {
+      "X-Stub-Scenario": { "equalTo": "slow-response" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "fixedDelayMilliseconds": 11000,
+    "jsonBody": {
+      "id": "chatcmpl-slow",
+      "model": "gpt-4o",
+      "choices": [
+        {
+          "message": { "role": "assistant", "content": "Delayed response" },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": { "prompt_tokens": 5, "completion_tokens": 3, "total_tokens": 8 }
+    }
+  }
+}

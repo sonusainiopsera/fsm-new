@@ -1,0 +1,103 @@
+spring:
+  application:
+    name: field-service-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/fieldservice}
+    username: ${DATABASE_USERNAME:fieldservice}
+    password: ${DATABASE_PASSWORD:fieldservice}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 2000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        generate_statistics: false
+        envers:
+          audit_table_suffix: _aud
+          store_data_at_delete: true
+          default_schema: public
+          revision_field_name: rev
+          revision_type_field_name: revtype
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8180/realms/fieldservice}
+          audiences: ${JWT_AUDIENCE:field-service-api}
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
+    path: /error
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+fieldservice:
+  pagination:
+    cursor-hmac-secret: ${CURSOR_HMAC_SECRET:changeme-not-for-production}
+    keyset-offset-threshold: 20
+  idempotency:
+    ttl: PT24H
+    lease-timeout: PT30S
+    max-body-size: 65536
+    purge-batch-size: 1000
+    require-key: false
+
+ai:
+  copilot:
+    enabled: false
+    daily-cap-per-user: 100
+  provider:
+    endpoint: ${AI_PROVIDER_ENDPOINT:}
+    api-key-env: AI_PROVIDER_API_KEY
+    allowed-hosts: ${AI_PROVIDER_ALLOWED_HOSTS:}
+    model: ${AI_PROVIDER_MODEL:gpt-4o}
+    max-tokens: 2000
+    connect-timeout: 2s
+    read-timeout: 10s
+  resilience:
+    failure-rate-threshold: 50
+    sliding-window-size: 20
+    wait-duration-open: 30s
+    half-open-calls: 3
+    max-concurrent-calls: 16
+    time-limit-duration: 10s
+  metrics:
+    token-cost-per-thousand: 0.00003
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+logging:
+  level:
+    com.fieldservice: INFO
+    org.springframework.security: WARN

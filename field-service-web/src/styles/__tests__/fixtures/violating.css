@@ -1,0 +1,21 @@
+/*
+ * VIOLATING FIXTURE
+ * =================
+ * Deliberately contains hard-coded visual literals.
+ * The Stylelint lint gate MUST report at least one warning per violation below.
+ * Used only by the lint-gate unit test — never deployed.
+ */
+
+.violating-component {
+  /* VIOLATION: hard-coded hex colour */
+  color: #ff3366;
+
+  /* VIOLATION: hard-coded px border-radius */
+  border-radius: 6px;
+
+  /* VIOLATION: hard-coded px spacing */
+  padding: 8px;
+
+  /* VIOLATION: hard-coded ms duration */
+  transition-duration: 120ms;
+}
