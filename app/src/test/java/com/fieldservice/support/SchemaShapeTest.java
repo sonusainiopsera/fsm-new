@@ -37,7 +37,9 @@ class SchemaShapeTest extends AbstractIntegrationTest {
             "sla_policy_aud",
             "role_assignment_aud",
             "work_order_hold_aud",
-            "work_order_part_aud"
+            "work_order_part_aud",
+            "customer_aud",   // WO-117: Customer @Audited via V22 migration
+            "asset_aud"       // WO-117: Asset @Audited via V22 migration
     );
 
     @Autowired

@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -47,8 +48,23 @@ public class Site extends BaseEntity implements ScopedEntity {
     @Column(name = "longitude", precision = 9, scale = 6)
     private java.math.BigDecimal longitude;
 
+    @Column(name = "site_code", length = 50)
+    private String siteCode;
+
+    @Column(name = "display_name", length = 255)
+    private String displayName;
+
+    @Column(name = "postcode", length = 20)
+    private String postcode;
+
+    @Column(name = "access_notes", columnDefinition = "TEXT")
+    private String accessNotes;
+
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
+
+    @Column(name = "deactivated_at")
+    private Instant deactivatedAt;
 
     protected Site() {
     }
@@ -98,6 +114,18 @@ public class Site extends BaseEntity implements ScopedEntity {
         this.longitude = longitude;
     }
 
+    public String getSiteCode() { return siteCode; }
+    public void setSiteCode(String siteCode) { this.siteCode = siteCode; }
+
+    public String getDisplayName() { return displayName; }
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
+
+    public String getPostcode() { return postcode; }
+    public void setPostcode(String postcode) { this.postcode = postcode; }
+
+    public String getAccessNotes() { return accessNotes; }
+    public void setAccessNotes(String accessNotes) { this.accessNotes = accessNotes; }
+
     public boolean isActive() {
         return active;
     }
@@ -105,4 +133,7 @@ public class Site extends BaseEntity implements ScopedEntity {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+    public Instant getDeactivatedAt() { return deactivatedAt; }
+    public void setDeactivatedAt(Instant deactivatedAt) { this.deactivatedAt = deactivatedAt; }
 }

@@ -245,3 +245,10 @@
 - **Files:** 13 (+1590/-8)
 - **Duration:** 964ss
 - **Approach:** Implemented the sign-in screen as a split-layout page (BrandPanel + AuthCard) in src/features/auth/ (not src/surfaces/ so coverage thresholds apply). The useSignIn hook uses TanStack Query useMutation with retry:false, direct fetch with credentials:include for the login endpoint, normalises all status codes into a typed LoginError including network failures (status:0), boundary-validates the response before the token reaches tokenStore, and exposes attemptBootRefresh() for mount-time silent re-authentication from the HttpOnly cookie. The SignInPage mounts with bootRefreshing:true, attempts refresh, then either navigates away (success) or shows the form. Error routing: 400 with fieldErrors → per-field aria-describedby errors; all other failures → GenericErrorAlert with aria-live=assertive. Double-submit prevented by disabling the button and early-returning in handleSubmit while isPending. SSO section behind VITE_SSO_ENABLED feature flag. ESLint restricted-properties bans localStorage/sessionStorage access in src/features/auth/** and src/surfaces/auth/**.
+
+## WO-117: User Story: WO-117 - Catalog module: customer, site and asset reference data
+- **Status:** completed
+- **Commit:** `eb1a30f`
+- **Files:** 26 (+2695/-37)
+- **Duration:** 1138ss
+- **Approach:** Layered the catalog module on top of the existing Customer/Site/Asset domain entities rather than creating parallel entities. Enhanced the existing entities with new V22 catalog fields and @Audited annotations. The catalog module follows the inventory module pattern: api/ package (CatalogQueryPort + projection records), application/ package (CatalogService with @PreAuthorize, hierarchy guards, cascade deactivation, and outbox), and web/ package (three REST controllers). All reads route through ScopedQueryExecutor for mandatory row-scope enforcement. SortAllowList per entity prevents sort injection. Outbox events (CustomerChanged, SiteChanged, AssetChanged) are published atomically with the domain write via DomainEventPublisher(MANDATORY).
