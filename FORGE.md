@@ -413,3 +413,10 @@
 - **Files:** 15 (+1826/-8)
 - **Duration:** 700ss
 - **Approach:** Implemented the dispatcher work order board as a feature module under field-service-web/src/features/workorders. URL search params are the single source of truth for filters, sort, page, and open drawer id. useWorkOrderSearch wraps TanStack Query with 30-second conditional GET polling via the shared conditionalFetch/ETag utilities. WorkOrderBoardPage wires together FilterBar (debounced, URL-synced), WorkOrderTable (sortable, keyboard-operable), and WorkOrderDetailDrawer (focus-trapped, deep-linkable). Lifecycle actions in the drawer are rendered strictly from the server-provided legalNextEvents list with no client-side duplication. useWorkOrderTransition sends Idempotency-Key and expectedVersion, maps every refusal code to a typed TransitionError, and invalidates only the affected row and board list on success. All components consume design tokens and shared library primitives (Chip, DetailDrawer, StateSurface variants). The dispatch surface index was updated to render WorkOrderBoardPage on the default and work-orders routes.
+
+## WO-143: User Story: WO-143 - Minute-cadence SLA risk evaluator with distributed sweep lock
+- **Status:** completed
+- **Commit:** `3cea068`
+- **Files:** 15 (+1437/-0)
+- **Duration:** 936ss
+- **Approach:** N/A

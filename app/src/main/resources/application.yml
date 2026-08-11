@@ -159,6 +159,17 @@ app:
       # Time zone for cut-off instant computation
       zone-id: ${PRIVACY_PURGE_ZONE_ID:UTC}
 
+  sla:
+    sweep:
+      # Interval between SLA risk sweep ticks in milliseconds (worker profile only)
+      tick-interval-ms: ${APP_SLA_SWEEP_TICK_INTERVAL_MS:60000}
+      # Maximum work orders evaluated per sweep batch
+      batch-size: ${APP_SLA_SWEEP_BATCH_SIZE:500}
+      # Set to false to disable the advisory lock (tests with a single context)
+      lock-enabled: ${APP_SLA_SWEEP_LOCK_ENABLED:true}
+      # Master kill-switch: set to false to pause the sweep without removing the bean
+      enabled: ${APP_SLA_SWEEP_ENABLED:true}
+
   idempotency:
     # How long an IN_PROGRESS record holds its lease before it can be reclaimed (crash recovery)
     lease-duration: ${APP_IDEMPOTENCY_LEASE_DURATION:PT30S}
