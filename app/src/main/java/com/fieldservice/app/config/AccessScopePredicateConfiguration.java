@@ -1,6 +1,8 @@
 package com.fieldservice.app.config;
 
 import com.fieldservice.customer.domain.CustomerAccount;
+import com.fieldservice.inventory.domain.Part;
+import com.fieldservice.inventory.domain.StockLocation;
 import com.fieldservice.platform.persistence.ScopedEntity;
 import com.fieldservice.platform.security.AccessScopePredicateFactory;
 import com.fieldservice.platform.security.EntityScopeSpec;
@@ -40,7 +42,9 @@ public class AccessScopePredicateConfiguration {
     private static final Set<Class<? extends ScopedEntity>> REQUIRED_ENTITY_TYPES = Set.of(
             WorkOrder.class,
             Site.class,
-            CustomerAccount.class
+            CustomerAccount.class,
+            Part.class,
+            StockLocation.class
     );
 
     @Bean
