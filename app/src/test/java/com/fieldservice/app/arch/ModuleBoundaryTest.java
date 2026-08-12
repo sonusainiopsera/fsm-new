@@ -138,4 +138,21 @@ class ModuleBoundaryTest {
                          "com.fieldservice.notification.api only")
                 .check(ALL_CLASSES);
     }
+
+    // ---------------------------------------------------------------
+    // WO-133: dispatch.eligibility is not accessible from outside dispatch
+    // ---------------------------------------------------------------
+
+    @Test
+    @DisplayName("No code outside dispatch may depend on dispatch.eligibility internals")
+    void outsideCode_mustNotDependOn_dispatchEligibilityInternals() {
+        noClasses()
+                .that().resideOutsideOfPackage("com.fieldservice.dispatch..")
+                .and().resideOutsideOfPackage("..test..")
+                .should().dependOnClassesThat()
+                .resideInAPackage("com.fieldservice.dispatch.eligibility..")
+                .because("dispatch.eligibility is an internal package; use EligibilityService " +
+                         "from com.fieldservice.dispatch.api only")
+                .check(ALL_CLASSES);
+    }
 }

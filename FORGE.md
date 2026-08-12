@@ -490,3 +490,10 @@
 - **Files:** 13 (+1454/-1)
 - **Duration:** 647ss
 - **Approach:** Added a focus-trapped CreateWorkOrderModal with dependent customer/site/asset selects, SLA policy lookup for deadline preview, idempotent submission via per-modal idempotency keys, and complete server 400/422 field-error mapping. Extracted a shared DeadlineCountdown component driven by a single shared serverClock tick driver with clock-skew correction from HTTP Date headers and immediate visibilitychange reconciliation. Added a backend GET /api/v1/sla-policies/by-priority/{priority} endpoint accessible to dispatchers. The 'New Work Order' button on the dispatch board opens the modal and invalidates the board query on success.
+
+## WO-133: User Story: WO-133 - Technician eligibility filtering as hard dispatch gate
+- **Status:** completed
+- **Commit:** `7c68044`
+- **Files:** 15 (+1356/-0)
+- **Duration:** 1387ss
+- **Approach:** N/A
