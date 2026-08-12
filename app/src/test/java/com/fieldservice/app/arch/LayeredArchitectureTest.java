@@ -160,4 +160,47 @@ class LayeredArchitectureTest {
 
         rule.check(PROD_CLASSES);
     }
+
+    // ==========================================================================
+    // WO-193 Envelope field encryption architecture rules
+    // ==========================================================================
+
+    /**
+     * {@code SubjectKeySpec} must not reside in web or event packages.
+     * Key material (wrapped in SubjectKeySpec) must never be returned in an API response
+     * or included in a domain event payload.
+     */
+    @Test
+    @DisplayName("SubjectKeySpec must not reside in web or event packages")
+    void subject_key_spec_must_not_reside_in_web_or_event_packages() {
+        ArchRule rule = noClasses()
+                .that().haveSimpleName("SubjectKeySpec")
+                .should().resideInAPackage("..web..")
+                .orShould().resideInAPackage("..event..")
+                .because("SubjectKeySpec holds plaintext key material; it must never be "
+                        + "serialised into an API response or event payload. "
+                        + "See docs/security/cryptography-standards.md §key-hygiene.");
+
+        rule.check(PROD_CLASSES);
+    }
+
+    /**
+     * Classes outside the platform.crypto package must not call
+     * {@code SubjectKeyManager.destroy()} directly.  Destruction must flow through
+     * the privacy module's erasure service so audit trail and cache eviction are
+     * guaranteed.
+     */
+    @Test
+    @DisplayName("Only platform.crypto classes may call SubjectKeyManager directly from web layer")
+    void web_layer_must_not_call_subject_key_manager_directly() {
+        ArchRule rule = noClasses()
+                .that().resideInAPackage("..web..")
+                .should().accessClassesThat()
+                .implement(com.fieldservice.platform.crypto.SubjectKeyManager.class)
+                .because("SubjectKeyManager must be accessed through the privacy module's "
+                        + "erasure service, not directly from web controllers. "
+                        + "See docs/security/cryptography-standards.md §key-destruction.");
+
+        rule.check(PROD_CLASSES);
+    }
 }

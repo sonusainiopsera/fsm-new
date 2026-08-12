@@ -1,6 +1,6 @@
 package com.fieldservice.workforce.internal;
 
-import com.fieldservice.platform.crypto.EncryptedStringConverter;
+import com.fieldservice.platform.crypto.EnvelopeEncryptedStringConverter;
 import com.fieldservice.platform.util.UuidV7;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -26,11 +26,11 @@ class TechnicianPositionEntity {
     @Column(name = "technician_id", nullable = false)
     private UUID technicianId;
 
-    @Convert(converter = EncryptedStringConverter.class)
+    @Convert(converter = EnvelopeEncryptedStringConverter.class)
     @Column(name = "latitude", nullable = false, columnDefinition = "TEXT")
     private String latitude;
 
-    @Convert(converter = EncryptedStringConverter.class)
+    @Convert(converter = EnvelopeEncryptedStringConverter.class)
     @Column(name = "longitude", nullable = false, columnDefinition = "TEXT")
     private String longitude;
 

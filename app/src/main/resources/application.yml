@@ -164,6 +164,18 @@ app:
       # Non-production-only secret for deterministic HMAC pseudonymisation
       seed: ${APP_ANONYMISE_SEED:change-me-non-production-seed-only}
 
+  encryption:
+    # AES-256 data-encryption key (Phase 1 global key and LocalStubSubjectKeyManager master key).
+    # Production: inject from secrets manager.  Fallback is all-zeros test key.
+    data-key-base64: ${APP_ENCRYPTION_DATA_KEY:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+    # HMAC-SHA-256 blind-index key — MUST be distinct from data-key-base64.
+    # Production: inject from secrets manager.  Fallback is all-zeros test key.
+    blind-index-key-base64: ${APP_ENCRYPTION_BLIND_INDEX_KEY:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+    # Key cache configuration
+    key-cache:
+      max-entries: 512
+      ttl-seconds: 900
+
 server:
   port: ${PORT:8080}
   error:

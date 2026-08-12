@@ -126,6 +126,52 @@ rules:
   # must not be passed to ObjectMapper.writeValueAsString() or a logger
   # without going through the masking module.  Use a DTO or masked view.
   # -----------------------------------------------------------------------
+  # -----------------------------------------------------------------------
+  # Rule 4: Logging or serialising cryptographic key material.
+  #
+  # SecretKey, byte[] key buffers and SubjectKeySpec must never appear in
+  # any log statement or be serialised in an event payload.  The ban covers
+  # getEncoded() (which extracts raw key bytes) and SubjectKeySpec/SecretKey
+  # passed directly to a logger.
+  # -----------------------------------------------------------------------
+  - id: key-material-in-logger
+    message: >
+      Logger call may expose cryptographic key material.
+      SecretKey, SubjectKeySpec and raw key byte arrays must never be logged.
+      Log only non-sensitive identifiers (subjectType, subjectId, keyVersion).
+      See docs/security/cryptography-standards.md §key-hygiene.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-312: Cleartext Storage of Sensitive Information"
+      compliance: "SOC2 CC6.7"
+    paths:
+      include:
+        - "*/src/main/java/**"
+        - "*/src/test/java/**"
+    patterns:
+      - pattern: |
+          $LOG.$LEVEL(..., $KEY.getEncoded(), ...)
+      - metavariable-regex:
+          metavariable: "$LEVEL"
+          regex: "^(info|warn|error|debug|trace|atLevel)$"
+
+  - id: key-material-in-event-payload
+    message: >
+      SubjectKeySpec or SecretKey must not be serialised into an event payload or API response.
+      Wrap the key operation and return only non-sensitive result data.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-312: Cleartext Storage of Sensitive Information"
+    paths:
+      include:
+        - "*/src/main/java/**"
+    pattern: |
+      $OM.writeValueAsString(new SubjectKeySpec(...))
+
   - id: objectmapper-serialises-classified-entity
     message: >
       ObjectMapper is serialising an object that may be a classified entity.
