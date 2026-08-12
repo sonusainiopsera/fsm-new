@@ -21,6 +21,8 @@ import java.util.UUID;
  * @param teamMeanBookedHours       mean booked hours across the eligible candidate pool
  * @param partsAvailabilityStatus   advisory parts availability verdict for this candidate
  *                                  ({@code null} treated as FULLY_STOCKED — no required parts)
+ * @param partsAvailabilityRatio    fraction of required part quantities satisfied from the
+ *                                  candidate's van stock (0..1); 1.0 when no parts required
  */
 public record ScoringContext(
         UUID technicianId,
@@ -30,7 +32,8 @@ public record ScoringContext(
         TravelTimeEstimate travelTime,
         double bookedHours,
         double teamMeanBookedHours,
-        PartsAvailabilityStatus partsAvailabilityStatus
+        PartsAvailabilityStatus partsAvailabilityStatus,
+        double partsAvailabilityRatio
 ) {
     public ScoringContext {
         heldCertificationCodes     = heldCertificationCodes    == null ? List.of() : List.copyOf(heldCertificationCodes);
@@ -40,5 +43,7 @@ public record ScoringContext(
         if (teamMeanBookedHours < 0) teamMeanBookedHours = 0;
         if (priorJobTypeExperienceCount < 0) priorJobTypeExperienceCount = 0;
         if (partsAvailabilityStatus == null) partsAvailabilityStatus = PartsAvailabilityStatus.FULLY_STOCKED;
+        if (partsAvailabilityRatio < 0) partsAvailabilityRatio = 0;
+        if (partsAvailabilityRatio > 1) partsAvailabilityRatio = 1;
     }
 }

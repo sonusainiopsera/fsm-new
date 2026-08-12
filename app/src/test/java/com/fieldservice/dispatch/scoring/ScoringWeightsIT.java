@@ -1,6 +1,7 @@
 package com.fieldservice.dispatch.scoring;
 
 import com.fieldservice.dispatch.scoring.factors.CompetencyFitFactor;
+import com.fieldservice.inventory.api.PartsAvailabilityStatus;
 import com.fieldservice.dispatch.scoring.factors.PartsAvailabilityFactor;
 import com.fieldservice.dispatch.scoring.factors.TravelEfficiencyFactor;
 import com.fieldservice.dispatch.scoring.factors.WorkloadFairnessFactor;
@@ -78,13 +79,16 @@ class ScoringWeightsIT extends AbstractIntegrationTest {
         List<ScoringContext> candidates = List.of(
                 // TECH_A: cert 100%, 5 exp, 30 min, 6h booked (below mean), parts ok
                 new ScoringContext(TECH_A, List.of("ELEC_LV"), Set.of("ELEC_LV"),
-                        5, new TravelTimeEstimate(30, false), 6.0, teamMean, true),
+                        5, new TravelTimeEstimate(30, false), 6.0, teamMean,
+                        PartsAvailabilityStatus.FULLY_STOCKED, 1.0),
                 // TECH_B: cert 100%, 2 exp, 60 min, 7h booked (at mean), parts ok
                 new ScoringContext(TECH_B, List.of("ELEC_LV"), Set.of("ELEC_LV"),
-                        2, new TravelTimeEstimate(60, false), 7.0, teamMean, true),
+                        2, new TravelTimeEstimate(60, false), 7.0, teamMean,
+                        PartsAvailabilityStatus.FULLY_STOCKED, 1.0),
                 // TECH_C: cert 100%, 8 exp, 90 min, 9h booked (above mean), no parts
                 new ScoringContext(TECH_C, List.of("ELEC_LV"), Set.of("ELEC_LV"),
-                        8, new TravelTimeEstimate(90, false), 9.0, teamMean, false)
+                        8, new TravelTimeEstimate(90, false), 9.0, teamMean,
+                        PartsAvailabilityStatus.UNAVAILABLE, 0.0)
         );
 
         List<ScoredCandidate> ranked = scoringEngine.rank(candidates, weights);
@@ -102,7 +106,8 @@ class ScoringWeightsIT extends AbstractIntegrationTest {
         ScoringWeights weights = weightsLoader.load();
 
         ScoringContext ctx = new ScoringContext(TECH_A, List.of("ELEC_LV"), Set.of("ELEC_LV"),
-                5, new TravelTimeEstimate(30, false), 6.0, 7.0, true);
+                5, new TravelTimeEstimate(30, false), 6.0, 7.0,
+                PartsAvailabilityStatus.FULLY_STOCKED, 1.0);
         List<ScoredCandidate> ranked = scoringEngine.rank(List.of(ctx), weights);
 
         assertThat(ranked.get(0).breakdown())

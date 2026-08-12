@@ -34,6 +34,7 @@ public record RecommendationResponse(
             boolean partsDataDegraded,
             int candidatePoolSize,
             boolean truncated,
-            List<ExclusionSummaryEntry> exclusionSummary
+            List<ExclusionSummaryEntry> exclusionSummary,
+            PartsWarning partsWarning
     ) {}
 }

@@ -20,7 +20,7 @@ import java.util.UUID;
  *       mandatory AccessScope predicate — never as a post-fetch filter.</li>
  * </ul>
  */
-public interface StockQueryService {
+public interface StockQueryService extends StockAvailabilityPort {
 
     /**
      * Checks parts availability in batch across candidate vehicle locations and reachable warehouses.

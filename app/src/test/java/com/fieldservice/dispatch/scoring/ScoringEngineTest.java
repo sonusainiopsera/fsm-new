@@ -368,8 +368,10 @@ class ScoringEngineTest {
     private static ScoringContext ctx(UUID id, List<String> held, Set<String> required,
             int experience, TravelTimeEstimate travel, double booked, double mean,
             PartsAvailabilityStatus partsStatus) {
+        double ratio = partsStatus == PartsAvailabilityStatus.FULLY_STOCKED ? 1.0
+                : partsStatus == PartsAvailabilityStatus.UNAVAILABLE ? 0.0 : 0.5;
         return new ScoringContext(id == null ? UUID.randomUUID() : id,
-                held, required, experience, travel, booked, mean, partsStatus);
+                held, required, experience, travel, booked, mean, partsStatus, ratio);
     }
 
     private static ScoringContext travelCtx(UUID id, double minutes, boolean degraded) {
@@ -391,7 +393,8 @@ class ScoringEngineTest {
                 template.travelTime(),
                 template.bookedHours(),
                 template.teamMeanBookedHours(),
-                template.partsAvailabilityStatus());
+                template.partsAvailabilityStatus(),
+                template.partsAvailabilityRatio());
     }
 
     private static List<ScoringContext> buildCandidates(int count, double teamMean) {

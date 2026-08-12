@@ -9,24 +9,37 @@ import com.fieldservice.inventory.api.PartsAvailabilityStatus;
 /**
  * Parts availability factor — advisory soft contribution only.
  *
- * <p>This factor must never zero out or gate a candidate (AC-8 constraint).
- * It contributes a soft upward nudge when parts are in stock:
- * <ul>
- *   <li>FULLY_STOCKED: normalised = 1.0 — all required parts in vehicle</li>
- *   <li>PARTIALLY_STOCKED: normalised = 0.7 — some parts in vehicle, some shortfalls</li>
- *   <li>COLLECTABLE: normalised = 0.6 — all shortfalls covered by reachable warehouses</li>
- *   <li>UNAVAILABLE / null: normalised = {@link #UNAVAILABLE_SCORE} (0.5) — never 0.0</li>
- * </ul>
+ * <p>Computes {@code satisfiedQuantity / requiredQuantity} as the primary signal,
+ * applying a configurable collectable discount when shortfalls are satisfiable from
+ * a nearby stocking location (AC-1).
  *
- * <p>Raw value: the normalised value before weight application.
+ * <p>This factor must never zero out or gate a candidate (AC-2):
+ * <ul>
+ *   <li>FULLY_STOCKED: normalised = 1.0</li>
+ *   <li>PARTIALLY_STOCKED: normalised = max(vanRatio, {@link #NEUTRAL_FLOOR})</li>
+ *   <li>COLLECTABLE: normalised = vanRatio + nearbyDiscount * (1 - vanRatio)</li>
+ *   <li>UNAVAILABLE: normalised = {@link #NEUTRAL_FLOOR} (0.5) — never 0.0</li>
+ * </ul>
  */
 public class PartsAvailabilityFactor implements ScoringFactor {
 
     public static final String CODE = "PARTS_AVAILABILITY";
-    public static final double UNAVAILABLE_SCORE = 0.5;
+    public static final double NEUTRAL_FLOOR = 0.5;
+    public static final double DEFAULT_NEARBY_COLLECTABLE_DISCOUNT = 0.6;
 
-    private static final double PARTIALLY_STOCKED_SCORE = 0.7;
-    private static final double COLLECTABLE_SCORE        = 0.6;
+    private final double nearbyCollectableDiscount;
+
+    public PartsAvailabilityFactor() {
+        this(DEFAULT_NEARBY_COLLECTABLE_DISCOUNT);
+    }
+
+    public PartsAvailabilityFactor(double nearbyCollectableDiscount) {
+        if (nearbyCollectableDiscount < 0 || nearbyCollectableDiscount > 1) {
+            throw new IllegalArgumentException(
+                    "nearbyCollectableDiscount must be in [0, 1], got: " + nearbyCollectableDiscount);
+        }
+        this.nearbyCollectableDiscount = nearbyCollectableDiscount;
+    }
 
     @Override
     public String factorCode() {
@@ -37,22 +50,34 @@ public class PartsAvailabilityFactor implements ScoringFactor {
     public FactorBreakdown normalise(ScoringContext ctx, ScoringWeights weights) {
         double w = weights.weightFor(CODE);
         PartsAvailabilityStatus status = ctx.partsAvailabilityStatus();
+        double ratio = ctx.partsAvailabilityRatio();
 
-        return switch (status) {
-            case FULLY_STOCKED -> new FactorBreakdown(CODE, 1.0, 1.0, w, w,
-                    "all required parts fully stocked on vehicle", false);
-
-            case PARTIALLY_STOCKED -> new FactorBreakdown(CODE, PARTIALLY_STOCKED_SCORE,
-                    PARTIALLY_STOCKED_SCORE, w, w * PARTIALLY_STOCKED_SCORE,
-                    "some required parts in vehicle stock — partial shortfall", false);
-
-            case COLLECTABLE -> new FactorBreakdown(CODE, COLLECTABLE_SCORE,
-                    COLLECTABLE_SCORE, w, w * COLLECTABLE_SCORE,
-                    "required parts not on vehicle but collectable from reachable warehouse", false);
-
-            case UNAVAILABLE -> new FactorBreakdown(CODE, UNAVAILABLE_SCORE,
-                    UNAVAILABLE_SCORE, w, w * UNAVAILABLE_SCORE,
-                    "required parts not confirmed in stock — advisory penalty only", false);
+        double normalisedValue = switch (status) {
+            case FULLY_STOCKED ->
+                    1.0;
+            case PARTIALLY_STOCKED ->
+                    Math.max(ratio, NEUTRAL_FLOOR);
+            case COLLECTABLE ->
+                    ratio + nearbyCollectableDiscount * (1.0 - ratio);
+            case UNAVAILABLE ->
+                    NEUTRAL_FLOOR;
         };
+
+        String explanation = switch (status) {
+            case FULLY_STOCKED ->
+                    "all required parts fully stocked on vehicle";
+            case PARTIALLY_STOCKED ->
+                    String.format("%.0f%% of required parts in vehicle stock — partial shortfall",
+                            ratio * 100);
+            case COLLECTABLE ->
+                    String.format("%.0f%% on vehicle; shortfall collectable from nearby warehouse "
+                                    + "(discount %.2f applied)",
+                            ratio * 100, nearbyCollectableDiscount);
+            case UNAVAILABLE ->
+                    "required parts not confirmed in stock — advisory penalty only";
+        };
+
+        return new FactorBreakdown(CODE, ratio, normalisedValue, w, w * normalisedValue,
+                explanation, false);
     }
 }

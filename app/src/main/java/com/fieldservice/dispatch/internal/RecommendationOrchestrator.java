@@ -7,6 +7,9 @@ import com.fieldservice.dispatch.api.EligibilityService;
 import com.fieldservice.dispatch.api.ExcludedCandidate;
 import com.fieldservice.dispatch.api.WorkOrderRequirements;
 import com.fieldservice.dispatch.scoring.ScoredCandidate;
+import com.fieldservice.dispatch.web.dto.PartsAvailabilitySummary;
+import com.fieldservice.dispatch.web.dto.PartsShortfallEntry;
+import com.fieldservice.dispatch.web.dto.PartsWarning;
 import com.fieldservice.domain.workorder.WorkOrderCompetency;
 import com.fieldservice.domain.workorder.WorkOrderCompetencyRepository;
 import com.fieldservice.domain.inventory.WorkOrderRequiredPartRepository;
@@ -14,6 +17,7 @@ import com.fieldservice.inventory.api.CandidateAvailabilityResult;
 import com.fieldservice.inventory.api.PartsAvailabilityQuery;
 import com.fieldservice.inventory.api.PartsAvailabilityResult;
 import com.fieldservice.inventory.api.PartsAvailabilityStatus;
+import com.fieldservice.inventory.api.PartShortfall;
 import com.fieldservice.inventory.api.RequiredPartQuantity;
 import com.fieldservice.inventory.api.StockQueryService;
 import com.fieldservice.dispatch.scoring.ScoringContext;
@@ -37,6 +41,8 @@ import com.fieldservice.geo.api.TravelMatrixEntry;
 import com.fieldservice.geo.api.TravelMatrixResult;
 import com.fieldservice.geo.api.TravelTimePort;
 import com.fieldservice.platform.exception.BusinessGuardException;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +51,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -70,6 +77,7 @@ public class RecommendationOrchestrator {
 
     private static final Set<WorkOrderState> ASSIGNABLE_STATES = Set.of(WorkOrderState.NEW);
     private static final int MAX_CANDIDATE_POOL = 200;
+    static final String PARTS_DEGRADED_COUNTER = "dispatch.parts.degraded";
 
     private final EligibilityService eligibilityService;
     private final TravelTimePort travelTimePort;
@@ -82,6 +90,8 @@ public class RecommendationOrchestrator {
     private final ObjectMapper objectMapper;
     private final WorkOrderRequiredPartRepository requiredPartRepository;
     private final StockQueryService stockQueryService;
+    private final PartsWarningAssembler partsWarningAssembler;
+    private final Counter partsDegradedCounter;
 
     public RecommendationOrchestrator(
             EligibilityService eligibilityService,
@@ -94,7 +104,9 @@ public class RecommendationOrchestrator {
             RecommendationCursorCodec cursorCodec,
             ObjectMapper objectMapper,
             WorkOrderRequiredPartRepository requiredPartRepository,
-            StockQueryService stockQueryService) {
+            StockQueryService stockQueryService,
+            PartsWarningAssembler partsWarningAssembler,
+            MeterRegistry meterRegistry) {
         this.eligibilityService = eligibilityService;
         this.travelTimePort = travelTimePort;
         this.scoringEngine = scoringEngine;
@@ -106,6 +118,10 @@ public class RecommendationOrchestrator {
         this.objectMapper = objectMapper;
         this.requiredPartRepository = requiredPartRepository;
         this.stockQueryService = stockQueryService;
+        this.partsWarningAssembler = partsWarningAssembler;
+        this.partsDegradedCounter = Counter.builder(PARTS_DEGRADED_COUNTER)
+                .description("Number of requests where inventory data was unavailable")
+                .register(meterRegistry);
     }
 
     @Transactional
@@ -183,14 +199,21 @@ public class RecommendationOrchestrator {
         } catch (Exception e) {
             partsResult = PartsAvailabilityResult.empty();
             partsDataDegraded = true;
+            partsDegradedCounter.increment();
         }
 
-        // Build scoring contexts
+        // Assemble the job-level parts warning once (network-wide shortfall)
+        Optional<PartsWarning> partsWarning = partsWarningAssembler.assemble(requiredParts, partsResult);
+
+        // Build scoring contexts and per-candidate parts summaries
         double totalBookedHours = techData.stream().mapToDouble(TechnicianScoringData::bookedHours).sum();
         double teamMeanBookedHours = techData.isEmpty() ? 0.0 : totalBookedHours / techData.size();
 
+        int totalRequiredQty = requiredParts.stream().mapToInt(RequiredPartQuantity::requiredQuantity).sum();
+
         Set<String> requiredCerts = requirements.requiredCertificationCodes();
         List<ScoringContext> contexts = new ArrayList<>();
+        Map<UUID, PartsAvailabilitySummary> partsSummaryByTech = new HashMap<>();
 
         for (UUID tid : eligibleIds) {
             TechnicianScoringData td = techById.get(tid);
@@ -202,17 +225,33 @@ public class RecommendationOrchestrator {
                     : TravelTimeEstimate.DEGRADED;
 
             PartsAvailabilityStatus partsStatus = PartsAvailabilityStatus.FULLY_STOCKED;
+            double partsRatio = 1.0;
+            CandidateAvailabilityResult candidateResult = null;
+
             if (td.vehicleStockLocationId() != null) {
-                CandidateAvailabilityResult candidateResult =
-                        partsResult.byVehicleLocation().get(td.vehicleStockLocationId());
+                candidateResult = partsResult.byVehicleLocation().get(td.vehicleStockLocationId());
                 if (candidateResult != null) {
                     partsStatus = candidateResult.status();
+                    partsRatio = computeVanRatio(totalRequiredQty, candidateResult);
                 } else if (!requiredParts.isEmpty()) {
                     partsStatus = PartsAvailabilityStatus.UNAVAILABLE;
+                    partsRatio = 0.0;
                 }
             } else if (!requiredParts.isEmpty()) {
                 partsStatus = PartsAvailabilityStatus.COLLECTABLE;
+                partsRatio = 0.0;
             }
+
+            List<PartsShortfallEntry> shortfallEntries = candidateResult == null
+                    ? List.of()
+                    : candidateResult.shortfalls().stream()
+                            .map(s -> new PartsShortfallEntry(
+                                    s.partId(), s.partNumber(), s.requested(), s.available(),
+                                    Math.max(0, s.requested() - s.available())))
+                            .toList();
+
+            partsSummaryByTech.put(tid,
+                    new PartsAvailabilitySummary(partsStatus, partsRatio, shortfallEntries));
 
             contexts.add(new ScoringContext(
                     tid,
@@ -222,11 +261,13 @@ public class RecommendationOrchestrator {
                     travelEstimate,
                     td.bookedHours(),
                     teamMeanBookedHours,
-                    partsStatus
+                    partsStatus,
+                    partsRatio
             ));
         }
 
         final boolean finalPartsDataDegraded = partsDataDegraded;
+        final Optional<PartsWarning> finalPartsWarning = partsWarning;
 
         List<ScoredCandidate> ranked = scoringEngine.rank(contexts, weights);
 
@@ -276,8 +317,10 @@ public class RecommendationOrchestrator {
             boolean candidateDegraded = travelByTechId.containsKey(sc.technicianId())
                     && travelByTechId.get(sc.technicianId()).degraded();
 
+            PartsAvailabilitySummary partsSummary = partsSummaryByTech.get(sc.technicianId());
+
             dtoList.add(new CandidateDto(sc.technicianId(), name, globalRank,
-                    sc.compositeScore(), factors, candidateDegraded));
+                    sc.compositeScore(), factors, candidateDegraded, partsSummary));
         }
 
         // Build exclusion summary
@@ -292,7 +335,8 @@ public class RecommendationOrchestrator {
         RecommendationResponse.Links links = new RecommendationResponse.Links(nextCursor);
         RecommendationResponse.Meta meta = new RecommendationResponse.Meta(
                 snapshot.getId(), generatedAt, weightSetVersion,
-                travelDegraded, false, candidatePoolSize, truncated, exclusionSummary);
+                travelDegraded, finalPartsDataDegraded, candidatePoolSize, truncated,
+                exclusionSummary, finalPartsWarning.orElse(null));
 
         return new RecommendationResponse(dtoList, pageMeta, links, meta);
     }
@@ -359,6 +403,16 @@ public class RecommendationOrchestrator {
 
         int end = Math.min(ranked.size(), startIdx + pageSize + 1);
         return ranked.subList(startIdx, end);
+    }
+
+    private static double computeVanRatio(int totalRequiredQty, CandidateAvailabilityResult result) {
+        if (totalRequiredQty == 0) return 1.0;
+        if (result == null) return 0.0;
+        int totalShortfall = result.shortfalls().stream()
+                .mapToInt(s -> Math.max(0, s.requested() - s.available()))
+                .sum();
+        int satisfied = Math.max(0, totalRequiredQty - totalShortfall);
+        return (double) satisfied / totalRequiredQty;
     }
 
     private String toJson(Object obj) {

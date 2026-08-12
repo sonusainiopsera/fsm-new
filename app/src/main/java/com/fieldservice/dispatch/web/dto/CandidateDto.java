@@ -9,5 +9,6 @@ public record CandidateDto(
         int rank,
         double score,
         List<FactorDto> factors,
-        boolean travelEstimateDegraded
+        boolean travelEstimateDegraded,
+        PartsAvailabilitySummary partsAvailability
 ) {}
