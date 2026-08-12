@@ -201,6 +201,19 @@ app:
     # Row ceiling for synchronous export; requests above this generate asynchronously
     sync-export-row-ceiling: ${APP_AUDIT_SYNC_EXPORT_ROW_CEILING:5000}
 
+  storage:
+    s3:
+      bucket-name: ${APP_STORAGE_S3_BUCKET_NAME:}
+      region: ${APP_STORAGE_S3_REGION:us-east-1}
+      endpoint-override: ${APP_STORAGE_S3_ENDPOINT_OVERRIDE:}
+    photo:
+      put-expiry-seconds: ${APP_STORAGE_PHOTO_PUT_EXPIRY_SECONDS:300}
+      get-expiry-seconds: ${APP_STORAGE_PHOTO_GET_EXPIRY_SECONDS:60}
+      max-bytes: ${APP_STORAGE_PHOTO_MAX_BYTES:5242880}
+      orphan-grace-hours: ${APP_STORAGE_PHOTO_ORPHAN_GRACE_HOURS:24}
+      orphan-cleanup-interval-ms: ${APP_STORAGE_PHOTO_ORPHAN_CLEANUP_INTERVAL_MS:3600000}
+      retention-days: ${APP_STORAGE_PHOTO_RETENTION_DAYS:2557}
+
   duplicate:
     # Hours back from now to search for open work orders when detecting duplicates
     window-hours: ${APP_DUPLICATE_WINDOW_HOURS:72}

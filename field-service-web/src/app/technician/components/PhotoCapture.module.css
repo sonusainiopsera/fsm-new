@@ -1,0 +1,32 @@
+.addPhotoLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--token-space-1, 4px);
+  padding: var(--token-space-2, 8px) var(--token-space-3, 12px);
+  border: 1px dashed var(--token-color-border, #9ca3af);
+  border-radius: var(--token-radius-md, 6px);
+  cursor: pointer;
+  font-size: var(--token-font-size-sm, 0.875rem);
+  color: var(--token-color-action, #2563eb);
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.addPhotoLabel:hover {
+  background-color: var(--token-color-surface-hover, #f3f4f6);
+}
+
+.addPhotoLabel[data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.photoFileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

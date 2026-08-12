@@ -122,5 +122,11 @@ public record ErrorEnvelope(
 
         /** 422 — the CSAT survey response window has expired. */
         public static final String CSAT_WINDOW_EXPIRED = "CSAT_WINDOW_EXPIRED";
+
+        /** 422 — upload intent is missing, expired, consumed or mismatched. */
+        public static final String INTENT_NOT_FOUND = "INTENT_NOT_FOUND";
+
+        /** 422 — the uploaded object could not be verified in storage. */
+        public static final String OBJECT_NOT_FOUND = "OBJECT_NOT_FOUND";
     }
 }

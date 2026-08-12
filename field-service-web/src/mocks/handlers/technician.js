@@ -290,3 +290,141 @@ export function completeGuardFailedHandler() {
     })
   }
 }
+
+// ── Photo upload handlers (WO-158) ───────────────────────────────────────────
+
+const UPLOAD_INTENT_PATH_RE = /\/api\/v1\/work-orders\/([^/]+)\/photos\/upload-intent$/
+const PHOTOS_PATH_RE = /\/api\/v1\/work-orders\/([^/]+)\/photos$/
+
+/**
+ * Handler for POST .../photos/upload-intent — 201 with stub presigned PUT URL.
+ */
+export function photoUploadIntentHandler() {
+  return function mockFetch(url, options = {}) {
+    if (!UPLOAD_INTENT_PATH_RE.test(url)) return fetch(url, options)
+    const body = JSON.parse(options?.body ?? '{}')
+    const intentId = 'intent-' + Math.random().toString(36).slice(2)
+    const storageKey = 'work-orders/wo-tech-003/' + intentId + '.jpg'
+    return Promise.resolve({
+      ok: true,
+      status: 201,
+      headers: {
+        get: (h) => h.toLowerCase() === 'content-type' ? 'application/json' : null,
+        forEach: () => {},
+      },
+      json: () => Promise.resolve({
+        data: {
+          intentId,
+          storageKey,
+          uploadUrl: 'http://localhost:9000/test-bucket/' + storageKey + '?presigned=1',
+          expiresAt: new Date(Date.now() + 300_000).toISOString(),
+          requiredHeaders: { 'Content-Type': body.contentType ?? 'image/jpeg' },
+          maxBytes: 5242880,
+        },
+      }),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      clone() { return this },
+    })
+  }
+}
+
+/**
+ * Handler for PUT to a stub presigned URL — 200 OK (simulates object storage PUT).
+ */
+export function photoDirectUploadHandler() {
+  return function mockFetch(url, options = {}) {
+    if (!url.includes('presigned=1')) return fetch(url, options)
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      headers: {
+        get: () => null,
+        forEach: () => {},
+      },
+      json: () => Promise.resolve({}),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      clone() { return this },
+    })
+  }
+}
+
+/**
+ * Handler for PUT to stub presigned URL — 403 (expired URL, triggers client retry).
+ */
+export function photoDirectUploadExpiredHandler() {
+  return function mockFetch(url, options = {}) {
+    if (!url.includes('presigned=1')) return fetch(url, options)
+    return Promise.resolve({
+      ok: false,
+      status: 403,
+      headers: { get: () => null, forEach: () => {} },
+      json: () => Promise.resolve({}),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      clone() { return this },
+    })
+  }
+}
+
+/**
+ * Handler for POST .../photos — 201 with registered photo metadata.
+ */
+export function photoRegisterSuccessHandler() {
+  return function mockFetch(url, options = {}) {
+    if (!PHOTOS_PATH_RE.test(url) || options.method === 'GET') return fetch(url, options)
+    return Promise.resolve({
+      ok: true,
+      status: 201,
+      headers: {
+        get: (h) => h.toLowerCase() === 'content-type' ? 'application/json' : null,
+        forEach: () => {},
+      },
+      json: () => Promise.resolve({
+        data: {
+          photoId: 'photo-' + Math.random().toString(36).slice(2),
+          category: 'ISSUE',
+          capturedAt: new Date().toISOString(),
+          thumbnailUrl: 'http://localhost:9000/test-bucket/thumb.jpg?presigned=1',
+        },
+      }),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      clone() { return this },
+    })
+  }
+}
+
+/**
+ * Handler for POST .../photos — 422 OBJECT_NOT_FOUND.
+ */
+export function photoRegisterObjectMissingHandler() {
+  return function mockFetch(url, options = {}) {
+    if (!PHOTOS_PATH_RE.test(url) || options.method === 'GET') return fetch(url, options)
+    return errorResponse(422, {
+      code: 'OBJECT_NOT_FOUND',
+      message: 'The uploaded object could not be found in storage.',
+      fieldErrors: [],
+      traceId: 'trace-422-object',
+    })
+  }
+}
+
+/**
+ * Handler for GET .../photos — returns list of registered photos.
+ */
+export function photoListHandler(photos) {
+  return function mockFetch(url, options = {}) {
+    if (!PHOTOS_PATH_RE.test(url) || (options.method && options.method !== 'GET')) {
+      return fetch(url, options)
+    }
+    return jsonResponse({
+      data: photos ?? [
+        {
+          photoId: 'photo-001',
+          category: 'ISSUE',
+          capturedAt: '2026-08-12T09:15:00Z',
+          caption: null,
+          viewUrl: 'http://localhost:9000/test-bucket/photo-001.jpg?presigned=1',
+        },
+      ],
+    })
+  }
+}

@@ -2,6 +2,7 @@ package com.fieldservice.api;
 
 import com.fieldservice.aigateway.api.AiCapExceededException;
 import com.fieldservice.aigateway.api.AiUnavailableException;
+import com.fieldservice.photo.application.PhotoRegistrationException;
 import com.fieldservice.dispatch.api.EligibilityDataException;
 import com.fieldservice.inventory.api.InsufficientStockException;
 import com.fieldservice.inventory.api.InvalidMovementException;
@@ -534,6 +535,16 @@ public class GlobalExceptionHandler {
         String path = cv.getPropertyPath().toString();
         int dot = path.lastIndexOf('.');
         return dot >= 0 ? path.substring(dot + 1) : path;
+    }
+
+    @ExceptionHandler(PhotoRegistrationException.class)
+    public ResponseEntity<ErrorEnvelope> handlePhotoRegistration(
+            PhotoRegistrationException ex,
+            HttpServletRequest request) {
+
+        log.info("photo.registration_refused: code={}, traceId={}, path={}",
+                ex.getCode(), traceId(), request.getRequestURI());
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY, ex.getCode(), ex.getMessage());
     }
 
     @ExceptionHandler(DuplicateLinkException.class)

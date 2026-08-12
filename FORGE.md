@@ -630,3 +630,10 @@
 - **Files:** 16 (+1797/-2)
 - **Duration:** 1020ss
 - **Approach:** Added the full log-work screen for labour time and parts consumption. Backend: added GET /api/v1/technicians/me/stock (TechnicianStockController using SpecificationPageService with AccessScope enforcement), POST /api/v1/work-orders/{id}/labour (WorkOrderLabourController accepting duration or start/end range, storing in LabourTimeRecord with V57 note column migration), and POST /api/v1/work-orders/{id}/parts-consumption (TechnicianPartsConsumptionController that auto-resolves the technician's vehicle location and delegates to StockMovementService). Frontend: LogWorkView composing TimeEntryCard (dual-mode duration/range with client-side range validation), PartsRowsList (repeatable rows bound to vehicle stock with per-row shortfall errors), PhotoStrip (upload thumbnails with pending/error/retry states), and CompleteActionBar (sticky, posts labour + parts + COMPLETE in sequence, offline-guarded). 422 INSUFFICIENT_STOCK wires into HoldReasonSheet with AWAITING_PARTS preselected and shortfall detail prefilled. Idempotency keys minted once per complete-intent and stored in refs. HoldReasonSheet extended with initialCode/initialNote props. Route /technician/jobs/:workOrderId/log added.
+
+## WO-158: User Story: WO-158 - Presigned direct photo upload for field evidence capture
+- **Status:** completed
+- **Commit:** `b74948b`
+- **Files:** 27 (+1825/-32)
+- **Duration:** 812ss
+- **Approach:** N/A

@@ -20,6 +20,7 @@ import { get, post } from '../../../api/http.js'
 import { mapApiError } from '../../../shared/api/errorMapping.js'
 import { useConnectivity } from '../../../shared/hooks/useConnectivity.js'
 import { HoldReasonSheet } from './HoldReasonSheet.jsx'
+import { PhotoCapture } from './PhotoCapture.jsx'
 import { LoadingState, ErrorState } from '../../../components/index.js'
 import styles from './LogWorkView.module.css'
 
@@ -295,16 +296,7 @@ function PartsRowsList({ rows, dispatch, vehicleStock, stockLoading }) {
 
 // ── PhotoStrip ────────────────────────────────────────────────────────────────
 
-function PhotoStrip({ photos, onAdd, onRemove, onRetry }) {
-  function handleFileInput(e) {
-    const files = Array.from(e.target.files ?? [])
-    files.forEach((file) => {
-      const url = URL.createObjectURL(file)
-      onAdd({ id: mintKey(), url, name: file.name, status: 'pending' })
-    })
-    e.target.value = ''
-  }
-
+function PhotoStrip({ workOrderId, photos, onProgress, onAdded, onError, onRetry, onRemove, disabled }) {
   return (
     <section className={styles.card} aria-label="Evidence photos">
       <h2 className={styles.sectionTitle}>Photos</h2>
@@ -318,19 +310,23 @@ function PhotoStrip({ photos, onAdd, onRemove, onRetry }) {
           {photos.map((photo) => (
             <li key={photo.id} className={styles.photoItem} data-testid={`photo-${photo.id}`}>
               <img
-                src={photo.url}
-                alt={photo.name}
+                src={photo.thumbnailUrl ?? photo.url}
+                alt={photo.name ?? 'Photo'}
                 className={styles.photoThumb}
                 width={72}
                 height={72}
               />
               <div className={styles.photoMeta}>
-                <span className={styles.photoName}>{photo.name}</span>
+                <span className={styles.photoName}>{photo.name ?? 'Photo'}</span>
                 <span
                   className={photo.status === 'error' ? styles.photoStatusError : styles.photoStatus}
                   data-status={photo.status}
                 >
-                  {photo.status === 'pending' ? 'Uploading…' : photo.status === 'error' ? 'Upload failed' : 'Uploaded'}
+                  {photo.status === 'pending'
+                    ? 'Uploading…'
+                    : photo.status === 'error'
+                    ? photo.errorMessage ?? 'Upload failed'
+                    : 'Uploaded'}
                 </span>
               </div>
               {photo.status === 'error' && (
@@ -338,7 +334,7 @@ function PhotoStrip({ photos, onAdd, onRemove, onRetry }) {
                   type="button"
                   className={styles.retryPhoto}
                   onClick={() => onRetry(photo.id)}
-                  aria-label={`Retry upload for ${photo.name}`}
+                  aria-label={`Retry upload for ${photo.name ?? 'photo'}`}
                   data-testid={`retry-photo-${photo.id}`}
                 >
                   Retry
@@ -348,7 +344,7 @@ function PhotoStrip({ photos, onAdd, onRemove, onRetry }) {
                 type="button"
                 className={styles.removePhoto}
                 onClick={() => onRemove(photo.id)}
-                aria-label={`Remove photo ${photo.name}`}
+                aria-label={`Remove photo ${photo.name ?? ''}`}
                 data-testid={`remove-photo-${photo.id}`}
               >
                 ✕
@@ -358,18 +354,16 @@ function PhotoStrip({ photos, onAdd, onRemove, onRetry }) {
         </ul>
       )}
 
-      <label htmlFor="photo-input" className={styles.addPhotoLabel}>
-        + Add photo
-        <input
-          id="photo-input"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleFileInput}
-          className={styles.photoFileInput}
-          data-testid="photo-input"
-        />
-      </label>
+      <PhotoCapture
+        workOrderId={workOrderId}
+        category="ISSUE"
+        disabled={disabled}
+        onPhotoProgress={(localId, status, localUrl, name) =>
+          onProgress(localId, { id: localId, url: localUrl, name, status })
+        }
+        onPhotoAdded={(localId, photo) => onAdded(localId, photo)}
+        onPhotoError={(localId, message) => onError(localId, message)}
+      />
     </section>
   )
 }
@@ -621,12 +615,27 @@ export function LogWorkView({ workOrderId, holdReasons = [] }) {
       />
 
       <PhotoStrip
+        workOrderId={workOrderId}
         photos={photos}
-        onAdd={(photo) => setPhotos((prev) => [...prev, photo])}
+        disabled={isSubmitting}
+        onProgress={(localId, photo) =>
+          setPhotos((prev) => [...prev.filter((p) => p.id !== localId), photo])
+        }
+        onAdded={(localId, photo) =>
+          setPhotos((prev) => prev.map((p) => p.id === localId ? { ...p, ...photo } : p))
+        }
+        onError={(localId, message) =>
+          setPhotos((prev) => prev.map((p) =>
+            p.id === localId ? { ...p, status: 'error', errorMessage: message } : p
+          ))
+        }
         onRemove={(id) => setPhotos((prev) => prev.filter((p) => p.id !== id))}
-        onRetry={(id) => setPhotos((prev) =>
-          prev.map((p) => p.id === id ? { ...p, status: 'pending' } : p)
-        )}
+        onRetry={(id) => {
+          // Re-trigger upload for this photo by removing and re-adding
+          setPhotos((prev) => prev.map((p) =>
+            p.id === id ? { ...p, status: 'pending', errorMessage: null } : p
+          ))
+        }}
       />
 
       {/* Shortfall shortcut to hold sheet */}
