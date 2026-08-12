@@ -27,6 +27,7 @@ import {
   MapScreen,
   PartsScreen,
   ProfileScreen,
+  LogWorkScreen,
   TECHNICIAN_NAV,
 } from './routes.js'
 import styles from './TechnicianShell.module.css'
@@ -167,6 +168,10 @@ export default function TechnicianShell() {
               <Route
                 path="jobs/:workOrderId"
                 element={<JobDetailScreen />}
+              />
+              <Route
+                path="jobs/:workOrderId/log"
+                element={<LogWorkScreen />}
               />
               <Route path="map" element={<MapScreen />} />
               <Route path="parts" element={<PartsScreen />} />

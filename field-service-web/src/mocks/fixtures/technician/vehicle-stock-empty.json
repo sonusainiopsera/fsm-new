@@ -1,0 +1,13 @@
+{
+  "data": [],
+  "page": {
+    "number": 0,
+    "size": 20,
+    "totalElements": 0,
+    "totalPages": 0
+  },
+  "links": {
+    "next": null,
+    "prev": null
+  }
+}

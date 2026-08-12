@@ -37,6 +37,9 @@ public class LabourTimeRecord {
     @Column(name = "work_date", nullable = false)
     private Instant workDate;
 
+    @Column(name = "note", columnDefinition = "text")
+    private String note;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -57,6 +60,9 @@ public class LabourTimeRecord {
 
     public Instant getWorkDate() { return workDate; }
     public void setWorkDate(Instant workDate) { this.workDate = workDate; }
+
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
 
     public Instant getCreatedAt() { return createdAt; }
 }

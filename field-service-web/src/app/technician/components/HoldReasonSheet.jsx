@@ -27,9 +27,11 @@ export function HoldReasonSheet({
   onCancel,
   isPending = false,
   error = null,
+  initialCode = '',
+  initialNote = '',
 }) {
-  const [selectedCode, setSelectedCode] = useState('')
-  const [note, setNote] = useState('')
+  const [selectedCode, setSelectedCode] = useState(initialCode)
+  const [note, setNote] = useState(initialNote.slice(0, NOTE_MAX_LEN))
   const [validationError, setValidationError] = useState(null)
 
   const reasonsUnavailable = holdReasons.length === 0

@@ -12,4 +12,6 @@ import java.util.UUID;
  * service layer via {@link org.springframework.security.access.prepost.PreAuthorize}.
  */
 public interface StockLocationRepository extends JpaRepository<StockLocation, UUID>, JpaSpecificationExecutor<StockLocation> {
+
+    java.util.Optional<StockLocation> findFirstByTechnicianIdAndActiveTrue(UUID technicianId);
 }

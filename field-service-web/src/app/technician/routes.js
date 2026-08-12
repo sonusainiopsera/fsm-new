@@ -30,6 +30,9 @@ export const PartsScreen = lazy(
 export const ProfileScreen = lazy(
   () => import('../../surfaces/field/screens/ProfileScreen.jsx')
 )
+export const LogWorkScreen = lazy(
+  () => import('../../surfaces/field/screens/LogWorkScreen.jsx')
+)
 
 export const TECHNICIAN_NAV = [
   { key: 'jobs',    path: '/technician/jobs',   label: 'Jobs',   icon: '📋' },

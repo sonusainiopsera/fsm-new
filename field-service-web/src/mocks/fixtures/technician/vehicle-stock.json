@@ -1,0 +1,49 @@
+{
+  "data": [
+    {
+      "partId": "part-001",
+      "partCode": "DK-FAN-12A",
+      "description": "Condenser fan motor",
+      "quantityOnHand": 2,
+      "unit": "EACH"
+    },
+    {
+      "partId": "part-002",
+      "partCode": "DK-CTRL-E07",
+      "description": "Control board E07 replacement",
+      "quantityOnHand": 1,
+      "unit": "EACH"
+    },
+    {
+      "partId": "part-003",
+      "partCode": "SE-MCB-20A",
+      "description": "20A MCB Type B",
+      "quantityOnHand": 4,
+      "unit": "EACH"
+    },
+    {
+      "partId": "part-004",
+      "partCode": "FIT-COMP-0.5IN",
+      "description": "Compression fitting 1/2\"",
+      "quantityOnHand": 0,
+      "unit": "EACH"
+    },
+    {
+      "partId": "part-005",
+      "partCode": "AV-GROMMET-KIT",
+      "description": "Anti-vibration grommet kit",
+      "quantityOnHand": 3,
+      "unit": "EACH"
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 20,
+    "totalElements": 5,
+    "totalPages": 1
+  },
+  "links": {
+    "next": null,
+    "prev": null
+  }
+}
