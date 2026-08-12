@@ -1,16 +1,16 @@
 package com.fieldservice.privacy.internal;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Enables the Spring Cache abstraction for the privacy module.
- *
- * <p>Without an explicit {@link org.springframework.cache.CacheManager} bean,
- * Spring Boot auto-configures a {@code ConcurrentMapCacheManager}.
- * Production deployments may override this with a Caffeine or Redis manager
- * by declaring a {@code CacheManager} bean elsewhere.
+ * Enables the Spring Cache abstraction and scheduled task support for the privacy module.
+ * Also registers {@link RetentionProperties} for {@code @ConfigurationProperties} binding.
  */
 @Configuration
 @EnableCaching
+@EnableScheduling
+@EnableConfigurationProperties(RetentionProperties.class)
 class PrivacyConfiguration {}

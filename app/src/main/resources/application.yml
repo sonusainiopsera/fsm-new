@@ -134,6 +134,19 @@ management:
   info:
     enabled: false
 
+app:
+  privacy:
+    purge:
+      execution-enabled: false
+      batch-size: 200
+      run-budget: PT10M
+      cron: "0 0 2 * * *"
+      lock-lease-secs: 660
+      audit-floor-days: 365
+      zone: UTC
+    consistency-check:
+      enabled: true
+
 server:
   port: ${PORT:8080}
   error:

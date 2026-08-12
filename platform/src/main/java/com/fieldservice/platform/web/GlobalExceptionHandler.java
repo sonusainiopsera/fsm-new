@@ -269,6 +269,17 @@ public class GlobalExceptionHandler {
                 ApiErrorResponse.of(ErrorCode.SLA_POLICY_UNAVAILABLE, ex.getMessage(), traceId));
     }
 
+    // ---- 422 Retention Floor Violation ----------------------------------------
+
+    @ExceptionHandler(com.fieldservice.privacy.api.RetentionPolicyService.AuditFloorViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleRetentionFloorViolation(
+            com.fieldservice.privacy.api.RetentionPolicyService.AuditFloorViolationException ex) {
+        String traceId = resolveTraceId();
+        log.warn("retention_floor_violation trace_id={}", traceId);
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorResponse.of(ErrorCode.RETENTION_FLOOR_VIOLATION, ex.getMessage(), traceId));
+    }
+
     // ---- 422 Business Guard Refusal -------------------------------------------
 
     @ExceptionHandler(BusinessGuardException.class)

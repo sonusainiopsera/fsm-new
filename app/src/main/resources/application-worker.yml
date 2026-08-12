@@ -1,0 +1,15 @@
+spring:
+  config:
+    activate:
+      on-profile: worker
+
+app:
+  privacy:
+    purge:
+      # Execution remains disabled until Q7 retention periods are ratified by the DPO.
+      # Set to true only after DPO sign-off and operational runbook is approved.
+      execution-enabled: false
+      cron: "0 0 2 * * *"
+      run-budget: PT10M
+      batch-size: 200
+      lock-lease-secs: 660

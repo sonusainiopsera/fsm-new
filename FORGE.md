@@ -350,3 +350,10 @@
 - **Files:** 18 (+1586/-3)
 - **Duration:** 719ss
 - **Approach:** N/A
+
+## WO-189: User Story: WO-189 - Configurable retention schedule with automated purge sweep
+- **Status:** completed
+- **Commit:** `afba59a`
+- **Files:** 31 (+1813/-7)
+- **Duration:** 992ss
+- **Approach:** N/A
