@@ -700,3 +700,10 @@
 - **Files:** 11 (+1382/-3)
 - **Duration:** 1189ss
 - **Approach:** Built the dispatch recommendations React feature from scratch. useRecommendations hook uses TanStack Query with keyset cursor accumulation (useState-based, no useInfiniteQuery to match codebase pattern), 10-minute staleTime, abort on workOrderId change, and retry on 5xx. FactorBreakdownPanel renders factor label, progress bar (role=meter with aria-valuenow), weight, and verbatim server explanation. RecommendationCard shows rank, name, score, travelEstimateDegraded inline indicator, and aria-expanded disclosure for the factor panel. DispatchRecommendationsPage composes WorkOrderContextBanner (reference/customer/site/priority/deadlines from WO detail fetch), aggregate degraded banner (aria-live=polite), pool metadata, ranked candidate list, Load more cursor button, and all five explicit states. dispatch surface updated from single export to nested Routes layout. Sixteen tests cover all acceptance criteria scenarios.
+
+## WO-166: User Story: WO-166 - ETag-conditional KPI widget API with staleness contract
+- **Status:** completed
+- **Commit:** `a3d8dbd`
+- **Files:** 10 (+1041/-0)
+- **Duration:** 705ss
+- **Approach:** Implemented a full ETag-conditional KPI widget REST API in the analytics.web package. WidgetMetricKey and WidgetWindow enums provide an allow-list that Spring's type conversion validates, returning 400 on unknown values. WidgetEtagCalculator computes a deterministic SHA-256 strong ETag by sorting projections by metricKey|segmentKey|windowKey before hashing, ensuring instance-independence for round-robin load balancers. DashboardWidgetService carries @PreAuthorize('hasAnyRole(MANAGER,ADMIN)') and maps KpiProjection objects (via KpiProjectionQuery port) to WidgetDto, emitting an explicit no-data placeholder widget when no projection exists rather than 404 or blank. DashboardWidgetController wires Spring WebRequest.checkNotModified() for 304 handling, sets Cache-Control max-age=30 private must-revalidate, and Vary: Authorization. springdoc @Operation/@ApiResponse annotations document the ETag, 304, and degraded contract for the OpenAPI schema export.
