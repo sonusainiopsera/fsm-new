@@ -220,6 +220,38 @@
   justify-content: center;
 }
 
+/* Copilot entry row */
+.copilotEntryRow {
+  display: flex;
+  justify-content: center;
+  padding: var(--token-space-2) 0;
+}
+
+.copilotButton {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-2);
+  min-height: 44px;
+  padding: 0 var(--token-space-4);
+  background: var(--token-accent-500, #3b82f6);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--token-radius-pill);
+  font-size: var(--token-fs-14);
+  font-weight: 600;
+  font-family: var(--token-family-base);
+  cursor: pointer;
+  box-shadow: var(--token-elevation-1);
+  transition: background var(--token-duration-micro, 120ms);
+}
+.copilotButton:hover {
+  background: var(--token-accent-600, #2563eb);
+}
+.copilotButton:focus-visible {
+  outline: 2px solid var(--token-accent-500, #3b82f6);
+  outline-offset: 2px;
+}
+
 /* Hold sheet overlay */
 .sheetOverlay {
   position: fixed;

@@ -1,0 +1,67 @@
+{
+  "happyPath": {
+    "description": "Successful streamed answer with basis and interactionId",
+    "ticketResponse": { "ticket": "test-ticket-abc123" },
+    "events": [
+      { "event": "token", "data": { "chunkIndex": 0, "text": "Check the pressure gauge on the secondary circuit. ", "interactionId": "iact-001" } },
+      { "event": "token", "data": { "chunkIndex": 1, "text": "Based on prior service records, this unit has had two similar faults resolved by resetting the relief valve. " } },
+      { "event": "token", "data": { "chunkIndex": 2, "text": "Refer to WO-2024-0891 for the exact procedure." } },
+      { "event": "complete", "data": {
+        "interactionId": "iact-001",
+        "basis": {
+          "assetId": "asset-boiler-42",
+          "assetTag": "BOILER-42",
+          "priorWorkOrders": [
+            { "workOrderId": "wo-2024-0891", "reference": "WO-2024-0891" },
+            { "workOrderId": "wo-2024-0744", "reference": "WO-2024-0744" }
+          ]
+        }
+      }}
+    ]
+  },
+  "refusal": {
+    "description": "No grounded basis available",
+    "ticketResponse": { "ticket": "test-ticket-refused" },
+    "events": [
+      { "event": "no_grounded_basis", "data": {} }
+    ]
+  },
+  "degraded": {
+    "description": "Provider degraded after partial content",
+    "ticketResponse": { "ticket": "test-ticket-degraded" },
+    "events": [
+      { "event": "token", "data": { "chunkIndex": 0, "text": "Begin by isolating the ", "interactionId": "iact-002" } },
+      { "event": "degraded", "data": {} }
+    ]
+  },
+  "capped": {
+    "description": "Daily interaction cap reached (429 on ticket fetch)",
+    "ticketError": { "status": 429, "retryAfter": 3600 }
+  },
+  "outOfOrder": {
+    "description": "Chunks arrive out of order — rendering must be deterministic",
+    "ticketResponse": { "ticket": "test-ticket-ooo" },
+    "events": [
+      { "event": "token", "data": { "chunkIndex": 2, "text": "C" } },
+      { "event": "token", "data": { "chunkIndex": 0, "text": "A" } },
+      { "event": "token", "data": { "chunkIndex": 1, "text": "B" } },
+      { "event": "complete", "data": { "interactionId": "iact-003", "basis": null } }
+    ]
+  },
+  "markupInChunk": {
+    "description": "Model output containing HTML markup — must display literally",
+    "ticketResponse": { "ticket": "test-ticket-markup" },
+    "events": [
+      { "event": "token", "data": { "chunkIndex": 0, "text": "<script>alert('xss')</script> Use the pressure gauge.", "interactionId": "iact-004" } },
+      { "event": "complete", "data": { "interactionId": "iact-004", "basis": null } }
+    ]
+  },
+  "midStreamError": {
+    "description": "EventSource error after partial content → PARTIAL state",
+    "ticketResponse": { "ticket": "test-ticket-mid-error" },
+    "events": [
+      { "event": "token", "data": { "chunkIndex": 0, "text": "Start by checking the filter. ", "interactionId": "iact-005" } }
+    ],
+    "simulateError": true
+  }
+}

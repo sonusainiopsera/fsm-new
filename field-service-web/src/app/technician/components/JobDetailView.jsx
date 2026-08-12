@@ -23,6 +23,8 @@ import { HoldReasonSheet } from './HoldReasonSheet.jsx'
 import { EmptyState, LoadingState, ErrorState } from '../../../components/index.js'
 import { usePositionReporting } from '../hooks/usePositionReporting.js'
 import { usePositionSharing } from '../PositionSharingContext.jsx'
+import { CopilotSheet } from '../../../features/copilot/CopilotSheet.jsx'
+import { useCopilotCapability } from '../../../features/copilot/useCopilotCapability.js'
 import styles from './JobDetailView.module.css'
 
 // ── Query keys ────────────────────────────────────────────────────────────────
@@ -186,6 +188,7 @@ export function JobDetailView({ workOrderId }) {
   const [holdPending, setHoldPending] = useState(false)
   const [holdError, setHoldError] = useState(null)
   const [conflictNotice, setConflictNotice] = useState(null)
+  const [showCopilot, setShowCopilot] = useState(false)
 
   const { data: job, isLoading, isError, error, refetch } = useQuery({
     queryKey: detailQueryKey(workOrderId),
@@ -196,6 +199,7 @@ export function JobDetailView({ workOrderId }) {
 
   const { isReporting } = usePositionReporting(job?.state)
   const { setIsSharing } = usePositionSharing()
+  const { copilotEnabled } = useCopilotCapability()
 
   useEffect(() => {
     setIsSharing(isReporting)
@@ -298,6 +302,29 @@ export function JobDetailView({ workOrderId }) {
             error={holdError}
           />
         </div>
+      )}
+
+      {/* Copilot entry point — hidden when capability flag is off (AC-1, feature gate) */}
+      {copilotEnabled && !showHoldSheet && (
+        <div className={styles.copilotEntryRow}>
+          <button
+            type="button"
+            className={styles.copilotButton}
+            onClick={() => setShowCopilot(true)}
+            data-testid="copilot-open-button"
+            aria-label="Open copilot job assistance"
+          >
+            ✦ Ask copilot
+          </button>
+        </div>
+      )}
+
+      {/* Copilot sheet overlay */}
+      {showCopilot && (
+        <CopilotSheet
+          workOrderId={workOrderId}
+          onDismiss={() => setShowCopilot(false)}
+        />
       )}
     </div>
   )

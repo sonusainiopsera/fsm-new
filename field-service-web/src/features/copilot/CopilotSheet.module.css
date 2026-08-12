@@ -1,0 +1,421 @@
+/*
+ * CopilotSheet styles — WO-179
+ * All values from shared design tokens; no bespoke colour literals.
+ * Supports light and dark via the token theme provider.
+ */
+
+/* ── Overlay ──────────────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--token-elevation-scrim);
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* Fade in */
+  animation: overlayFadeIn var(--token-duration-overlay) var(--token-easing-standard);
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Sheet ────────────────────────────────────────────────────────────────── */
+.sheet {
+  background: var(--token-surface-0, #ffffff);
+  border-radius: var(--token-radius-overlay) var(--token-radius-overlay) 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
+  animation: sheetSlideUp var(--token-duration-overlay) var(--token-easing-standard);
+  /* Prevent layout shift during resize / keyboard open */
+  touch-action: pan-y;
+}
+
+@keyframes sheetSlideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-3);
+  padding: var(--token-space-3) var(--token-space-4);
+  border-bottom: var(--token-elevation-border);
+  flex-shrink: 0;
+}
+
+.dragHandle {
+  position: absolute;
+  top: var(--token-space-2);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  border-radius: var(--token-radius-pill);
+  background: var(--token-neutral-300, #d1d5db);
+}
+
+.title {
+  flex: 1;
+  font-size: var(--token-fs-16);
+  font-weight: 700;
+  margin: 0;
+  color: var(--token-text-primary);
+  font-family: var(--token-family-base);
+}
+
+.closeButton {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--token-radius-control);
+  color: var(--token-text-secondary);
+  font-size: var(--token-fs-16);
+  transition: background var(--token-duration-micro) var(--token-easing-standard);
+}
+.closeButton:hover,
+.closeButton:focus-visible {
+  background: var(--token-neutral-100, #f3f4f6);
+  outline: 2px solid var(--token-accent-500, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* ── Answer region ────────────────────────────────────────────────────────── */
+.answerRegion {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--token-space-4);
+  /* Reserve minimum height to prevent CLS during skeleton → text transition */
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-3);
+}
+
+/* ── Advisory label (pinned — always in the answer region top) ───────────── */
+.advisoryLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--token-space-2);
+  padding: var(--token-space-2) var(--token-space-3);
+  background: var(--token-warning-subtle, #fffbeb);
+  border: 1px solid var(--token-warning-default, #f59e0b);
+  border-radius: var(--token-radius-control);
+  font-size: var(--token-fs-13);
+  color: var(--token-warning-emphasis, #92400e);
+  font-family: var(--token-family-base);
+  flex-shrink: 0;
+  /* Sticky within the scroll container so it never scrolls out */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.advisoryIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Skeleton ─────────────────────────────────────────────────────────────── */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-2);
+  padding: var(--token-space-2) 0;
+}
+
+.skeletonLine {
+  height: 1rem;
+  border-radius: var(--token-radius-control);
+  background: var(--token-neutral-200, #e5e7eb);
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* ── Answer text ──────────────────────────────────────────────────────────── */
+.answerText {
+  font-size: var(--token-fs-14);
+  line-height: var(--token-lh-body);
+  color: var(--token-text-primary);
+  font-family: var(--token-family-base);
+  margin: 0;
+  /* Preserve newlines from model output */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Streaming cursor */
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--token-accent-500, #3b82f6);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── Terminal states ──────────────────────────────────────────────────────── */
+.terminalState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--token-space-3);
+  text-align: center;
+  padding: var(--token-space-6) var(--token-space-4);
+}
+
+.terminalIcon {
+  font-size: var(--token-fs-30);
+  color: var(--token-neutral-400, #9ca3af);
+  line-height: 1;
+}
+
+.terminalHeading {
+  font-size: var(--token-fs-16);
+  font-weight: 600;
+  color: var(--token-text-primary);
+  margin: 0;
+  font-family: var(--token-family-base);
+}
+
+.terminalBody {
+  font-size: var(--token-fs-14);
+  color: var(--token-text-secondary);
+  margin: 0;
+  font-family: var(--token-family-base);
+  line-height: var(--token-lh-body);
+}
+
+.partialNotice {
+  font-size: var(--token-fs-13);
+  color: var(--token-warning-emphasis, #92400e);
+  background: var(--token-warning-subtle, #fffbeb);
+  border: 1px solid var(--token-warning-default, #f59e0b);
+  border-radius: var(--token-radius-control);
+  padding: var(--token-space-2) var(--token-space-3);
+  margin: 0;
+}
+
+.idlePrompt {
+  font-size: var(--token-fs-14);
+  color: var(--token-text-secondary);
+  text-align: center;
+  margin: var(--token-space-8) 0;
+}
+
+/* ── Basis section ────────────────────────────────────────────────────────── */
+.basisSection {
+  border-top: var(--token-elevation-border);
+  padding: var(--token-space-3) var(--token-space-4);
+  flex-shrink: 0;
+}
+
+.basisToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--token-fs-13);
+  color: var(--token-text-secondary);
+  font-family: var(--token-family-base);
+  padding: var(--token-space-1) 0;
+  min-height: 44px;
+  width: 100%;
+  text-align: left;
+}
+.basisToggle:focus-visible {
+  outline: 2px solid var(--token-accent-500, #3b82f6);
+  outline-offset: 2px;
+  border-radius: var(--token-radius-control);
+}
+
+.basisToggleIcon {
+  flex-shrink: 0;
+  font-size: var(--token-fs-12);
+}
+
+.basisContent {
+  padding-top: var(--token-space-2);
+}
+
+.basisAsset {
+  display: flex;
+  gap: var(--token-space-2);
+  font-size: var(--token-fs-13);
+  color: var(--token-text-primary);
+  margin-bottom: var(--token-space-2);
+}
+
+.basisLabel {
+  font-weight: 600;
+  color: var(--token-text-secondary);
+  flex-shrink: 0;
+}
+
+.basisList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-1);
+}
+
+.basisItem {
+  font-size: var(--token-fs-13);
+}
+
+.basisLink {
+  color: var(--token-accent-600, #2563eb);
+  text-decoration: none;
+}
+.basisLink:hover,
+.basisLink:focus-visible {
+  text-decoration: underline;
+  outline: 2px solid var(--token-accent-500, #3b82f6);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Helpfulness rating ───────────────────────────────────────────────────── */
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-3);
+  padding: var(--token-space-3) var(--token-space-4);
+  border-top: var(--token-elevation-border);
+  flex-shrink: 0;
+}
+
+.ratingLabel {
+  font-size: var(--token-fs-13);
+  color: var(--token-text-secondary);
+  flex-shrink: 0;
+  font-family: var(--token-family-base);
+}
+
+.ratingButton {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--token-border-default, #e5e7eb);
+  border-radius: var(--token-radius-control);
+  cursor: pointer;
+  font-size: var(--token-fs-20);
+  transition: background var(--token-duration-micro) var(--token-easing-standard),
+              border-color var(--token-duration-micro) var(--token-easing-standard);
+}
+.ratingButton:hover:not(:disabled),
+.ratingButton:focus-visible {
+  background: var(--token-neutral-50, #f9fafb);
+  outline: 2px solid var(--token-accent-500, #3b82f6);
+  outline-offset: 2px;
+}
+.ratingButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ratingButton[data-selected='true'] {
+  background: var(--token-accent-100, #dbeafe);
+  border-color: var(--token-accent-500, #3b82f6);
+}
+
+.ratingAck {
+  font-size: var(--token-fs-13);
+  color: var(--token-success-emphasis, #166534);
+  font-family: var(--token-family-base);
+}
+
+/* ── Action bar ───────────────────────────────────────────────────────────── */
+.actionBar {
+  display: flex;
+  gap: var(--token-space-3);
+  padding: var(--token-space-3) var(--token-space-4)
+           calc(var(--token-space-3) + env(safe-area-inset-bottom, 0px));
+  border-top: var(--token-elevation-border);
+  flex-shrink: 0;
+}
+
+.primaryButton {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 var(--token-space-4);
+  background: var(--token-accent-500, #3b82f6);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--token-radius-control);
+  font-size: var(--token-fs-14);
+  font-weight: 600;
+  font-family: var(--token-family-base);
+  cursor: pointer;
+  transition: background var(--token-duration-micro) var(--token-easing-standard);
+}
+.primaryButton:hover {
+  background: var(--token-accent-600, #2563eb);
+}
+.primaryButton:focus-visible {
+  outline: 2px solid var(--token-accent-500, #3b82f6);
+  outline-offset: 2px;
+}
+
+.secondaryButton {
+  min-height: 44px;
+  padding: 0 var(--token-space-4);
+  background: none;
+  color: var(--token-text-secondary);
+  border: 1px solid var(--token-border-default, #e5e7eb);
+  border-radius: var(--token-radius-control);
+  font-size: var(--token-fs-14);
+  font-family: var(--token-family-base);
+  cursor: pointer;
+  transition: background var(--token-duration-micro) var(--token-easing-standard);
+}
+.secondaryButton:hover {
+  background: var(--token-neutral-50, #f9fafb);
+}
+.secondaryButton:focus-visible {
+  outline: 2px solid var(--token-accent-500, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* ── Utility ──────────────────────────────────────────────────────────────── */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
