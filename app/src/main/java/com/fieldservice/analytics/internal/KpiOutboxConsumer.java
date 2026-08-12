@@ -3,6 +3,7 @@ package com.fieldservice.analytics.internal;
 import com.fieldservice.outbox.payload.PartsConsumedPayload;
 import com.fieldservice.outbox.payload.SlaBreachedPayload;
 import com.fieldservice.outbox.payload.SlaPolicyChangedPayload;
+import com.fieldservice.outbox.payload.TechnicianAvailabilityChangedPayload;
 import com.fieldservice.outbox.payload.WorkOrderCreatedPayload;
 import com.fieldservice.outbox.payload.WorkOrderStateChangedPayload;
 import com.fieldservice.platform.outbox.EventHandler;
@@ -42,6 +43,10 @@ class KpiOutboxConsumer {
 
     static final String CONSUMER_NAME = "analytics.kpi";
 
+    // WO-163: workforce metric key strings (WorkforceMetricKeys is package-private in the sub-package)
+    private static final String WORKFORCE_UTILIZATION_RATE = "workforce.utilization.rate";
+    private static final String WORKFORCE_JOBS_PER_DAY     = "workforce.jobs_per_day";
+
     private static final Map<String, List<String>> EVENT_TO_METRICS = Map.of(
             WorkOrderCreatedPayload.EVENT_TYPE, List.of(
                     KpiAggregationQueries.METRIC_WO_BACKLOG_COUNT,
@@ -57,7 +62,9 @@ class KpiOutboxConsumer {
                     SlaMetricKeys.COMPLIANCE_RATE,
                     SlaMetricKeys.RESOLUTION_MEAN,
                     SlaMetricKeys.RESOLUTION_MEDIAN,
-                    SlaMetricKeys.BREACH_COUNT),
+                    SlaMetricKeys.BREACH_COUNT,
+                    // WO-163: work order closure affects jobs-per-day throughput
+                    WORKFORCE_JOBS_PER_DAY),
             PartsConsumedPayload.EVENT_TYPE, List.of(
                     KpiAggregationQueries.METRIC_WO_COMPLETION_RATE_7D),
             // WO-162: SLA breach detection affects breach count and compliance
@@ -69,7 +76,11 @@ class KpiOutboxConsumer {
                     SlaMetricKeys.COMPLIANCE_RATE,
                     SlaMetricKeys.RESOLUTION_MEAN,
                     SlaMetricKeys.RESOLUTION_MEDIAN,
-                    SlaMetricKeys.BREACH_COUNT)
+                    SlaMetricKeys.BREACH_COUNT),
+            // WO-163: roster change or deactivation affects utilization and throughput denominators
+            TechnicianAvailabilityChangedPayload.EVENT_TYPE, List.of(
+                    WORKFORCE_UTILIZATION_RATE,
+                    WORKFORCE_JOBS_PER_DAY)
     );
 
     private final MetricDebounceRegistry debounceRegistry;

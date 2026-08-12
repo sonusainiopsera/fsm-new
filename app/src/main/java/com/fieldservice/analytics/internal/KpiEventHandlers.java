@@ -3,6 +3,7 @@ package com.fieldservice.analytics.internal;
 import com.fieldservice.outbox.payload.PartsConsumedPayload;
 import com.fieldservice.outbox.payload.SlaBreachedPayload;
 import com.fieldservice.outbox.payload.SlaPolicyChangedPayload;
+import com.fieldservice.outbox.payload.TechnicianAvailabilityChangedPayload;
 import com.fieldservice.outbox.payload.WorkOrderCreatedPayload;
 import com.fieldservice.outbox.payload.WorkOrderStateChangedPayload;
 import com.fieldservice.platform.outbox.EventHandler;
@@ -98,6 +99,23 @@ class KpiEventHandlers {
 
         @Override
         public String getSupportedEventType() { return PartsConsumedPayload.EVENT_TYPE; }
+
+        @Override
+        public void handle(EventHandlerContext ctx) {
+            consumer.consume(ctx);
+        }
+    }
+
+    // WO-163: roster change or technician deactivation marks workforce metrics dirty
+    @Component
+    static class TechnicianAvailabilityChangedHandler implements EventHandler {
+        private final KpiOutboxConsumer consumer;
+        TechnicianAvailabilityChangedHandler(KpiOutboxConsumer consumer) { this.consumer = consumer; }
+
+        @Override
+        public String getSupportedEventType() {
+            return TechnicianAvailabilityChangedPayload.EVENT_TYPE;
+        }
 
         @Override
         public void handle(EventHandlerContext ctx) {

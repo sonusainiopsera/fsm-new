@@ -672,3 +672,10 @@
 - **Files:** 18 (+968/-11)
 - **Duration:** 926ss
 - **Approach:** N/A
+
+## WO-163: User Story: WO-163 - Technician utilization and jobs-per-day KPI projections
+- **Status:** completed
+- **Commit:** `51b9707`
+- **Files:** 14 (+1447/-2)
+- **Duration:** 874ss
+- **Approach:** New analytics.internal.workforce sub-package follows the SlaKpiRefreshHandler pattern exactly: a WorkforceAggregationRepository with two replica-routed named-parameter queries (labour minutes by tech-week, closures by tech-date, active days by tech), an ActiveTechnicianDayResolver that encapsulates the active-day definition with a documented roster-absent fallback, pure UtilizationCalculator (sum-of-numerators team rollup) and ThroughputCalculator (zero-active-day exclusion), and a WorkforceKpiRefreshHandler orchestrator wired into KpiProjectionService. V64 migration fixes the V27 maturity CHECK constraint to include BASELINE_PENDING and adds is_partial_week and is_incomplete_data columns. KpiOutboxConsumer maps TechnicianAvailabilityChangedPayload → workforce metrics, and WorkOrderStateChangedPayload gains WORKFORCE_JOBS_PER_DAY. KpiEventHandlers gains TechnicianAvailabilityChangedHandler.

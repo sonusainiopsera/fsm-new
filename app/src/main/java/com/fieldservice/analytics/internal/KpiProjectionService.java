@@ -2,6 +2,7 @@ package com.fieldservice.analytics.internal;
 
 import com.fieldservice.analytics.KpiProjection;
 import com.fieldservice.analytics.KpiProjectionQuery;
+import com.fieldservice.analytics.internal.workforce.WorkforceKpiRefreshHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
@@ -51,6 +52,7 @@ class KpiProjectionService implements KpiProjectionQuery {
     private final AnalyticsMetrics metrics;
     private final Clock clock;
     private final SlaKpiRefreshHandler slaKpiRefreshHandler;
+    private final WorkforceKpiRefreshHandler workforceKpiRefreshHandler;
 
     @Nullable
     private final AnalyticsRedisCache redisCache;
@@ -66,6 +68,7 @@ class KpiProjectionService implements KpiProjectionQuery {
             AnalyticsMetrics metrics,
             Clock clock,
             SlaKpiRefreshHandler slaKpiRefreshHandler,
+            WorkforceKpiRefreshHandler workforceKpiRefreshHandler,
             @Nullable @org.springframework.beans.factory.annotation.Autowired(required = false)
             AnalyticsRedisCache redisCache) {
         this.repository = repository;
@@ -78,6 +81,7 @@ class KpiProjectionService implements KpiProjectionQuery {
         this.metrics = metrics;
         this.clock = clock;
         this.slaKpiRefreshHandler = slaKpiRefreshHandler;
+        this.workforceKpiRefreshHandler = workforceKpiRefreshHandler;
         this.redisCache = redisCache;
     }
 
@@ -150,6 +154,12 @@ class KpiProjectionService implements KpiProjectionQuery {
         // SLA metrics produce multiple (segment, window) rows — delegated to the SLA handler
         if (SlaMetricKeys.ALL_METRIC_KEYS.contains(metricKey)) {
             slaKpiRefreshHandler.recomputeAll(metricKey, clock.instant());
+            return;
+        }
+
+        // WO-163: workforce metrics produce multiple (segment, window) rows — delegated to workforce handler
+        if ("workforce.utilization.rate".equals(metricKey) || "workforce.jobs_per_day".equals(metricKey)) {
+            workforceKpiRefreshHandler.recomputeAll(metricKey, clock.instant());
             return;
         }
 

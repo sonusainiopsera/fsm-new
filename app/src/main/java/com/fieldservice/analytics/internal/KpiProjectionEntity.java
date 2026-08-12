@@ -68,6 +68,14 @@ class KpiProjectionEntity {
     @Column(name = "degraded_reason")
     private String degradedReason;
 
+    /** True when this row covers an ISO week still in progress at the window boundary (AC-3). */
+    @Column(name = "is_partial_week", nullable = false)
+    private boolean partialWeek;
+
+    /** True when the authoritative hours-worked source was absent for ≥1 contributing week (AC-2). */
+    @Column(name = "is_incomplete_data", nullable = false)
+    private boolean incompleteData;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -109,4 +117,8 @@ class KpiProjectionEntity {
     void bumpProjectionVersion() { this.projectionVersion++; }
     void setDegraded(boolean degraded) { this.degraded = degraded; }
     void setDegradedReason(@Nullable String reason) { this.degradedReason = reason; }
+    boolean isPartialWeek() { return partialWeek; }
+    void setPartialWeek(boolean partialWeek) { this.partialWeek = partialWeek; }
+    boolean isIncompleteData() { return incompleteData; }
+    void setIncompleteData(boolean incompleteData) { this.incompleteData = incompleteData; }
 }
