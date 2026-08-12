@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Field Service</title>
+    <script>
+      // Resolve appearance BEFORE first paint to avoid flash of wrong theme
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('appearance')
+          if (stored === 'dark' || stored === 'light') {
+            document.documentElement.setAttribute('data-appearance', stored)
+          } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-appearance', 'dark')
+          } else {
+            document.documentElement.setAttribute('data-appearance', 'light')
+          }
+        } catch (e) {
+          // localStorage may be unavailable in some contexts; fall back to light
+          document.documentElement.setAttribute('data-appearance', 'light')
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
