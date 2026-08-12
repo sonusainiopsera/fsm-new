@@ -8,6 +8,7 @@ import { Routes, Route } from 'react-router-dom'
 import { EmptyState, LoadingState } from '../../components/index.js'
 
 const DashboardPage = lazy(() => import('../../features/dashboard/DashboardPage.jsx'))
+const DrillDownPage = lazy(() => import('../../features/dashboard/DrillDownPage.jsx'))
 
 export default function OperationsSurface() {
   return (
@@ -17,6 +18,14 @@ export default function OperationsSurface() {
         element={
           <Suspense fallback={<LoadingState />}>
             <DashboardPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="drill-down"
+        element={
+          <Suspense fallback={<LoadingState />}>
+            <DrillDownPage />
           </Suspense>
         }
       />

@@ -749,3 +749,10 @@
 - **Files:** 25 (+2222/-10)
 - **Duration:** 977ss
 - **Approach:** N/A
+
+## WO-168: User Story: WO-168 - KPI drill-down to scoped work order list
+- **Status:** completed
+- **Commit:** `4321b48`
+- **Files:** 12 (+1804/-2)
+- **Duration:** 826ss
+- **Approach:** N/A

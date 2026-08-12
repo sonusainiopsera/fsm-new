@@ -15,6 +15,7 @@
  */
 
 import { Suspense } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PageHeader, KpiCard, LoadingState, EmptyState, DegradedState, ErrorState } from '../../components/index.js'
 import { useDashboardWidgets } from './api/useDashboardWidgets.js'
 import { DataAgeBadge } from './components/DataAgeBadge.jsx'
@@ -94,10 +95,11 @@ function resolveTargetAttainment(ta) {
  * @param {{
  *   widget: import('./api/useDashboardWidgets.js').WidgetDto,
  *   isLoading: boolean,
- *   onRetry?: () => void
+ *   onRetry?: () => void,
+ *   onDrillDown?: (metricKey: string) => void
  * }} props
  */
-function WidgetCard({ widget, isLoading, onRetry }) {
+function WidgetCard({ widget, isLoading, onRetry, onDrillDown }) {
   const label = METRIC_LABELS[widget.metricKey] ?? widget.metricKey
 
   // Loading state
@@ -192,6 +194,17 @@ function WidgetCard({ widget, isLoading, onRetry }) {
       data-metric-key={widget.metricKey}
       style={{ display: 'flex', flexDirection: 'column', gap: 'var(--token-space-2)' }}
     >
+      {onDrillDown && (
+        <button
+          type="button"
+          aria-label={`View work orders for ${label}`}
+          data-testid={`drill-down-${widget.metricKey}`}
+          onClick={() => onDrillDown(widget.metricKey)}
+          style={drillDownBtnStyle}
+        >
+          View work orders →
+        </button>
+      )}
       <KpiCard
         label={label}
         value={display}
@@ -250,8 +263,17 @@ function WidgetCard({ widget, isLoading, onRetry }) {
  * @param {{ window?: string, segment?: string }} props
  */
 export default function DashboardPage() {
+  const navigate = useNavigate()
   const { window, setWindow } = useWindowParam()
   const { segment } = useSegmentParam()
+
+  function handleDrillDown(metricKey) {
+    const params = new URLSearchParams()
+    params.set('metric', metricKey)
+    params.set('window', window)
+    if (segment && segment !== 'ALL') params.set('segment', segment)
+    navigate(`drill-down?${params.toString()}`)
+  }
 
   const { data, isLoading, isError, error, refetch, isFetching } = useDashboardWidgets({ window, segment })
 
@@ -354,6 +376,7 @@ export default function DashboardPage() {
               widget={widget}
               isLoading={isLoading}
               onRetry={() => refetch()}
+              onDrillDown={handleDrillDown}
             />
           ))}
         </div>
@@ -465,4 +488,17 @@ const retryBtnStyle = {
   background: 'var(--token-surface-card)',
   color: 'var(--token-text-primary)',
   cursor: 'pointer',
+}
+
+const drillDownBtnStyle = {
+  alignSelf: 'flex-end',
+  padding: 'var(--token-space-1) var(--token-space-3)',
+  fontSize: 'var(--token-fs-12)',
+  fontFamily: 'var(--token-family-base)',
+  borderRadius: 'var(--token-radius-control)',
+  border: '1px solid var(--token-accent-500)',
+  background: 'transparent',
+  color: 'var(--token-accent-600)',
+  cursor: 'pointer',
+  textDecoration: 'none',
 }
