@@ -1,0 +1,16 @@
+{
+  "data": [],
+  "page": {
+    "totalElements": 0,
+    "totalPages": 0,
+    "page": 0,
+    "size": 20,
+    "hasNext": false,
+    "hasPrev": false
+  },
+  "links": {
+    "self": "/api/v1/portal/service-requests?page=0&size=20",
+    "next": null,
+    "prev": null
+  }
+}

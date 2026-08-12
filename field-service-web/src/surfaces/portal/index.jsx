@@ -1,7 +1,12 @@
 /**
  * @fileoverview Portal surface — Customer self-service portal.
  * Internet-facing, strictly row-scoped.
- * Routes: /portal → /portal/requests/new, /portal/requests/:id/status
+ * Routes:
+ *   /portal                              → redirect to requests/new
+ *   /portal/requests/new                 → NewServiceRequestPage
+ *   /portal/requests/:id/status          → ServiceRequestStatusPage
+ *   /portal/history                      → ServiceHistoryPage (WO-175)
+ *   /portal/surveys/:workOrderId         → SurveyPage (WO-175)
  */
 
 import { lazy, Suspense } from 'react'
@@ -10,6 +15,8 @@ import { LoadingState } from '../../components/index.js'
 
 const NewServiceRequestPage = lazy(() => import('../../features/portal/NewServiceRequestPage.jsx'))
 const ServiceRequestStatusPage = lazy(() => import('../../features/portal/ServiceRequestStatusPage.jsx'))
+const ServiceHistoryPage = lazy(() => import('../../routes/portal/ServiceHistoryPage.jsx'))
+const SurveyPage = lazy(() => import('../../routes/portal/SurveyPage.jsx'))
 
 function PortalFallback() {
   return <LoadingState />
@@ -35,6 +42,22 @@ export default function PortalSurface() {
         element={
           <Suspense fallback={<PortalFallback />}>
             <ServiceRequestStatusPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="history"
+        element={
+          <Suspense fallback={<PortalFallback />}>
+            <ServiceHistoryPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="surveys/:workOrderId"
+        element={
+          <Suspense fallback={<PortalFallback />}>
+            <SurveyPage />
           </Suspense>
         }
       />

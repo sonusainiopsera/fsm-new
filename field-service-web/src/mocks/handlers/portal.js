@@ -5,7 +5,10 @@
  *   GET  /api/v1/portal/sites                              (customer's own sites)
  *   GET  /api/v1/portal/sites/:siteId/assets              (assets at a site)
  *   POST /api/v1/portal/service-requests                  (submission)
+ *   GET  /api/v1/portal/service-requests                  (paginated history)
  *   GET  /api/v1/portal/service-requests/:id/status       (status polling with ETag)
+ *   GET  /api/v1/portal/surveys                           (CSAT survey list)
+ *   POST /api/v1/portal/surveys/:id/response              (submit response)
  */
 
 import sitesFixture from '../fixtures/portal/portal-sites.json'
@@ -18,6 +21,13 @@ import statusAssignedFixture from '../fixtures/portal/portal-status-assigned.jso
 import statusInProgressFixture from '../fixtures/portal/portal-status-in-progress.json'
 import statusCompletedFixture from '../fixtures/portal/portal-status-completed.json'
 import statusDegradedFixture from '../fixtures/portal/portal-status-degraded.json'
+import historyPage1Fixture from '../fixtures/portal/portal-history-page1.json'
+import historyPage2Fixture from '../fixtures/portal/portal-history-page2.json'
+import historyEmptyFixture from '../fixtures/portal/portal-history-empty.json'
+import surveyAnswerableFixture from '../fixtures/portal/portal-survey-answerable.json'
+import survey409Fixture from '../fixtures/portal/portal-survey-409.json'
+import survey422Fixture from '../fixtures/portal/portal-survey-422.json'
+import surveySubmitOkFixture from '../fixtures/portal/portal-survey-submit-ok.json'
 
 const BASE = '/api/v1/portal'
 
@@ -213,6 +223,81 @@ export function portalStatusHandler({ state = 'assigned', etag, error, sequence 
   }
 }
 
+// ── History handler ────────────────────────────────────────────────────────────
+
+/**
+ * Service history handler — GET /api/v1/portal/service-requests (collection).
+ * Multi-page: returns page1 for page=0, page2 for page=1. Both pages have
+ * duplicate openedAt values across items to test exact-once rendering (AC-4).
+ *
+ * @param {{
+ *   empty?: boolean,
+ *   error?: 400 | 403 | 500,
+ *   page2?: boolean
+ * }} options
+ */
+export function portalHistoryHandler({ empty = false, error, page2 = false } = {}) {
+  return (url, _init = {}) => {
+    const urlStr = typeof url === 'string' ? url : url.url
+    // Must be a GET on the base service-requests collection (not /:id/status)
+    if (!urlStr.includes(`${BASE}/service-requests`) || urlStr.match(/\/service-requests\/[^?]/)) {
+      return Promise.reject(new Error(`Unhandled URL: ${urlStr}`))
+    }
+    if (error === 403) return jsonError(403, { code: 'FORBIDDEN', message: 'Access denied.' })
+    if (error === 500) return jsonError(500, { code: 'INTERNAL_ERROR', message: 'Server error.' })
+    if (empty) return jsonOk(historyEmptyFixture)
+
+    // Determine page from URL param
+    const parsedUrl = new URL(urlStr, 'http://localhost')
+    const pageParam = Number(parsedUrl.searchParams.get('page') ?? 0)
+    const fixture = (pageParam >= 1 || page2) ? historyPage2Fixture : historyPage1Fixture
+    return jsonOk(fixture)
+  }
+}
+
+// ── Survey handlers ────────────────────────────────────────────────────────────
+
+/**
+ * Survey list handler — GET /api/v1/portal/surveys.
+ * Returns the answerable, already-answered, or expired fixture.
+ *
+ * @param {{ state?: 'answerable' | 'empty', error?: 403 | 500 }} options
+ */
+export function portalSurveysHandler({ state = 'answerable', error } = {}) {
+  return (url, _init = {}) => {
+    const urlStr = typeof url === 'string' ? url : url.url
+    if (!urlStr.includes(`${BASE}/surveys`) || urlStr.match(/\/surveys\/[^?]/)) {
+      return Promise.reject(new Error(`Unhandled URL: ${urlStr}`))
+    }
+    if (error === 403) return jsonError(403, { code: 'FORBIDDEN', message: 'Access denied.' })
+    if (error === 500) return jsonError(500, { code: 'INTERNAL_ERROR', message: 'Server error.' })
+    if (state === 'empty') {
+      return jsonOk({ data: [], page: { totalElements: 0, totalPages: 0, page: 0, size: 10, hasNext: false, hasPrev: false }, links: {} })
+    }
+    return jsonOk(surveyAnswerableFixture)
+  }
+}
+
+/**
+ * Survey response submission handler — POST /api/v1/portal/surveys/:id/response.
+ *
+ * @param {{ error?: 409 | 422 | 400 | 500 }} options
+ */
+export function portalSurveyResponseHandler({ error } = {}) {
+  return (url, init = {}) => {
+    const urlStr = typeof url === 'string' ? url : url.url
+    const method = (init?.method ?? 'GET').toUpperCase()
+    if (!urlStr.match(/\/portal\/surveys\/[^/]+\/response/) || method !== 'POST') {
+      return Promise.reject(new Error(`Unhandled URL: ${urlStr}`))
+    }
+    if (error === 409) return jsonError(409, survey409Fixture)
+    if (error === 422) return jsonError(422, survey422Fixture)
+    if (error === 400) return jsonError(400, { code: 'VALIDATION_FAILED', message: 'Invalid request.', fieldErrors: [{ field: 'score', message: 'score is required' }] })
+    if (error === 500) return jsonError(500, { code: 'INTERNAL_ERROR', message: 'Server error.' })
+    return jsonCreated(surveySubmitOkFixture)
+  }
+}
+
 /**
  * Combined handler for all portal endpoints.
  * @param {{
@@ -221,7 +306,10 @@ export function portalStatusHandler({ state = 'assigned', etag, error, sequence 
  *   submitError?: number,
  *   statusState?: string,
  *   statusError?: number,
- *   statusSequence?: string[]
+ *   statusSequence?: string[],
+ *   historyOptions?: object,
+ *   surveysOptions?: object,
+ *   surveyResponseError?: number
  * }} options
  */
 export function portalHandler({
@@ -231,11 +319,17 @@ export function portalHandler({
   statusState = 'assigned',
   statusError,
   statusSequence,
+  historyOptions = {},
+  surveysOptions = {},
+  surveyResponseError,
 } = {}) {
   const sitesH = portalSitesHandler(sitesOptions)
   const assetsH = portalSiteAssetsHandler(assetsOptions)
   const submitH = portalSubmitHandler({ error: submitError })
   const statusH = portalStatusHandler({ state: statusState, error: statusError, sequence: statusSequence })
+  const historyH = portalHistoryHandler(historyOptions)
+  const surveysH = portalSurveysHandler(surveysOptions)
+  const surveyResponseH = portalSurveyResponseHandler({ error: surveyResponseError })
 
   return (url, init = {}) => {
     const urlStr = typeof url === 'string' ? url : url.url
@@ -244,6 +338,11 @@ export function portalHandler({
     if (urlStr.match(/\/portal\/service-requests\/[^/]+\/status/)) return statusH(url, init)
     if (urlStr.match(/\/portal\/sites\/[^/]+\/assets/)) return assetsH(url, init)
     if (urlStr.includes(`${BASE}/sites`)) return sitesH(url, init)
+    if (urlStr.match(/\/portal\/surveys\/[^/?]+\/response/) && method === 'POST') return surveyResponseH(url, init)
+    if (urlStr.includes(`${BASE}/surveys`)) return surveysH(url, init)
+    if (urlStr.match(/\/portal\/service-requests\?/) || urlStr.endsWith('/service-requests')) {
+      if (method === 'GET') return historyH(url, init)
+    }
     if (urlStr.includes(`${BASE}/service-requests`) && method === 'POST') return submitH(url, init)
 
     return Promise.reject(new Error(`Unhandled portal URL: ${urlStr}`))

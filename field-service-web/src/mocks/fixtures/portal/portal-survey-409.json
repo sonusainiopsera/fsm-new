@@ -1,0 +1,9 @@
+{
+  "code": "SURVEY_ALREADY_ANSWERED",
+  "message": "You have already submitted feedback for this service request.",
+  "outcome": {
+    "score": 4,
+    "npsScore": 8,
+    "submittedAt": "2026-08-13T09:00:00Z"
+  }
+}

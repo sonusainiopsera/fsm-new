@@ -1,0 +1,49 @@
+{
+  "data": [
+    {
+      "workOrderId": "c0000000-0000-0000-0000-000000000006",
+      "reference": "REF-H-006",
+      "statusLabel": "Service Completed",
+      "siteName": "Main Office",
+      "assetLabel": "HVAC Unit 2",
+      "openedAt": "2026-08-11T10:00:00Z",
+      "closedAt": "2026-08-11T16:30:00Z",
+      "outcomeSummary": "Work completed successfully"
+    },
+    {
+      "workOrderId": "c0000000-0000-0000-0000-000000000005",
+      "reference": "REF-H-005",
+      "statusLabel": "Service Completed",
+      "siteName": "Main Office",
+      "assetLabel": null,
+      "openedAt": "2026-08-10T09:00:00Z",
+      "closedAt": "2026-08-10T14:00:00Z",
+      "outcomeSummary": "Work completed successfully"
+    },
+    {
+      "workOrderId": "c0000000-0000-0000-0000-000000000004",
+      "reference": "REF-H-004",
+      "statusLabel": "In Progress",
+      "siteName": "Warehouse",
+      "assetLabel": "Boiler Unit A",
+      "openedAt": "2026-08-09T14:30:00Z",
+      "closedAt": null,
+      "outcomeSummary": null
+    }
+  ],
+  "page": {
+    "totalElements": 6,
+    "totalPages": 2,
+    "page": 0,
+    "size": 3,
+    "hasNext": true,
+    "hasPrev": false
+  },
+  "links": {
+    "self": "/api/v1/portal/service-requests?page=0&size=3&sort=createdAt",
+    "next": "/api/v1/portal/service-requests?page=1&size=3&sort=createdAt",
+    "prev": null,
+    "first": "/api/v1/portal/service-requests?page=0&size=3&sort=createdAt",
+    "last": "/api/v1/portal/service-requests?page=1&size=3&sort=createdAt"
+  }
+}

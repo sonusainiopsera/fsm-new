@@ -581,3 +581,10 @@
 - **Files:** 12 (+1715/-7)
 - **Duration:** 1538ss
 - **Approach:** Added a dedicated 'technician-mobile' Playwright project pointing to e2e/ with 360x800 viewport, deviceScaleFactor 2, mobile user agent, trace always-on and video on-first-failure with 1 retry. Frontend E2E specs use page.route() for API mocking (no real backend required locally). Backend TechnicianJourneyIT extends AbstractIntegrationTest, re-inserts baseline fixtures in @BeforeEach via JDBC with ON CONFLICT DO NOTHING, and asserts by fresh work order UUIDs so outbox/audit assertions are noise-free. V136 Flyway fixture provides journey-specific stock and work-order data automatically loaded in test profile.
+
+## WO-175: User Story: WO-175 - Portal service history browser and satisfaction survey UI
+- **Status:** completed
+- **Commit:** `fb6235d`
+- **Files:** 16 (+2105/-11)
+- **Duration:** 739ss
+- **Approach:** ServiceHistoryPage: link-driven pagination via LinkPager (server envelope links.next/prev only), filter state (status group, sort, date range) synced to URL search params with page reset on filter change, keepPreviousData to prevent flash on page transitions, exact-once row keying by workOrderId, clamped page size to MAX_HISTORY_PAGE_SIZE=50, allow-listed sort options (createdAt, closedAt, state). SurveyPage: accessible ScoreRadioGroup (fieldset+legend+radio, 44px touch targets), 0-10 NPS radio control, length-capped comment with live counter and visible PII notice, server-authoritative duplicate/expiry detection — 409 renders read-only already-answered state, 422 renders read-only window-expired state, both in plain language without internal enum codes. portalClient.js extended with useServiceHistory (keepPreviousData, contract enforcement), useSurveys, useSubmitSurveyResponse. MSW handlers extended with portalHistoryHandler (multi-page, empty, errors), portalSurveysHandler, portalSurveyResponseHandler. Seven JSON fixtures including two history pages with duplicate sort keys for exact-once test. Portal surface wired with /portal/history and /portal/surveys/:workOrderId routes.
