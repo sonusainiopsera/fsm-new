@@ -22,6 +22,7 @@ const TechnicianShell = lazy(() => import('./technician/TechnicianShell.jsx'))
 const OperationsSurface = lazy(() => import('../surfaces/operations/index.jsx'))
 const PortalSurface = lazy(() => import('../surfaces/portal/index.jsx'))
 const AdminSurface = lazy(() => import('../surfaces/admin/index.jsx'))
+const SettingsSurface = lazy(() => import('../surfaces/settings/index.jsx'))
 const SignIn = lazy(() => import('../surfaces/auth/SignIn.jsx'))
 const NotFound = lazy(() => import('../surfaces/NotFound.jsx'))
 
@@ -112,8 +113,12 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'settings',
-        element: <LazyRoute><NotFound /></LazyRoute>,
+        path: 'settings/*',
+        element: (
+          <LazyRoute>
+            <SettingsSurface />
+          </LazyRoute>
+        ),
       },
     ],
   },

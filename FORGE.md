@@ -756,3 +756,10 @@
 - **Files:** 12 (+1804/-2)
 - **Duration:** 826ss
 - **Approach:** N/A
+
+## WO-197: User Story: WO-197 - Per-user notification channel preferences API and settings screen
+- **Status:** completed
+- **Commit:** `2c39480`
+- **Files:** 17 (+1684/-2)
+- **Duration:** 811ss
+- **Approach:** N/A
