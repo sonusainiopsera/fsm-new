@@ -518,3 +518,10 @@
 - **Files:** 19 (+1962/-5)
 - **Duration:** 968ss
 - **Approach:** Built two customer portal screens on top of existing WO-170/171 backend APIs. NewServiceRequestPage generates a stable Idempotency-Key once per form mount (useRef), uses useMutation for submission with inline 400 field-error mapping and 429 plain-language messaging. ServiceRequestStatusPage uses useConditionalQuery (PORTAL_INTERVAL=60s, If-None-Match/ETag) so 304 responses retain cached data without re-render. FreshnessBanner shows degraded/not-connected states. StatusTimeline renders API-provided plain-language milestone labels only. Both screens use customer density tokens (48px controls, var(--token-*) exclusively), no internal codes or coordinates. PortalSurface updated to lazy-load both page components.
+
+## WO-178: User Story: WO-178 - Copilot streaming endpoint with advisory basis and refusal
+- **Status:** completed
+- **Commit:** `fa28777`
+- **Files:** 14 (+818/-2)
+- **Duration:** 1112ss
+- **Approach:** N/A

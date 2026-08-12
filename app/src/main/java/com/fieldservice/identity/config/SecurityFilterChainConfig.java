@@ -83,6 +83,7 @@ public class SecurityFilterChainConfig {
                         .requestMatchers("/api-docs/**", "/v3/api-docs/**").permitAll()
                         // Stream paths: authenticated via ticket (handled by StreamTicketAuthenticationFilter)
                         .requestMatchers("/api/v1/streams/**").authenticated()
+                        .requestMatchers("/api/v1/work-orders/*/copilot/stream").authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

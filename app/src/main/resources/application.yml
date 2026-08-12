@@ -176,6 +176,11 @@ app:
       max-free-text-chars: ${COPILOT_GROUNDING_MAX_FREE_TEXT_CHARS:2000}
       # Operation ID forwarded to the AI gateway for rate-limit accounting
       operation-id: ${COPILOT_GROUNDING_OPERATION_ID:copilot-suggestion}
+    stream:
+      # Hard interaction budget in seconds; exceeding it emits degraded and closes the stream
+      budget-seconds: ${COPILOT_STREAM_BUDGET_SECONDS:10}
+      # Maximum simultaneous copilot streams per authenticated user
+      max-concurrent-per-user: ${COPILOT_STREAM_MAX_CONCURRENT:1}
 
   sla:
     sweep:

@@ -19,12 +19,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 /**
  * Authentication filter for SSE stream paths that require a single-use ticket credential.
  *
- * <h3>Stream path behaviour (matches {@code /api/v1/streams/**})</h3>
+ * <h3>Stream path behaviour (matches {@code /api/v1/streams/**} or any registered stream path)</h3>
  * <ol>
  *   <li>Reads the {@code ticket} query parameter.</li>
  *   <li>If absent → 401 (ticket is mandatory for the stream path).</li>
@@ -46,6 +47,8 @@ public class StreamTicketAuthenticationFilter extends OncePerRequestFilter {
 
     static final String TICKET_PARAM = "ticket";
     static final String STREAM_PATH_PREFIX = "/api/v1/streams/";
+    // Additional stream paths that require ticket authentication
+    private static final List<String> EXTRA_STREAM_SUFFIXES = List.of("/copilot/stream");
     private static final String GENERIC_401_MESSAGE = "Authentication required.";
 
     private final StreamTicketService streamTicketService;
@@ -65,7 +68,8 @@ public class StreamTicketAuthenticationFilter extends OncePerRequestFilter {
 
         String ticketParam = request.getParameter(TICKET_PARAM);
         String path = request.getRequestURI();
-        boolean isStreamPath = path.startsWith(STREAM_PATH_PREFIX);
+        boolean isStreamPath = path.startsWith(STREAM_PATH_PREFIX)
+                || EXTRA_STREAM_SUFFIXES.stream().anyMatch(path::endsWith);
 
         // Reject ticket param on non-stream paths
         if (ticketParam != null && !isStreamPath) {
