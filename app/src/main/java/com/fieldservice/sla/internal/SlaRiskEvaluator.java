@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Pure SLA risk evaluation function.
@@ -88,9 +90,52 @@ class SlaRiskEvaluator {
         return new RiskDecision.Healthy(null);
     }
 
+    /**
+     * Detects breach conditions for both response and resolution deadlines.
+     *
+     * <p>Returns an empty list when: the work order is terminal, the SLA clock is paused,
+     * or no effective deadlines are set. May return two entries when both response and
+     * resolution deadlines have passed simultaneously.
+     *
+     * @param snapshot the pre-built snapshot with effective deadlines
+     * @param now      the evaluation instant (from the caller's injected Clock)
+     * @return list of {@link RiskDecision.Breached} decisions, one per breached deadline
+     */
+    List<RiskDecision.Breached> evaluateBreaches(WorkOrderRiskSnapshot snapshot, Instant now) {
+        if (isTerminal(snapshot.state()) || snapshot.currentlyPaused()) {
+            return List.of();
+        }
+
+        List<RiskDecision.Breached> breaches = new ArrayList<>(2);
+
+        // RESOLUTION breach: resolution deadline has passed.
+        if (snapshot.effectiveResolutionDueAt() != null
+                && !now.isBefore(snapshot.effectiveResolutionDueAt())) {
+            long overrun = Duration.between(snapshot.effectiveResolutionDueAt(), now).toMinutes();
+            breaches.add(new RiskDecision.Breached(
+                    "RESOLUTION", snapshot.effectiveResolutionDueAt(), (int) overrun));
+        }
+
+        // RESPONSE breach: response deadline has passed and the work order has not yet
+        // transitioned to a responding state (EN_ROUTE or IN_PROGRESS).
+        if (snapshot.effectiveResponseDueAt() != null
+                && !now.isBefore(snapshot.effectiveResponseDueAt())
+                && isPreResponseState(snapshot.state())) {
+            long overrun = Duration.between(snapshot.effectiveResponseDueAt(), now).toMinutes();
+            breaches.add(new RiskDecision.Breached(
+                    "RESPONSE", snapshot.effectiveResponseDueAt(), (int) overrun));
+        }
+
+        return breaches;
+    }
+
     private static boolean isTerminal(WorkOrderState state) {
         return state == WorkOrderState.COMPLETED
                 || state == WorkOrderState.CLOSED
                 || state == WorkOrderState.CANCELLED;
+    }
+
+    private static boolean isPreResponseState(WorkOrderState state) {
+        return state == WorkOrderState.OPEN || state == WorkOrderState.ASSIGNED;
     }
 }

@@ -497,3 +497,10 @@
 - **Files:** 19 (+1688/-0)
 - **Duration:** 1445ss
 - **Approach:** Built a pure, clock-injected EligibilityFilter over value objects with no Spring/JPA/HTTP dependency. A CandidateReadRepository loads all candidate data in exactly 3 native SQL queries (candidates+certs, windows IN batch, absences IN batch) using PostgreSQL uuid[] array parameter binding — constant statement count regardless of pool size. EligibilityServiceImpl wires the repository, filter, and Micrometer metrics. EligibilityDataException maps to HTTP 503 via GlobalExceptionHandler (fail-closed). ArchUnit enforces that no external module accesses dispatch.eligibility.* or dispatch.internal.*.
+
+## WO-144: User Story: WO-144 - Breach recording with overrun minutes and reason codes
+- **Status:** completed
+- **Commit:** `676337a`
+- **Files:** 21 (+1508/-1)
+- **Duration:** 1212ss
+- **Approach:** Extended the pure SlaRiskEvaluator with a separate evaluateBreaches() method returning List<RiskDecision.Breached> — keeps the evaluator I/O-free while supporting both RESPONSE and RESOLUTION breach detection in one sweep pass. WorkOrderRiskSnapshot gained effectiveResponseDueAt (pause-adjusted). SlaEvaluationScheduler calls evaluateBreaches() before evaluate() each tick and routes each Breached decision to SlaBreachService.detect() (REQUIRES_NEW per breach, idempotent via unique index). detect() atomically writes the breach row, closes open risk flags with reason 'breached', and publishes SlaBreached outbox event. SlaBreachPort public interface exposes finalise(); WorkOrderTransitionServiceImpl calls it on all terminal transitions (idempotent — writeFinalOverrun is a no-op when already set). SlaBreachController (DISPATCHER/MANAGER/ADMIN) exposes paginated GET with filtering and POST /{id}/reason with Bean Validation on the controlled-vocabulary enum.

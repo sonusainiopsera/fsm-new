@@ -62,6 +62,7 @@ public class SlaEvaluationScheduler {
     private final SlaRiskEvaluator evaluator;
     private final SlaRiskFlagRepository flagRepository;
     private final SlaClockPauseRepository pauseRepository;
+    private final SlaBreachService breachService;
     private final DomainEventPublisher eventPublisher;
     private final DistributedSweepLock sweepLock;
     private final JdbcTemplate jdbcTemplate;
@@ -79,6 +80,7 @@ public class SlaEvaluationScheduler {
     public SlaEvaluationScheduler(SlaRiskEvaluator evaluator,
                                    SlaRiskFlagRepository flagRepository,
                                    SlaClockPauseRepository pauseRepository,
+                                   SlaBreachService breachService,
                                    DomainEventPublisher eventPublisher,
                                    DistributedSweepLock sweepLock,
                                    JdbcTemplate jdbcTemplate,
@@ -88,6 +90,7 @@ public class SlaEvaluationScheduler {
         this.evaluator = evaluator;
         this.flagRepository = flagRepository;
         this.pauseRepository = pauseRepository;
+        this.breachService = breachService;
         this.eventPublisher = eventPublisher;
         this.sweepLock = sweepLock;
         this.jdbcTemplate = jdbcTemplate;
@@ -239,6 +242,8 @@ public class SlaEvaluationScheduler {
                 ? rawResolutionDueAt.plusSeconds(totalPauseSeconds) : null;
         Instant effectiveAtRiskAt = rawAtRiskAt != null
                 ? rawAtRiskAt.plusSeconds(totalPauseSeconds) : null;
+        Instant effectiveResponseDueAt = responseDueAt != null
+                ? responseDueAt.plusSeconds(totalPauseSeconds) : null;
 
         // Determine existing open flag (if any)
         String existingOpenFlagType = null;
@@ -256,7 +261,18 @@ public class SlaEvaluationScheduler {
                 workOrderId, state, priority, createdAt,
                 responseDueAt,
                 effectiveAtRiskAt, effectiveResolutionDueAt,
+                effectiveResponseDueAt,
                 currentlyPaused, existingOpenFlagType);
+
+        // Detect and record any deadline breaches (idempotent; REQUIRES_NEW per breach).
+        int pausedMinutesExcluded = (int) (totalPauseSeconds / 60);
+        List<RiskDecision.Breached> detectedBreaches = evaluator.evaluateBreaches(snapshot, now);
+        for (RiskDecision.Breached breach : detectedBreaches) {
+            breachService.detect(workOrderId, breach.breachType(),
+                    breach.effectiveDeadline(), now,
+                    breach.overrunMinutes(), pausedMinutesExcluded,
+                    openFlags);
+        }
 
         RiskDecision decision = evaluator.evaluate(snapshot, now);
 

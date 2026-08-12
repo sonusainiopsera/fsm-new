@@ -16,6 +16,7 @@ import com.fieldservice.workorder.GuardRefusedException;
 import com.fieldservice.workorder.IllegalWorkOrderTransitionException;
 import com.fieldservice.workorder.WorkOrderTransitionService;
 import com.fieldservice.workorder.WorkOrderVersionConflictException;
+import com.fieldservice.sla.SlaBreachPort;
 import com.fieldservice.sla.SlaClockPausePort;
 import com.fieldservice.workorder.holds.HoldReasonService;
 import jakarta.annotation.PostConstruct;
@@ -78,6 +79,7 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
     private final DomainEventPublisher eventPublisher;
     private final HoldReasonService holdReasonService;
     private final SlaClockPausePort slaClockPausePort;
+    private final SlaBreachPort slaBreachPort;
     private final Map<String, TransitionGuard> guardsByName;
 
     public WorkOrderTransitionServiceImpl(
@@ -89,6 +91,7 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
             DomainEventPublisher eventPublisher,
             HoldReasonService holdReasonService,
             SlaClockPausePort slaClockPausePort,
+            SlaBreachPort slaBreachPort,
             List<TransitionGuard> guards) {
         this.entityManager = entityManager;
         this.workOrderRepository = workOrderRepository;
@@ -98,6 +101,7 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
         this.eventPublisher = eventPublisher;
         this.holdReasonService = holdReasonService;
         this.slaClockPausePort = slaClockPausePort;
+        this.slaBreachPort = slaBreachPort;
         this.guardsByName = guards.stream()
                 .collect(Collectors.toMap(TransitionGuard::guardId, Function.identity()));
     }
@@ -203,6 +207,11 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
         // 7. Publish outbox event (MANDATORY — same transaction; rolls back with state if it fails)
         publishStateChangedEvent(saved, fromState, actor);
 
+        // 8. Finalise SLA breach overrun on terminal transitions (idempotent).
+        if (isTerminalState(descriptor.toState())) {
+            slaBreachPort.finalise(workOrderId, transitionInstant);
+        }
+
         log.info("transition.applied: actor={}, workOrderId={}, fromState={}, event={}, toState={}, version={}",
                 actor, workOrderId, fromState, event, descriptor.toState(), saved.getVersion());
 
@@ -281,6 +290,12 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
         }
         // Ceiling division: any partial minute counts as 1
         return (seconds + 59) / 60;
+    }
+
+    private static boolean isTerminalState(WorkOrderState state) {
+        return state == WorkOrderState.COMPLETED
+                || state == WorkOrderState.CLOSED
+                || state == WorkOrderState.CANCELLED;
     }
 
     // ── Guards ──────────────────────────────────────────────────────────────────

@@ -21,6 +21,7 @@ import java.util.UUID;
  * @param responseDueAt            original response deadline (may be {@code null} for legacy rows)
  * @param effectiveAtRiskAt        at-risk threshold extended by pause duration (may be {@code null})
  * @param effectiveResolutionDueAt resolution deadline extended by pause duration (may be {@code null})
+ * @param effectiveResponseDueAt   response deadline extended by pause duration (may be {@code null})
  * @param currentlyPaused          true when the SLA clock is paused right now
  * @param existingOpenFlagType     the flag type currently open ("AT_RISK" / "PROJECTED_OVERRUN"),
  *                                 or {@code null} if no open flag exists
@@ -33,6 +34,7 @@ record WorkOrderRiskSnapshot(
         Instant responseDueAt,
         Instant effectiveAtRiskAt,
         Instant effectiveResolutionDueAt,
+        Instant effectiveResponseDueAt,
         boolean currentlyPaused,
         String existingOpenFlagType
 ) {}
