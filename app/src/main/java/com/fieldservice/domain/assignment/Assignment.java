@@ -73,6 +73,30 @@ public class Assignment implements ScopedEntity {
     @Column(name = "parts_warning_acknowledgement_reason", columnDefinition = "TEXT")
     private String partsWarningAcknowledgementReason;
 
+    /** Dispatcher or admin who created this assignment. */
+    @Column(name = "assigned_by")
+    private UUID assignedBy;
+
+    /** Recommendation snapshot referenced at assignment time; null when none used. */
+    @Column(name = "recommendation_snapshot_id")
+    private UUID recommendationSnapshotId;
+
+    /** Rank of the chosen technician in the snapshot; null when absent from snapshot. */
+    @Column(name = "recommendation_rank")
+    private Integer recommendationRank;
+
+    /** Composite score from the snapshot; null when absent. */
+    @Column(name = "recommendation_score")
+    private Double recommendationScore;
+
+    /** Override reason; required when rank is null or > 3. */
+    @Column(name = "override_reason", columnDefinition = "TEXT")
+    private String overrideReason;
+
+    /** True when the snapshot was older than the configured staleness window. */
+    @Column(name = "snapshot_stale", nullable = false)
+    private boolean snapshotStale = false;
+
     @Version
     @Column(name = "version", nullable = false)
     private Integer version;
@@ -143,4 +167,22 @@ public class Assignment implements ScopedEntity {
 
     public String getPartsWarningAcknowledgementReason() { return partsWarningAcknowledgementReason; }
     public void setPartsWarningAcknowledgementReason(String r) { this.partsWarningAcknowledgementReason = r; }
+
+    public UUID getAssignedBy() { return assignedBy; }
+    public void setAssignedBy(UUID assignedBy) { this.assignedBy = assignedBy; }
+
+    public UUID getRecommendationSnapshotId() { return recommendationSnapshotId; }
+    public void setRecommendationSnapshotId(UUID recommendationSnapshotId) { this.recommendationSnapshotId = recommendationSnapshotId; }
+
+    public Integer getRecommendationRank() { return recommendationRank; }
+    public void setRecommendationRank(Integer recommendationRank) { this.recommendationRank = recommendationRank; }
+
+    public Double getRecommendationScore() { return recommendationScore; }
+    public void setRecommendationScore(Double recommendationScore) { this.recommendationScore = recommendationScore; }
+
+    public String getOverrideReason() { return overrideReason; }
+    public void setOverrideReason(String overrideReason) { this.overrideReason = overrideReason; }
+
+    public boolean isSnapshotStale() { return snapshotStale; }
+    public void setSnapshotStale(boolean snapshotStale) { this.snapshotStale = snapshotStale; }
 }

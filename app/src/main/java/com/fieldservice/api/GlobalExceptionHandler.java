@@ -2,6 +2,8 @@ package com.fieldservice.api;
 
 import com.fieldservice.aigateway.api.AiCapExceededException;
 import com.fieldservice.aigateway.api.AiUnavailableException;
+import com.fieldservice.dispatch.api.AssignmentService.CertificationGuardException;
+import com.fieldservice.dispatch.api.AssignmentService.OverrideReasonRequiredException;
 import com.fieldservice.photo.application.PhotoRegistrationException;
 import com.fieldservice.dispatch.api.EligibilityDataException;
 import com.fieldservice.inventory.api.InsufficientStockException;
@@ -392,6 +394,32 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
                 ErrorEnvelope.Code.ASSET_SITE_MISMATCH,
                 "The referenced asset is not located at the referenced site.");
+    }
+
+    // -------------------------------------------------------------------------
+    // Dispatch — Assignment Guard / Override
+    // -------------------------------------------------------------------------
+
+    @ExceptionHandler(CertificationGuardException.class)
+    public ResponseEntity<ErrorEnvelope> handleCertificationGuard(
+            CertificationGuardException ex,
+            HttpServletRequest request) {
+
+        log.info("dispatch.certification_guard_refused: code={}, traceId={}, path={}",
+                ex.getCode(), traceId(), request.getRequestURI());
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.getCode(),
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(OverrideReasonRequiredException.class)
+    public ResponseEntity<ErrorEnvelope> handleOverrideReasonRequired(
+            OverrideReasonRequiredException ex,
+            HttpServletRequest request) {
+
+        log.info("dispatch.override_reason_required: traceId={}, path={}", traceId(), request.getRequestURI());
+        List<FieldError> fieldErrors = List.of(new FieldError("overrideReason", ex.getMessage()));
+        return validationResponse(fieldErrors);
     }
 
     // -------------------------------------------------------------------------

@@ -686,3 +686,10 @@
 - **Files:** 17 (+1857/-0)
 - **Duration:** 1152ss
 - **Approach:** Implemented WO-181 across both repos. Backend: V65 expand-only Flyway migration adds content_type/size_bytes/analysis_interaction_id to work_order_photo, mirrors them in the Envers audit table, and creates the photo_description_override companion table with allow-list CHECK constraints. WorkOrderPhoto domain entity extended with three new mapped fields. New photoanalysis module contains: ImageContentValidator (magic-byte JPEG/PNG/WebP validation, reads only 12 bytes, never buffers full object), DescriptionOverrideClassifier (Jaccard similarity, ACCEPTED_UNCHANGED/LIGHTLY_EDITED/SUBSTANTIALLY_REWRITTEN/DISCARDED), PhotoDescriptionOverride (append-only JPA entity), PhotoDescriptionOverrideRepository, PromptTextScrubber (standalone PII scrubber mirroring aigateway.internal.FreeTextScrubber patterns — package-private so cannot be imported), PhotoAnalysisService (storage-first, AI-optional orchestration with SSRF prevention — only server-side presigned GET URL used, never caller-supplied URL), PhotoAnalysisController (two endpoints: POST .../analysis returns advisory-only draft, POST .../description records technician choice with override classification). Feature flag ai.photo-analysis.enabled defaults to false. Frontend: photoAnalysisStates.js (IDLE/LOADING/READY/DEGRADED/DISABLED state machine), useAnalyzePhoto.js (TanStack Query mutation hook), SuggestedDescriptionField.jsx (pre-fills editable textarea, shows Advisory chip when suggestion present, never auto-submits, renders as plain text), SuggestedDescriptionField.module.css (design-token styles with dark mode), MSW handlers in photoAnalysis.js (happy/degraded/capped/disabled scenarios), SuggestedDescriptionField.test.jsx (15 component tests).
+
+## WO-138: User Story: WO-138 - Assignment endpoint with hard guards and override audit
+- **Status:** completed
+- **Commit:** `484d712`
+- **Files:** 9 (+831/-0)
+- **Duration:** 878ss
+- **Approach:** N/A
