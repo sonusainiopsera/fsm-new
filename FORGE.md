@@ -595,3 +595,10 @@
 - **Files:** 23 (+1772/-0)
 - **Duration:** 868ss
 - **Approach:** Implemented the geo module travel-time adapter following the same pattern as the AI gateway module. The public surface is TravelTimePort (geo.api) with TravelMatrixResult and Coordinates records. The adapter (geo.internal) issues a single batched POST to the provider, serves results from Redis cache keyed on rounded coordinates (4dp, ~11m precision), and falls back to HaversineEstimator on any failure. Resilience4j wraps the call with TimeLimiter (1.5s), Retry (max 2 attempts, jittered exponential), and CircuitBreaker (50% failure rate / 20-call sliding window / 30s wait). SSRF is prevented by TravelProviderAllowList which validates the configured host at startup (context refresh fails for non-listed hosts). TravelHealthIndicator exposes circuit breaker state at /actuator/health. Micrometer meters geo.travel.call.duration/errors, geo.travel.degraded, and geo.travel.cache.hit are published. An ArchUnit rule added to LayeredArchitectureTest enforces dispatch → geo.api (never geo.internal).
+
+## WO-136: User Story: WO-136 - Recommendations endpoint with keyset pagination and snapshots
+- **Status:** completed
+- **Commit:** `142d23d`
+- **Files:** 15 (+1443/-0)
+- **Duration:** 1047ss
+- **Approach:** N/A
