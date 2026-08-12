@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/matrix"
+  },
+  "response": {
+    "status": 503,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "fixedDelayMilliseconds": 2100,
+    "jsonBody": {
+      "error": "Travel provider temporarily unavailable",
+      "code": "PROVIDER_UNAVAILABLE"
+    }
+  }
+}

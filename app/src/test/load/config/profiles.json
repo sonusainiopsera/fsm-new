@@ -1,0 +1,92 @@
+{
+  "description": "Load profiles for dispatch recommendation latency gate (WO-206).",
+  "profiles": [
+    {
+      "name": "healthy",
+      "description": "Standard run against healthy provider stub. Phase 2 exit criterion.",
+      "travelProviderDelayMs": 200,
+      "travelProviderFaultRate": 0.0,
+      "phases": [
+        {
+          "name": "ramp",
+          "durationSeconds": 60,
+          "startVirtualUsers": 1,
+          "targetVirtualUsers": 20,
+          "description": "Linear ramp to operating concurrency"
+        },
+        {
+          "name": "warm-up",
+          "durationSeconds": 60,
+          "constantVirtualUsers": 20,
+          "description": "Warm-up phase — excluded from percentile calculation"
+        },
+        {
+          "name": "hold",
+          "durationSeconds": 300,
+          "constantVirtualUsers": 20,
+          "description": "Measurement window at twice design-peak concurrency (10 dispatch users * 2)"
+        },
+        {
+          "name": "cool-down",
+          "durationSeconds": 30,
+          "startVirtualUsers": 20,
+          "targetVirtualUsers": 0,
+          "description": "Graceful ramp-down"
+        }
+      ],
+      "requestMixPercent": {
+        "recommendations": 40,
+        "workOrderCreate": 20,
+        "workOrderSearch": 25,
+        "workOrderTransition": 10,
+        "workOrderAssign": 5
+      }
+    },
+    {
+      "name": "degraded",
+      "description": "Degraded-provider run: provider latency above timeout and high failure rate. Asserts recommendations still return with degraded flag within latency budget.",
+      "travelProviderDelayMs": 2000,
+      "travelProviderFaultRate": 0.8,
+      "phases": [
+        {
+          "name": "ramp",
+          "durationSeconds": 30,
+          "startVirtualUsers": 1,
+          "targetVirtualUsers": 10,
+          "description": "Reduced ramp for degraded run"
+        },
+        {
+          "name": "warm-up",
+          "durationSeconds": 30,
+          "constantVirtualUsers": 10,
+          "description": "Warm-up to open circuit breaker"
+        },
+        {
+          "name": "hold",
+          "durationSeconds": 120,
+          "constantVirtualUsers": 10,
+          "description": "Measurement window under degraded provider"
+        },
+        {
+          "name": "cool-down",
+          "durationSeconds": 15,
+          "startVirtualUsers": 10,
+          "targetVirtualUsers": 0,
+          "description": "Graceful ramp-down"
+        }
+      ],
+      "requestMixPercent": {
+        "recommendations": 70,
+        "workOrderCreate": 10,
+        "workOrderSearch": 15,
+        "workOrderTransition": 5,
+        "workOrderAssign": 0
+      },
+      "assertions": [
+        "travelEstimateDegraded=true on all recommendation responses",
+        "recommendations.p95LatencyMs <= 3000",
+        "errorRate < 0.01"
+      ]
+    }
+  ]
+}

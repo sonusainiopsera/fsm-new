@@ -1,0 +1,48 @@
+{
+  "description": "Phase 2 exit-criteria thresholds for dispatch recommendation latency gate (WO-206).",
+  "comment": "comparator must be one of: <=, <, >=, >. Boundary values are evaluated inclusively for <= and >=.",
+  "thresholds": [
+    {
+      "metric": "recommendations.p95LatencyMs",
+      "comparator": "<=",
+      "limit": 3000,
+      "rationale": "Stakeholder-committed 3-second p95 budget for recommendation endpoint"
+    },
+    {
+      "metric": "recommendations.p99LatencyMs",
+      "comparator": "<=",
+      "limit": 5000,
+      "rationale": "Tail-latency guard to catch individual extreme outliers"
+    },
+    {
+      "metric": "recommendations.p50LatencyMs",
+      "comparator": "<=",
+      "limit": 1000,
+      "rationale": "Median well below the p95 budget to ensure normal-path is fast"
+    },
+    {
+      "metric": "errorRate",
+      "comparator": "<",
+      "limit": 0.01,
+      "rationale": "Server error rate must stay below 1% under load"
+    },
+    {
+      "metric": "workOrderCreate.p95LatencyMs",
+      "comparator": "<=",
+      "limit": 2000,
+      "rationale": "Work-order creation should not degrade under recommendation load"
+    },
+    {
+      "metric": "workOrderSearch.p95LatencyMs",
+      "comparator": "<=",
+      "limit": 1500,
+      "rationale": "Paginated search p95 budget"
+    },
+    {
+      "metric": "travelProviderCallLatencyMs",
+      "comparator": "<=",
+      "limit": 1500,
+      "rationale": "Travel-provider call timeout is 1500ms; p95 must fit within it"
+    }
+  ]
+}

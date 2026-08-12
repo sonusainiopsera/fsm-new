@@ -707,3 +707,10 @@
 - **Files:** 12 (+1013/-0)
 - **Duration:** 1046ss
 - **Approach:** Implemented the ETag-conditional KPI widget API as a layered addition to the existing analytics module. Extended the public KpiProjectionQuery interface with findRecentTrendPoints and findBaseline methods, implemented in KpiProjectionService by injecting BaselineMetricStore and primary JdbcTemplate. Created WidgetEtagCalculator (SHA-256 over sorted projection tuples — deterministic across instances) in analytics.internal. Added DashboardWidgetService (@Service in analytics package) with @PreAuthorize('hasAnyRole(MANAGER, ADMIN)') that resolves projections, delta rows (via DELTA_SUFFIX window key), trend points, and baseline/targetAttainment for each requested metric. The controller at GET /api/v1/analytics/dashboard/widgets performs conditional GET (If-None-Match == computed ETag → 304 with no body), sets Cache-Control max-age=30 and Vary Authorization. Allow-listed MetricKey and WindowKey enums in analytics.web reject unknown values via Spring MVC enum binding → 400. Degraded individual metrics surface as degraded=true in the widget DTO (200); complete read-model failure throws ProviderDegradedException → 503. Added the new endpoint to rbac-matrix.yml so the existing RbacMatrixTest verifies the MANAGER/ADMIN allow and DISPATCHER/TECHNICIAN/CUSTOMER deny rules.
+
+## WO-206: User Story: WO-206 - Dispatch Recommendation Latency Load Gate At Scale
+- **Status:** completed
+- **Commit:** `57b1044`
+- **Files:** 14 (+1584/-0)
+- **Duration:** 986ss
+- **Approach:** N/A

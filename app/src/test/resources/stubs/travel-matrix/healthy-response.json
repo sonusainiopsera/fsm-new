@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/matrix"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "fixedDelayMilliseconds": 200,
+    "jsonBody": {
+      "results": [
+        {"originLat": 37.7749, "originLon": -122.4194, "estimatedMinutes": 12.5, "degraded": false},
+        {"originLat": 37.7751, "originLon": -122.4180, "estimatedMinutes": 14.2, "degraded": false},
+        {"originLat": 37.7760, "originLon": -122.4200, "estimatedMinutes": 9.8, "degraded": false},
+        {"originLat": 37.7730, "originLon": -122.4210, "estimatedMinutes": 18.1, "degraded": false},
+        {"originLat": 37.7780, "originLon": -122.4150, "estimatedMinutes": 22.3, "degraded": false}
+      ],
+      "degraded": false
+    }
+  }
+}
