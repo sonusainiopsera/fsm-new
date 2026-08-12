@@ -1,0 +1,40 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  min-height: 24px;
+}
+
+.healthy {
+  background: var(--color-success-surface, #dcfce7);
+  color: var(--color-success-text, #166534);
+}
+
+.atRisk {
+  background: var(--color-warning-surface, #fef9c3);
+  color: var(--color-warning-text, #854d0e);
+}
+
+.overrun {
+  background: var(--color-error-surface, #fee2e2);
+  color: var(--color-error-text, #991b1b);
+}
+
+@media (prefers-color-scheme: dark) {
+  .healthy {
+    background: var(--color-success-surface-dark, #14532d);
+    color: var(--color-success-text-dark, #bbf7d0);
+  }
+  .atRisk {
+    background: var(--color-warning-surface-dark, #422006);
+    color: var(--color-warning-text-dark, #fde68a);
+  }
+  .overrun {
+    background: var(--color-error-surface-dark, #450a0a);
+    color: var(--color-error-text-dark, #fecaca);
+  }
+}

@@ -616,3 +616,10 @@
 - **Files:** 24 (+1244/-48)
 - **Duration:** 1200ss
 - **Approach:** N/A
+
+## WO-156: User Story: WO-156 - Job detail screen with single-tap lifecycle transitions
+- **Status:** completed
+- **Commit:** `abd5acf`
+- **Files:** 24 (+2128/-32)
+- **Duration:** 1054ss
+- **Approach:** Full-stack implementation of the technician job detail screen. Backend: AllowedTransitionResolver computes TECHNICIAN-allowed events from the existing transition table; TechnicianJobDetailQueryService executes a single scoped JDBC query (assigned_technician_id predicate) augmented by sub-queries for certifications and expected parts; the detail endpoint returns 404 for out-of-scope rows (no existence disclosure); AssetServiceHistoryController returns last N closed WOs for an asset, scoped to the caller. Frontend: purely server-driven TransitionActionBar (no hardcoded transitions); stable per-tap Idempotency-Key via newAttemptKey(); HoldReasonSheet driven by server holdReasons vocabulary; SlaCountdownChip with 30s interval and overrun/at-risk states; shared errorMapping module for 409→CONFLICT_REFRESH, 422→GUARD_MESSAGE, 403→PERMISSION, 5xx→DEGRADED.

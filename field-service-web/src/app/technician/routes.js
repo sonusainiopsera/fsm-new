@@ -2,9 +2,9 @@ import React, { lazy, Suspense } from 'react';
 import { TechnicianShell } from './TechnicianShell.jsx';
 import { LoadingState } from '../../components/index.js';
 
-// Route-level code splitting: DayListScreen is the initial chunk.
-// Downstream job-detail and form screens will add entries here.
-const LazyDayList = lazy(() => import('./DayListScreen.jsx'));
+// Route-level code splitting: each screen is its own lazy chunk.
+const LazyDayList    = lazy(() => import('./DayListScreen.jsx'));
+const LazyJobDetail  = lazy(() => import('./JobDetailView.jsx').then(m => ({ default: m.JobDetailView })));
 
 function ShellSuspense({ children }) {
   return (
@@ -34,6 +34,14 @@ export const technicianRoutes = {
       element: (
         <ShellSuspense>
           <LazyDayList />
+        </ShellSuspense>
+      ),
+    },
+    {
+      path: ':jobId',
+      element: (
+        <ShellSuspense>
+          <LazyJobDetail />
         </ShellSuspense>
       ),
     },

@@ -1,0 +1,123 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 200;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--color-surface, #fff);
+  border-radius: 16px 16px 0 0;
+  padding: 24px 16px env(safe-area-inset-bottom, 16px);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #111827);
+  margin: 0 0 16px;
+}
+
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+
+.legend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #6b7280);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-primary, #111827);
+  min-height: 44px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border, #f3f4f6);
+}
+
+.radioLabel:last-child { border-bottom: none; }
+
+.radio { width: 20px; height: 20px; cursor: pointer; }
+
+.error {
+  font-size: 0.875rem;
+  color: var(--color-error, #dc2626);
+  margin: 4px 0 8px;
+}
+
+.noteLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #6b7280);
+  margin: 12px 0 4px;
+}
+
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-input, #d1d5db);
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  resize: vertical;
+  box-sizing: border-box;
+  background: var(--color-input-bg, #fff);
+  color: var(--color-text-primary, #111827);
+}
+
+.charCount {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #6b7280);
+  text-align: right;
+  margin: 2px 0 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.cancelBtn {
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid var(--color-border-input, #d1d5db);
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  color: var(--color-text-primary, #111827);
+}
+
+.confirmBtn {
+  flex: 1;
+  min-height: 44px;
+  background: var(--color-warning, #f59e0b);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.confirmBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
