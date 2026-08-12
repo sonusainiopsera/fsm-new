@@ -1,0 +1,24 @@
+{
+  "_comment": "WireMock stub for a degraded travel-matrix provider. Fixed delay above the 1500ms timeout causes the circuit breaker to open; recommendations fall back to Haversine with degraded=true. Used for the degraded-provider load profile.",
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/matrix",
+    "headers": {
+      "Content-Type": {
+        "contains": "application/json"
+      }
+    }
+  },
+  "response": {
+    "status": 503,
+    "headers": {
+      "Content-Type": "application/json",
+      "Retry-After": "30"
+    },
+    "fixedDelayMilliseconds": 2000,
+    "jsonBody": {
+      "error": "provider_unavailable",
+      "message": "Travel matrix provider is temporarily unavailable (load test stub)"
+    }
+  }
+}

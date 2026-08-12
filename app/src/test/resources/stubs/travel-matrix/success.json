@@ -1,0 +1,29 @@
+{
+  "_comment": "WireMock stub for a healthy travel-matrix provider response. Returned for load tests with travelProviderFaultPercent=0.",
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/matrix",
+    "headers": {
+      "Content-Type": {
+        "contains": "application/json"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "fixedDelayMilliseconds": 50,
+    "jsonBody": {
+      "estimates": [
+        { "technicianId": "{{jsonPath request.body '$.origins[0].technicianId'}}", "estimatedMinutes": 12 },
+        { "technicianId": "{{jsonPath request.body '$.origins[1].technicianId'}}", "estimatedMinutes": 18 },
+        { "technicianId": "{{jsonPath request.body '$.origins[2].technicianId'}}", "estimatedMinutes": 25 },
+        { "technicianId": "{{jsonPath request.body '$.origins[3].technicianId'}}", "estimatedMinutes": 9 },
+        { "technicianId": "{{jsonPath request.body '$.origins[4].technicianId'}}", "estimatedMinutes": 32 }
+      ]
+    },
+    "transformers": ["response-template"]
+  }
+}

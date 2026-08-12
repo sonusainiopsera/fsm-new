@@ -1,0 +1,68 @@
+{
+  "_comment": "Threshold configuration for ThresholdEvaluator. Phase 2 exit criteria: p95 <= 3000ms and error rate < 1%.",
+  "_boundary_rule": "lte and lt comparators use <=; lt uses <. A metric EXACTLY equal to its threshold passes for lte/gte and fails for lt/gt.",
+  "thresholds": [
+    {
+      "metric": "recommendations.latency.p50.ms",
+      "comparator": "lte",
+      "limit": 800,
+      "description": "Recommendation p50 latency must be at or below 800ms"
+    },
+    {
+      "metric": "recommendations.latency.p90.ms",
+      "comparator": "lte",
+      "limit": 2000,
+      "description": "Recommendation p90 latency must be at or below 2000ms"
+    },
+    {
+      "metric": "recommendations.latency.p95.ms",
+      "comparator": "lte",
+      "limit": 3000,
+      "description": "Phase 2 exit criterion: recommendation p95 latency must be at or below 3000ms"
+    },
+    {
+      "metric": "recommendations.latency.p99.ms",
+      "comparator": "lte",
+      "limit": 5000,
+      "description": "Recommendation p99 latency must be at or below 5000ms"
+    },
+    {
+      "metric": "all.error.rate.percent",
+      "comparator": "lt",
+      "limit": 1.0,
+      "description": "Phase 2 exit criterion: server error rate must be strictly below 1%"
+    },
+    {
+      "metric": "all.latency.p95.ms",
+      "comparator": "lte",
+      "limit": 4000,
+      "description": "Overall p95 latency across all request types must be at or below 4000ms"
+    },
+    {
+      "metric": "travel.cache.hit.ratio",
+      "comparator": "gte",
+      "limit": 0.5,
+      "description": "Travel matrix cache hit ratio must be at or above 50% during hold phase"
+    }
+  ],
+  "degradedThresholds": [
+    {
+      "metric": "recommendations.latency.p95.ms",
+      "comparator": "lte",
+      "limit": 3000,
+      "description": "Degraded-provider p95 must still meet the 3s budget"
+    },
+    {
+      "metric": "recommendations.degraded.flag.rate",
+      "comparator": "gte",
+      "limit": 0.9,
+      "description": "In degraded-provider run, at least 90% of recommendation responses must carry travelEstimateDegraded=true"
+    },
+    {
+      "metric": "all.error.rate.percent",
+      "comparator": "lt",
+      "limit": 1.0,
+      "description": "Error rate must remain below 1% even under degraded provider"
+    }
+  ]
+}

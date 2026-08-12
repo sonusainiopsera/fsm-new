@@ -1,0 +1,63 @@
+{
+  "_comment": "Load profile configuration for RecommendationLoadScenario. All durations in seconds.",
+  "profiles": {
+    "healthy": {
+      "description": "Healthy-provider run at twice design peak. Phase 2 gate profile.",
+      "warmUpSeconds": 60,
+      "rampUpSeconds": 30,
+      "holdSeconds": 120,
+      "coolDownSeconds": 15,
+      "targetVirtualUsers": 40,
+      "maxVirtualUsers": 40,
+      "candidatePoolSize": 200,
+      "travelProviderFixedDelayMs": 50,
+      "travelProviderFaultPercent": 0,
+      "scenarioMix": {
+        "recommendationsPercent": 50,
+        "workOrderCreatePercent": 20,
+        "workOrderSearchPercent": 15,
+        "workOrderTransitionPercent": 10,
+        "assignmentPercent": 5
+      }
+    },
+    "degraded": {
+      "description": "Degraded-provider run. Travel provider latency above timeout; recommendations must still return within budget with degraded=true.",
+      "warmUpSeconds": 30,
+      "rampUpSeconds": 20,
+      "holdSeconds": 60,
+      "coolDownSeconds": 10,
+      "targetVirtualUsers": 20,
+      "maxVirtualUsers": 20,
+      "candidatePoolSize": 200,
+      "travelProviderFixedDelayMs": 2000,
+      "travelProviderFaultPercent": 80,
+      "scenarioMix": {
+        "recommendationsPercent": 70,
+        "workOrderCreatePercent": 10,
+        "workOrderSearchPercent": 10,
+        "workOrderTransitionPercent": 5,
+        "assignmentPercent": 5
+      }
+    },
+    "ci-smoke": {
+      "description": "Fast CI smoke run — proves scenario wires up and thresholds evaluate. Not a gate.",
+      "warmUpSeconds": 10,
+      "rampUpSeconds": 10,
+      "holdSeconds": 30,
+      "coolDownSeconds": 5,
+      "targetVirtualUsers": 5,
+      "maxVirtualUsers": 5,
+      "candidatePoolSize": 200,
+      "travelProviderFixedDelayMs": 50,
+      "travelProviderFaultPercent": 0,
+      "scenarioMix": {
+        "recommendationsPercent": 50,
+        "workOrderCreatePercent": 20,
+        "workOrderSearchPercent": 15,
+        "workOrderTransitionPercent": 10,
+        "assignmentPercent": 5
+      }
+    }
+  },
+  "defaultProfile": "healthy"
+}
