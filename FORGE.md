@@ -476,3 +476,10 @@
 - **Files:** 12 (+1301/-0)
 - **Duration:** 968ss
 - **Approach:** Implemented the certification expiry sweep as a @Profile('worker') @Scheduled component backed by JdbcSchedulingLock for exactly-once execution. Alert state is tracked in a new certification_alert_state table (V44 migration) with a unique constraint on (technician_certification_id, alert_stage, validity_key) where validity_key=expiresOn.toString() — this makes re-issued certifications automatically alert again without manual cleanup. The sweep uses keyset pagination so large cohorts do not produce single giant transactions. Each row's state write and outbox event publication are atomic via @Transactional(propagation=MANDATORY) in CertificationAlertPublisher. The notification consumer (CertificationAlertConsumer) is idempotent via ConsumerIdempotencyGuard and resolves Operations Manager users plus the affected technician as recipients; per-recipient failures are isolated and do not abort the sweep.
+
+## WO-122: User Story: WO-122 - Certification data-readiness completeness report and gate
+- **Status:** completed
+- **Commit:** `f8039ce`
+- **Files:** 25 (+1795/-0)
+- **Duration:** 1046ss
+- **Approach:** N/A

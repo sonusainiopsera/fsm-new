@@ -28,6 +28,7 @@ import { AssetsPage }                from '../../features/admin/AssetsPage.jsx';
 import { TechniciansPage }           from '../../features/admin/TechniciansPage.jsx';
 import { CertificationTypesPage }    from '../../features/admin/CertificationTypesPage.jsx';
 import { TechnicianCertificationsPage } from '../../features/admin/TechnicianCertificationsPage.jsx';
+import { ReadinessReportPage }           from '../../features/admin/ReadinessReportPage.jsx';
 
 import styles from './AdminSurface.module.css';
 
@@ -38,6 +39,7 @@ const SUB_NAV = [
   { to: '/admin/technicians',          label: 'Technicians' },
   { to: '/admin/certification-types',  label: 'Cert Types' },
   { to: '/admin/certifications',       label: 'Certifications' },
+  { to: '/admin/readiness-report',     label: 'Readiness' },
 ];
 
 /**
@@ -69,6 +71,7 @@ export default function AdminSurface({ roles = [] }) {
           <Route path="technicians"         element={<TechniciansPage roles={roles} />} />
           <Route path="certification-types" element={<CertificationTypesPage roles={roles} />} />
           <Route path="certifications"      element={<TechnicianCertificationsPage roles={roles} />} />
+          <Route path="readiness-report"    element={<ReadinessReportPage roles={roles} />} />
         </Routes>
       </div>
     </div>

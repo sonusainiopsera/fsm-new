@@ -328,6 +328,29 @@ public class CertificationCurrencyService implements CertificationCurrencyPort, 
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Package-private overload without {@code @PreAuthorize} for use by internal
+     * batch services (e.g. readiness report, schedulers) that run without a user
+     * security context.
+     */
+    @Transactional(readOnly = true)
+    List<CertificationSummary> allCertificationsInternal(UUID technicianId, LocalDate atDate) {
+        List<TechnicianCertification> certs = certRepository.findByTechnicianId(technicianId);
+        List<TechnicianCertification> newSchema = certs.stream()
+                .filter(c -> c.getCertificationTypeId() != null)
+                .collect(Collectors.toList());
+        Set<UUID> typeIds = newSchema.stream()
+                .map(TechnicianCertification::getCertificationTypeId)
+                .collect(Collectors.toSet());
+        Map<UUID, CertificationTypeEntity> typeById = typeIds.isEmpty()
+                ? Collections.emptyMap()
+                : typeRepository.findAllById(typeIds).stream()
+                        .collect(Collectors.toMap(CertificationTypeEntity::getId, t -> t));
+        return newSchema.stream()
+                .map(c -> toSummary(c, typeById.get(c.getCertificationTypeId()), atDate))
+                .collect(Collectors.toList());
+    }
+
     // ---- Helpers ------------------------------------------------------------
 
     private CertificationSummary toSummary(TechnicianCertification c,

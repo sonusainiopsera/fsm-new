@@ -17,6 +17,11 @@ app:
       batch-size: 200
       enabled: true
       lock-lease-secs: 300
+  readiness:
+    snapshot:
+      cron: "0 0 7 * * MON"     # Weekly Monday at 07:00 UTC
+    warning-window-days: 14
+
   privacy:
     dsar:
       export-cron: "0 */5 * * * *"
