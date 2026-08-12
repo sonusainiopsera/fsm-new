@@ -218,6 +218,13 @@ duplicate:
   window-hours: 72
   min-signature-overlap: 0.3
 
+sla:
+  stream:
+    max-per-user: 3
+    max-global: 200
+    heartbeat-interval-seconds: 15
+    replay-buffer-capacity: 500
+
 ---
 spring:
   config:

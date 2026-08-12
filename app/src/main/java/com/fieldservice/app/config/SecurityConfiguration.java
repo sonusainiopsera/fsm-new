@@ -88,7 +88,8 @@ public class SecurityConfiguration {
         StreamTicketAuthFilter ticketFilter = new StreamTicketAuthFilter(streamTicketService);
 
         http
-            .securityMatcher("/api/v1/streams/**", "/api/v1/work-orders/*/copilot/stream")
+            .securityMatcher("/api/v1/streams/**", "/api/v1/work-orders/*/copilot/stream",
+                    "/api/v1/sla/alerts/stream")
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(ticketFilter, UsernamePasswordAuthenticationFilter.class)
