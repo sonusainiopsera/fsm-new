@@ -5,6 +5,7 @@ import com.fieldservice.platform.api.DomainEventPublisher;
 import com.fieldservice.platform.api.exception.BusinessGuardException;
 import com.fieldservice.platform.api.exception.ConflictException;
 import com.fieldservice.platform.api.exception.NotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import com.fieldservice.platform.security.RequestScopedAccessScope;
 import com.fieldservice.platform.util.UuidV7;
 import com.fieldservice.technician.domain.Technician;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -55,6 +57,8 @@ public class WorkforceService implements TechnicianDirectoryPort, AvailabilityPo
     private final DomainEventPublisher                   eventPublisher;
     private final RequestScopedAccessScope               accessScope;
 
+    private final int positionRetentionDays;
+
     public WorkforceService(
             TechnicianRepository technicianRepository,
             SkillRepository skillRepository,
@@ -63,15 +67,17 @@ public class WorkforceService implements TechnicianDirectoryPort, AvailabilityPo
             TechnicianAbsenceRepository absenceRepository,
             TechnicianPositionRepository positionRepository,
             DomainEventPublisher eventPublisher,
-            RequestScopedAccessScope accessScope) {
-        this.technicianRepository       = technicianRepository;
-        this.skillRepository            = skillRepository;
-        this.technicianSkillRepository  = technicianSkillRepository;
+            RequestScopedAccessScope accessScope,
+            @Value("${app.workforce.position.retention-days:90}") int positionRetentionDays) {
+        this.technicianRepository         = technicianRepository;
+        this.skillRepository              = skillRepository;
+        this.technicianSkillRepository    = technicianSkillRepository;
         this.availabilityWindowRepository = availabilityWindowRepository;
-        this.absenceRepository          = absenceRepository;
-        this.positionRepository         = positionRepository;
-        this.eventPublisher             = eventPublisher;
-        this.accessScope                = accessScope;
+        this.absenceRepository            = absenceRepository;
+        this.positionRepository           = positionRepository;
+        this.eventPublisher               = eventPublisher;
+        this.accessScope                  = accessScope;
+        this.positionRetentionDays        = positionRetentionDays;
     }
 
     // ---- TechnicianDirectoryPort (read-only) --------------------------------
@@ -306,11 +312,15 @@ public class WorkforceService implements TechnicianDirectoryPort, AvailabilityPo
                     technicianId, request.capturedAt(), existing.get().getCapturedAt());
             return;
         }
+        int accuracy = request.accuracyMetres() != null ? request.accuracyMetres() : 0;
+        LocalDate retainUntil = LocalDate.now().plusDays(positionRetentionDays);
         positionRepository.save(new TechnicianPositionEntity(
                 technicianId,
                 request.latitude().toString(),
                 request.longitude().toString(),
-                request.capturedAt()));
+                request.capturedAt(),
+                accuracy,
+                retainUntil));
     }
 
     // ---- Skill admin -------------------------------------------------------

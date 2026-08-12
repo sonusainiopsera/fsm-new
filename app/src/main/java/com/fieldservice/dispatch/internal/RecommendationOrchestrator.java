@@ -23,6 +23,7 @@ import com.fieldservice.dispatch.web.dto.RecommendationResponse;
 import com.fieldservice.geo.api.Coordinates;
 import com.fieldservice.geo.api.TravelMatrixResult;
 import com.fieldservice.geo.api.TravelTimePort;
+import com.fieldservice.workforce.api.TechnicianPositionCachePort;
 import com.fieldservice.inventory.api.CandidateAvailability;
 import com.fieldservice.inventory.api.PartsAvailabilityQuery;
 import com.fieldservice.inventory.api.PartsAvailabilityResult;
@@ -103,6 +104,7 @@ public class RecommendationOrchestrator {
     private final RecommendationSnapshotRepository  snapshotRepository;
     private final RecommendationCursor              cursor;
     private final StockQueryService                 stockQueryService;
+    private final TechnicianPositionCachePort       positionCache;
     private final NamedParameterJdbcTemplate        namedJdbc;
     private final Timer                             durationTimer;
 
@@ -118,6 +120,7 @@ public class RecommendationOrchestrator {
             RecommendationSnapshotRepository snapshotRepository,
             RecommendationCursor cursor,
             StockQueryService stockQueryService,
+            TechnicianPositionCachePort positionCache,
             JdbcTemplate jdbcTemplate,
             MeterRegistry meterRegistry) {
         this.workOrderRepository  = workOrderRepository;
@@ -131,6 +134,7 @@ public class RecommendationOrchestrator {
         this.snapshotRepository   = snapshotRepository;
         this.cursor               = cursor;
         this.stockQueryService    = stockQueryService;
+        this.positionCache        = positionCache;
         this.namedJdbc            = new NamedParameterJdbcTemplate(jdbcTemplate);
         this.durationTimer = Timer.builder("dispatch.recommendation.duration")
                 .description("End-to-end recommendation pipeline latency")
@@ -316,13 +320,20 @@ public class RecommendationOrchestrator {
             Map<UUID, ScoringDataLoader.TechnicianScoringInput> scoringData) {
         List<TravelTimePort.OriginRequest> origins = new ArrayList<>();
         for (UUID id : eligibleIds) {
+            // Prefer real-time cached position (60s TTL) over static home-base site coords.
+            var cached = positionCache.findCachedPosition(id);
+            if (cached.isPresent()) {
+                origins.add(new TravelTimePort.OriginRequest(id,
+                        new Coordinates(cached.get().latitude(), cached.get().longitude())));
+                continue;
+            }
             ScoringDataLoader.TechnicianScoringInput input = scoringData.get(id);
             if (input != null && input.homeLatitude() != null && input.homeLongitude() != null) {
                 origins.add(new TravelTimePort.OriginRequest(id,
                         new Coordinates(input.homeLatitude(), input.homeLongitude())));
             }
-            // Technicians without geocoded home base are omitted from origins;
-            // they will receive a degraded TravelTimeResult below.
+            // Technicians without a cached position and without a geocoded home base
+            // are omitted from origins and receive a degraded TravelTimeResult.
         }
         return origins;
     }

@@ -1,0 +1,22 @@
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-success, #16a34a);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.icon {
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.label {
+  line-height: 1;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}

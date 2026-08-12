@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -37,20 +38,30 @@ class TechnicianPositionEntity {
     @Column(name = "captured_at", nullable = false)
     private Instant capturedAt;
 
+    @Column(name = "accuracy_metres", nullable = false)
+    private int accuracyMetres;
+
+    @Column(name = "retain_until", nullable = false)
+    private LocalDate retainUntil;
+
     protected TechnicianPositionEntity() {}
 
     TechnicianPositionEntity(UUID technicianId, String latitude, String longitude,
-                             Instant capturedAt) {
-        this.id           = UuidV7.generate();
-        this.technicianId = technicianId;
-        this.latitude     = latitude;
-        this.longitude    = longitude;
-        this.capturedAt   = capturedAt;
+                             Instant capturedAt, int accuracyMetres, LocalDate retainUntil) {
+        this.id             = UuidV7.generate();
+        this.technicianId   = technicianId;
+        this.latitude       = latitude;
+        this.longitude      = longitude;
+        this.capturedAt     = capturedAt;
+        this.accuracyMetres = accuracyMetres;
+        this.retainUntil    = retainUntil;
     }
 
-    UUID    getId()           { return id; }
-    UUID    getTechnicianId() { return technicianId; }
-    String  getLatitude()     { return latitude; }
-    String  getLongitude()    { return longitude; }
-    Instant getCapturedAt()   { return capturedAt; }
+    UUID      getId()             { return id; }
+    UUID      getTechnicianId()   { return technicianId; }
+    String    getLatitude()       { return latitude; }
+    String    getLongitude()      { return longitude; }
+    Instant   getCapturedAt()     { return capturedAt; }
+    int       getAccuracyMetres() { return accuracyMetres; }
+    LocalDate getRetainUntil()    { return retainUntil; }
 }

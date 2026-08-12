@@ -19,6 +19,7 @@ import React, { useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useJobDetail } from './useJobDetail.js';
+import { usePositionReporting } from './hooks/usePositionReporting.js';
 import { ContextCard } from './components/ContextCard.jsx';
 import { AssetHistoryList } from './components/AssetHistoryList.jsx';
 import { SlaCountdownChip } from './components/SlaCountdownChip.jsx';
@@ -32,6 +33,9 @@ export function JobDetailView() {
   const qc          = useQueryClient();
 
   const { data: job, isLoading, isError, error, refetch } = useJobDetail(jobId);
+
+  // Start position reporting when job is EN_ROUTE or IN_PROGRESS; stops on unmount
+  usePositionReporting(job?.state ?? null, jobId);
 
   const handleTransitionSuccess = useCallback(() => {
     qc.invalidateQueries({ queryKey: ['technician', 'jobs', jobId] });

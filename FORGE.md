@@ -637,3 +637,10 @@
 - **Files:** 28 (+2278/-8)
 - **Duration:** 830ss
 - **Approach:** Introduced PhotoStoragePort interface + FakePhotoStorageAdapter (dev/test profile, no real S3 SDK dependency). Added com.fieldservice.photo module with domain entities (UploadIntent, WorkOrderPhoto + PhotoCategory enum), Spring Data repositories, and PhotoUploadService orchestrating the three-step flow: issueUploadIntent (allow-list validated, UUIDv7 key under work-orders/{id}/ prefix, 300s expiry), registerPhoto (HEAD verify, idempotent on storage_key), and listPhotos (60s presigned GET URLs). WorkOrderPhotoController exposes POST /photos/upload-intent (201), POST /photos (201), GET /photos. PhotoExceptionHandler maps domain exceptions to typed 400/422/503 responses without logging presigned URLs. Flyway V55 adds upload_intent and work_order_photo tables with unique constraints on storage_key and Envers audit table. SitePhotographsTarget wired to WorkOrderPhotoRepository for the retention sweep. ErrorCode extended with 6 photo-specific codes. Frontend: PhotoCapture component performs canvas downscale to ≤1920px (inherently strips EXIF), puts directly to presigned URL via XHR with progress, retries once on 403/400 (expired URL), then surfaces retryable error state. PhotoStrip renders ISSUE/COMPLETION lanes with presigned thumbnails and an error placeholder for failed photos. PhotoStrip wired into LogWorkView.
+
+## WO-159: User Story: WO-159 - Technician position reporting for travel-aware dispatch
+- **Status:** completed
+- **Commit:** `a4e1a92`
+- **Files:** 23 (+1165/-91)
+- **Duration:** 857ss
+- **Approach:** N/A
