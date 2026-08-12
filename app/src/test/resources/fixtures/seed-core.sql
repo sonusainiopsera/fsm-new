@@ -321,3 +321,23 @@ VALUES
      '00000000-0000-7012-8000-000000000002',
      'ACTIVE', NOW() - INTERVAL '1 day', 0)
 ON CONFLICT DO NOTHING;
+
+-- ---- Role-permission matrix seed rows (WO-198) --------------------------------
+-- UUID prefix: 00000000-0000-7020-8000-XXXXXXXXXXXX
+-- Mirrors V38__role_permission.sql but idempotent for integration tests.
+-- These rows ensure the ADMIN lockout guard and readMatrix() have data in tests.
+INSERT INTO role_permission (id, role_name, permission_code, active, granted_by, granted_at, version)
+VALUES
+    -- ADMIN: full access including role-matrix administration
+    ('00000000-0000-7020-8000-000000000001', 'ADMIN', 'ADMIN_ACCESS',       TRUE, 'system', NOW(), 0),
+    ('00000000-0000-7020-8000-000000000002', 'ADMIN', 'SLA_POLICY:READ',    TRUE, 'system', NOW(), 0),
+    ('00000000-0000-7020-8000-000000000003', 'ADMIN', 'SLA_POLICY:WRITE',   TRUE, 'system', NOW(), 0),
+    ('00000000-0000-7020-8000-000000000004', 'ADMIN', 'ROLE_MATRIX:READ',   TRUE, 'system', NOW(), 0),
+    ('00000000-0000-7020-8000-000000000005', 'ADMIN', 'ROLE_MATRIX:WRITE',  TRUE, 'system', NOW(), 0),
+    -- DISPATCHER: read-only SLA policy visibility
+    ('00000000-0000-7020-8000-000000000006', 'DISPATCHER', 'SLA_POLICY:READ', TRUE, 'system', NOW(), 0),
+    -- MANAGER: read-only SLA policy visibility
+    ('00000000-0000-7020-8000-000000000007', 'MANAGER', 'SLA_POLICY:READ',  TRUE, 'system', NOW(), 0),
+    -- TECHNICIAN: read-only SLA policy visibility
+    ('00000000-0000-7020-8000-000000000008', 'TECHNICIAN', 'SLA_POLICY:READ', TRUE, 'system', NOW(), 0)
+ON CONFLICT (id) DO NOTHING;

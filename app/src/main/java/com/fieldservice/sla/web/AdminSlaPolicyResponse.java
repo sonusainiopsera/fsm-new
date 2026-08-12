@@ -12,10 +12,13 @@ public record AdminSlaPolicyResponse(
         int        responseMinutes,
         int        resolutionMinutes,
         BigDecimal atRiskFraction,
+        boolean    ratified,
         Instant    effectiveFrom,
         Instant    effectiveTo,
         boolean    active,
         Instant    createdAt,
+        Instant    updatedAt,
+        String     updatedBy,
         int        version
 ) {
     public static AdminSlaPolicyResponse from(SlaPolicy p) {
@@ -25,10 +28,13 @@ public record AdminSlaPolicyResponse(
                 p.getResponseMinutes(),
                 p.getResolutionMinutes(),
                 p.getAtRiskFraction(),
+                p.isRatified(),
                 p.getEffectiveFrom(),
                 p.getEffectiveTo(),
                 p.isActive(),
                 p.getCreatedAt(),
+                p.getUpdatedAt(),
+                p.getUpdatedBy(),
                 p.getVersion() != null ? p.getVersion() : 0
         );
     }

@@ -44,6 +44,15 @@ public class SlaPolicy {
     @Column(nullable = false)
     private Boolean active = true;
 
+    @Column(nullable = false)
+    private Boolean ratified = false;
+
+    @Column(name = "updated_at")
+    private Instant updatedAt;
+
+    @Column(name = "updated_by", length = 255)
+    private String updatedBy;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -73,6 +82,20 @@ public class SlaPolicy {
         this.active      = false;
     }
 
+    /**
+     * In-place admin update: updates mutable fields and records who made the change.
+     * JPA's {@code @Version} handles optimistic locking automatically.
+     */
+    public void update(int responseMinutes, int resolutionMinutes,
+                       BigDecimal atRiskFraction, boolean ratified, String updatedBy) {
+        this.responseMinutes   = responseMinutes;
+        this.resolutionMinutes = resolutionMinutes;
+        this.atRiskFraction    = atRiskFraction;
+        this.ratified          = ratified;
+        this.updatedBy         = updatedBy;
+        this.updatedAt         = Instant.now();
+    }
+
     public UUID       getId()                { return id; }
     public String     getPriority()          { return priority; }
     public Integer    getResponseMinutes()   { return responseMinutes; }
@@ -81,6 +104,9 @@ public class SlaPolicy {
     public Instant    getEffectiveFrom()     { return effectiveFrom; }
     public Instant    getEffectiveTo()       { return effectiveTo; }
     public boolean    isActive()             { return Boolean.TRUE.equals(active); }
+    public boolean    isRatified()           { return Boolean.TRUE.equals(ratified); }
+    public Instant    getUpdatedAt()         { return updatedAt; }
+    public String     getUpdatedBy()         { return updatedBy; }
     public Instant    getCreatedAt()         { return createdAt; }
     public Integer    getVersion()           { return version; }
 }

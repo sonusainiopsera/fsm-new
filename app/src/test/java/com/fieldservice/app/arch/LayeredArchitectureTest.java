@@ -203,4 +203,31 @@ class LayeredArchitectureTest {
 
         rule.check(PROD_CLASSES);
     }
+
+    // ==========================================================================
+    // WO-198 SLA policy / role matrix admin console architecture rules
+    // ==========================================================================
+
+    /**
+     * The workorder module must not depend on SLA admin types.
+     *
+     * <p>Work-order processing may read published SLA thresholds (e.g. via an
+     * application service interface), but it must never import internal SLA
+     * admin DTOs, request/response records, or domain service beans.
+     * This keeps the boundary clean: SLA configuration is an admin concern;
+     * work-order fulfilment is an operational concern.
+     */
+    @Test
+    @DisplayName("workorder module must not depend on sla admin types")
+    void workorder_must_not_depend_on_sla_admin() {
+        ArchRule rule = noClasses()
+                .that().resideInAPackage("com.fieldservice.workorder..")
+                .should().accessClassesThat()
+                .resideInAPackage("com.fieldservice.sla..")
+                .because("Work-order classes must not import SLA admin types directly. "
+                        + "Use a published application interface or event if cross-boundary "
+                        + "communication is needed. See docs/arch/module-boundaries.md §sla-admin.");
+
+        rule.check(PROD_CLASSES);
+    }
 }

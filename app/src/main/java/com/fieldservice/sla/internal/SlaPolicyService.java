@@ -6,6 +6,10 @@ import com.fieldservice.sla.SlaPolicyProvider;
 import com.fieldservice.sla.SlaPolicyUnavailableException;
 import com.fieldservice.sla.domain.SlaPolicy;
 import com.fieldservice.sla.web.AdminSlaPolicyRequest;
+import com.fieldservice.sla.web.AdminSlaPolicyUpdateRequest;
+import com.fieldservice.platform.api.DomainEvent;
+import com.fieldservice.platform.api.DomainEventPublisher;
+import com.fieldservice.platform.api.exception.NotFoundException;
 import com.fieldservice.platform.util.UuidV7;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -14,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +45,7 @@ public class SlaPolicyService implements SlaPolicyProvider, SlaDeadlineCalculato
 
     private final SlaPolicyRepository    policyRepo;
     private final SlaClockPauseRepository pauseRepo;
+    private final DomainEventPublisher   eventPublisher;
     private final Counter                resolutionFailureCounter;
 
     /** Simple TTL cache: priority → (policy, expiryEpochMs). */
@@ -47,9 +53,11 @@ public class SlaPolicyService implements SlaPolicyProvider, SlaDeadlineCalculato
 
     public SlaPolicyService(SlaPolicyRepository policyRepo,
                             SlaClockPauseRepository pauseRepo,
+                            DomainEventPublisher eventPublisher,
                             MeterRegistry meterRegistry) {
-        this.policyRepo  = policyRepo;
-        this.pauseRepo   = pauseRepo;
+        this.policyRepo    = policyRepo;
+        this.pauseRepo     = pauseRepo;
+        this.eventPublisher = eventPublisher;
         this.resolutionFailureCounter = Counter.builder("sla_policy_resolution_failures_total")
                 .description("Count of SLA policy resolution failures")
                 .register(meterRegistry);
@@ -126,6 +134,53 @@ public class SlaPolicyService implements SlaPolicyProvider, SlaDeadlineCalculato
         return policyRepo.findAll(pageable);
     }
 
+    /**
+     * In-place update of an SLA policy row with optimistic locking.
+     *
+     * <p>Invalidates the priority's cache entry so subsequent deadline derivations
+     * use the new values immediately.  Publishes {@code SLA_POLICY_CHANGED} to the
+     * outbox so downstream consumers (analytics, reporting) react without polling.
+     *
+     * <p>The admin write path lives entirely inside the sla module; no synchronous
+     * dependency on workorder is introduced (ArchUnit rule enforces this).
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public SlaPolicy update(UUID id, AdminSlaPolicyUpdateRequest request) {
+        SlaPolicy policy = policyRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("SlaPolicy", id.toString()));
+
+        SlaPolicyChangedPayload before = new SlaPolicyChangedPayload(
+                policy.getId(), policy.getPriority(),
+                policy.getResponseMinutes(), policy.getResolutionMinutes(),
+                policy.getAtRiskFraction(), policy.isRatified(),
+                request.responseMinutes(), request.resolutionMinutes(),
+                request.atRiskFraction(), request.isRatified()
+        );
+
+        String actor = resolveActor();
+        policy.update(request.responseMinutes(), request.resolutionMinutes(),
+                request.atRiskFraction(), request.isRatified(), actor);
+        SlaPolicy saved = policyRepo.save(policy);
+
+        invalidateCache(saved.getPriority());
+
+        eventPublisher.publish(new DomainEvent(
+                UuidV7.generate(),
+                "SLA_POLICY_CHANGED",
+                "SLA_POLICY",
+                saved.getId(),
+                Instant.now(),
+                null,
+                null,
+                before
+        ));
+
+        log.info("sla_policy_updated id={} priority={} actor={} ratified={}",
+                saved.getId(), saved.getPriority(), actor, saved.isRatified());
+        return saved;
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional(readOnly = true)
     public Optional<SlaPolicy> findById(UUID id) {
@@ -170,6 +225,15 @@ public class SlaPolicyService implements SlaPolicyProvider, SlaDeadlineCalculato
     }
 
     // ---- Helpers ------------------------------------------------------------
+
+    private String resolveActor() {
+        try {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            return auth != null ? auth.getName() : "system";
+        } catch (Exception ignored) {
+            return "system";
+        }
+    }
 
     private Optional<SlaPolicy> loadFromRepo(String priority, Instant at) {
         try {

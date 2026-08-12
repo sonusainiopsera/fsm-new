@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.fieldservice.platform.api.exception.NotFoundException;
 
 import java.util.List;
 import java.util.UUID;
@@ -74,12 +75,26 @@ public class AdminSlaPolicyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(AdminSlaPolicyResponse.from(created));
     }
 
-    /** Supersede: closes the existing policy row and creates a new version. */
+    /**
+     * In-place update of SLA policy values with optimistic locking.
+     *
+     * <p>Send the current {@code version} from the GET response.
+     * A stale version returns 409 Conflict.
+     */
     @PutMapping("/{id}")
+    public ResponseEntity<AdminSlaPolicyResponse> updatePolicy(
+            @PathVariable UUID id,
+            @Valid @RequestBody AdminSlaPolicyUpdateRequest request) {
+        SlaPolicy updated = slaPolicyService.update(id, request);
+        return ResponseEntity.ok(AdminSlaPolicyResponse.from(updated));
+    }
+
+    /** Supersede: closes the existing policy row and creates a new version. */
+    @PostMapping("/{id}/supersede")
     public ResponseEntity<AdminSlaPolicyResponse> supersedePolicy(
             @PathVariable UUID id,
             @Valid @RequestBody AdminSlaPolicyRequest request) {
         SlaPolicy replacement = slaPolicyService.supersede(id, request);
-        return ResponseEntity.ok(AdminSlaPolicyResponse.from(replacement));
+        return ResponseEntity.status(HttpStatus.CREATED).body(AdminSlaPolicyResponse.from(replacement));
     }
 }
