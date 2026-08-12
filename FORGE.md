@@ -462,3 +462,10 @@
 - **Files:** 20 (+1518/-0)
 - **Duration:** 998ss
 - **Approach:** N/A
+
+## WO-194: User Story: WO-194 - Privacy administration console for classification retention DSAR
+- **Status:** completed
+- **Commit:** `da66cd6`
+- **Files:** 15 (+1894/-0)
+- **Duration:** 909ss
+- **Approach:** Three privacy admin screens built as named exports from their feature files. PrivacySurface is a lazy-loaded route group gated to PRIVACY_ADMIN/ADMIN; all other roles render PermissionDeniedState immediately. ClassificationRegistryPage and RetentionSchedulePage use usePagedQuery for server-side pagination and useMutation for versioned PUT with 409 conflict handling. DsarQueuePage uses server-side state filtering and countdown rendering from server-supplied remainingDays/atRisk. ErasureConfirmDialog requires typed 'CONFIRM' token, generates a stable idempotency key per dialog instance via newAttemptKey(), and shows 422 guard-refusal messages without stack detail. DsarRequestDetailPage opens export URLs fresh per click via window.open, never caching. DataTable rowActions render prop used throughout; Button uses 'destructive' variant for erasure. MSW handlers and fixture files provide comprehensive mock data for all states.

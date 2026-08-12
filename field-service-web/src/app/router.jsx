@@ -14,6 +14,7 @@ const LazyOperations = lazy(() => import('../surfaces/operations/index.jsx'));
 const LazyPortal = lazy(() => import('../surfaces/portal/index.jsx'));
 const LazyInventory = lazy(() => import('../features/inventory/index.jsx'));
 const LazyAdmin = lazy(() => import('../surfaces/admin/index.jsx'));
+const LazyPrivacy = lazy(() => import('../surfaces/privacy/index.jsx'));
 const LazySignIn = lazy(() => import('../surfaces/auth/SignIn.jsx'));
 
 /** Shared Suspense wrapper bound to the LoadingState skeleton primitive. */
@@ -121,6 +122,14 @@ export const router = createBrowserRouter([
         element: (
           <SurfaceSuspense>
             <LazyAdmin />
+          </SurfaceSuspense>
+        ),
+      },
+      {
+        path: 'privacy/*',
+        element: (
+          <SurfaceSuspense>
+            <LazyPrivacy />
           </SurfaceSuspense>
         ),
       },

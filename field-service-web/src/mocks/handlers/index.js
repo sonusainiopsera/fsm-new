@@ -345,6 +345,121 @@ const DEFAULT_ROUTES = {
       { typeCode: 'FIRST_AID_BASIC', outcome: 'COMMITTED', error: null },
     ],
   },
+
+  // Privacy — Classification registry
+  'GET:/api/v1/privacy/classifications': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'cls-001', module: 'identity', entityName: 'AppUser', fieldName: 'email',       tier: 'CONFIDENTIAL', lawfulBasisNote: 'Legitimate interest', handlingNotes: 'Email for account comms only', updatedAt: '2026-01-01T00:00:00Z', version: 1 },
+        { id: 'cls-002', module: 'identity', entityName: 'AppUser', fieldName: 'phoneNumber', tier: 'CONFIDENTIAL', lawfulBasisNote: null, handlingNotes: null, updatedAt: '2026-01-01T00:00:00Z', version: 1 },
+        { id: 'cls-003', module: 'identity', entityName: 'AppUser', fieldName: null,          tier: 'INTERNAL',     lawfulBasisNote: null, handlingNotes: 'Internal user record', updatedAt: '2026-01-01T00:00:00Z', version: 1 },
+        { id: 'cls-004', module: 'workforce', entityName: 'Technician', fieldName: 'name',   tier: 'CONFIDENTIAL', lawfulBasisNote: 'Contract', handlingNotes: null, updatedAt: '2026-02-01T00:00:00Z', version: 2 },
+      ],
+      page: { number: 0, size: 20, totalElements: 4, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/privacy/classifications?page=0&size=20', next: null, prev: null },
+    },
+  },
+  'PUT:/api/v1/privacy/classifications/cls-001': {
+    status: 200,
+    body: { id: 'cls-001', module: 'identity', entityName: 'AppUser', fieldName: 'email', tier: 'RESTRICTED', lawfulBasisNote: 'Legitimate interest', handlingNotes: 'Updated notes', updatedAt: '2026-08-12T10:00:00Z', version: 2 },
+  },
+
+  // Privacy — Retention policies
+  'GET:/api/v1/privacy/retention-policies': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'ret-001', dataCategory: 'SUBJECT_ERASURE_TOMBSTONE', entityName: 'subject_erasure', periodValue: 7, periodUnit: 'YEARS', anchorField: 'erased_at', disposalMethod: 'CRYPTO_ERASE', legalHold: false, ratified: true, enabled: true, notes: 'DPO evidence', version: 1 },
+        { id: 'ret-002', dataCategory: 'APP_USER', entityName: 'AppUser', periodValue: 6, periodUnit: 'YEARS', anchorField: 'closedAt', disposalMethod: 'CRYPTO_ERASE', legalHold: false, ratified: false, enabled: false, notes: 'Pending DPO ratification', version: 0 },
+        { id: 'ret-003', dataCategory: 'WORK_ORDER', entityName: 'WorkOrder', periodValue: 7, periodUnit: 'YEARS', anchorField: 'closedAt', disposalMethod: 'PHYSICAL_DELETE', legalHold: true, ratified: true, enabled: true, notes: 'Legal hold active — pending litigation', version: 3 },
+      ],
+      page: { number: 0, size: 20, totalElements: 3, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/privacy/retention-policies?page=0&size=20', next: null, prev: null },
+    },
+  },
+  'PUT:/api/v1/privacy/retention-policies/ret-001': {
+    status: 200,
+    body: { id: 'ret-001', dataCategory: 'SUBJECT_ERASURE_TOMBSTONE', entityName: 'subject_erasure', periodValue: 10, periodUnit: 'YEARS', anchorField: 'erased_at', disposalMethod: 'CRYPTO_ERASE', legalHold: false, ratified: true, enabled: true, notes: 'Updated', version: 2 },
+  },
+  'POST:/api/v1/privacy/retention-policies/ret-001/dry-run': {
+    status: 200,
+    body: { eligibleCount: 0, cutoffAt: '2019-08-12T00:00:00Z', oldestEligibleAt: null },
+  },
+  'POST:/api/v1/privacy/retention-policies/ret-002/dry-run': {
+    status: 200,
+    body: { eligibleCount: 142, cutoffAt: '2020-08-12T00:00:00Z', oldestEligibleAt: '2017-03-15T09:22:00Z' },
+  },
+
+  // Privacy — DSAR queue
+  'GET:/api/v1/privacy/dsar-requests': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'dsar-001', requestType: 'ACCESS',        subjectType: 'APP_USER', subjectId: 'user-101', state: 'VERIFIED',     submittedAt: '2026-07-15T08:00:00Z', dueAt: '2026-08-14T08:00:00Z', remainingDays: 2,  atRisk: true,  outcome: null, version: 2 },
+        { id: 'dsar-002', requestType: 'ERASURE',       subjectType: 'APP_USER', subjectId: 'user-102', state: 'RECEIVED',     submittedAt: '2026-08-01T10:00:00Z', dueAt: '2026-08-31T10:00:00Z', remainingDays: 19, atRisk: false, outcome: null, version: 1 },
+        { id: 'dsar-003', requestType: 'RECTIFICATION', subjectType: 'APP_USER', subjectId: 'user-103', state: 'FULFILLED',    submittedAt: '2026-06-01T09:00:00Z', dueAt: '2026-07-01T09:00:00Z', remainingDays: 0,  atRisk: false, outcome: 'FULFILLED', version: 3 },
+        { id: 'dsar-004', requestType: 'ACCESS',        subjectType: 'TECHNICIAN', subjectId: 'tech-201', state: 'REJECTED',   submittedAt: '2026-05-01T09:00:00Z', dueAt: '2026-05-31T09:00:00Z', remainingDays: -5, atRisk: false, outcome: 'REJECTED', version: 2 },
+      ],
+      page: { number: 0, size: 20, totalElements: 4, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/privacy/dsar-requests?page=0&size=20', next: null, prev: null },
+    },
+  },
+  'GET:/api/v1/privacy/dsar-requests/dsar-001': {
+    status: 200,
+    body: {
+      id: 'dsar-001', requestType: 'ACCESS', subjectType: 'APP_USER', subjectId: 'user-101',
+      state: 'VERIFIED', submittedAt: '2026-07-15T08:00:00Z', dueAt: '2026-08-14T08:00:00Z',
+      remainingDays: 2, atRisk: true, identityVerifiedAt: '2026-07-16T10:00:00Z',
+      verificationMethod: 'GOVERNMENT_ID', assignedHandler: null, outcome: null, version: 2,
+      manifest: null,
+    },
+  },
+  'GET:/api/v1/privacy/dsar-requests/dsar-002': {
+    status: 200,
+    body: {
+      id: 'dsar-002', requestType: 'ERASURE', subjectType: 'APP_USER', subjectId: 'user-102',
+      state: 'RECEIVED', submittedAt: '2026-08-01T10:00:00Z', dueAt: '2026-08-31T10:00:00Z',
+      remainingDays: 19, atRisk: false, identityVerifiedAt: null,
+      verificationMethod: null, assignedHandler: null, outcome: null, version: 1,
+      manifest: null,
+    },
+  },
+  'GET:/api/v1/privacy/dsar-requests/dsar-003': {
+    status: 200,
+    body: {
+      id: 'dsar-003', requestType: 'RECTIFICATION', subjectType: 'APP_USER', subjectId: 'user-103',
+      state: 'FULFILLED', submittedAt: '2026-06-01T09:00:00Z', dueAt: '2026-07-01T09:00:00Z',
+      remainingDays: 0, atRisk: false, identityVerifiedAt: '2026-06-02T11:00:00Z',
+      verificationMethod: 'PHONE_VERIFICATION', assignedHandler: null, outcome: 'FULFILLED', version: 3,
+      manifest: [
+        { sectionName: 'identity.app_user', sourceModule: 'identity', rowCount: 1 },
+        { sectionName: 'workorder.history', sourceModule: 'workorder', rowCount: 17 },
+      ],
+    },
+  },
+  'GET:/api/v1/privacy/dsar-requests/dsar-003/export': {
+    status: 200,
+    body: { downloadUrl: 'https://storage.example/exports/dsar-003-signed?token=abc123', expiresIn: 300 },
+  },
+
+  // Privacy — Erasure initiation
+  'POST:/api/v1/privacy/subjects/APP_USER/user-101/erasure': {
+    status: 202,
+    body: { erasureId: 'era-001', state: 'PENDING' },
+  },
+
+  // Privacy — Erasure tombstone
+  'GET:/api/v1/privacy/erasures/era-001': {
+    status: 200,
+    body: {
+      id: 'era-001', dsarRequestId: 'dsar-001', subjectType: 'APP_USER', subjectId: 'user-101',
+      keyReference: 'APP_USER/user-101/v1', erasedAt: '2026-08-12T10:00:00Z',
+      actor: 'SYSTEM', erasedSections: [{ name: 'identity.app_user', rowCount: 1 }],
+      verificationResults: [{ scope: 'live-tables', plaintextFound: false, itemsChecked: 5, checkedAt: '2026-08-12T10:01:00Z' }],
+      outcome: 'COMPLETED', refusalReason: null,
+    },
+  },
 };
 
 // ---- Status fixture helpers --------------------------------------------
