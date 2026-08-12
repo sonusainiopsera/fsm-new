@@ -17,8 +17,10 @@
  * @type {Record<string, string[][]>}
  */
 export const EVENT_KEY_MAP = {
-  WorkOrderAtRisk: [['workOrders'], ['dashboard', 'atRisk']],
-  WorkOrderBreached: [['workOrders'], ['dashboard', 'breached']],
+  WorkOrderAtRisk: [['workOrders'], ['slaAlerts'], ['dashboard', 'atRisk']],
+  WorkOrderBreached: [['workOrders'], ['slaAlerts'], ['dashboard', 'breached']],
+  SLA_AT_RISK: [['workOrders'], ['slaAlerts']],
+  SLA_BREACHED: [['workOrders'], ['slaAlerts']],
   WorkOrderStateChanged: [['workOrders']],
   PartsConsumed: [['workOrders'], ['stock']],
   PartsReturned: [['workOrders'], ['stock']],

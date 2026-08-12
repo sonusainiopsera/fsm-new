@@ -8,6 +8,7 @@
  * Keyboard: the row is focusable and activates the detail drawer on Enter/Space.
  */
 import { Chip } from '../../../components/index.js'
+import { SlaRiskChip } from '../../sla/SlaRiskChip.jsx'
 
 /** Formats a deadline instant as a human-readable countdown or timestamp. */
 function formatCountdown(isoString) {
@@ -137,16 +138,15 @@ export function WorkOrderRow({ row, isSelected, onSelect }) {
         </span>
       </td>
 
-      {/* At-risk indicator — icon + text, not colour-only (BR-34) */}
+      {/* SLA risk chip — icon + text + colour, not colour-only (BR-34) */}
       <td style={{ ...tdStyle, textAlign: 'center' }}>
-        {row.atRisk ? (
-          <span
-            role="img"
-            aria-label="At risk"
-            style={{ color: 'var(--token-danger-emphasis)', fontWeight: 600 }}
-          >
-            ⚠ At-risk
-          </span>
+        {(row.riskLevel || row.atRisk) ? (
+          <SlaRiskChip
+            riskLevel={row.riskLevel ?? (row.atRisk ? 'at_risk' : 'healthy')}
+            minutesRemaining={row.minutesRemaining ?? null}
+            stale={row.slaStale ?? false}
+            size="sm"
+          />
         ) : null}
       </td>
     </tr>

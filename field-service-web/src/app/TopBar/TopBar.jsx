@@ -1,21 +1,28 @@
 /**
  * @fileoverview TopBar — banner landmark with appearance switch, account menu,
- * and network-status indicator.
+ * network-status indicator, and live stream health indicator.
  *
  * Uses only token values (WO-086) and WO-087 primitives. Zero bespoke literals.
  */
 import { useAppearance } from '../../appearance/AppearanceProvider.jsx'
 import { useAuth } from '../AuthContext.js'
 import { useNetworkStatus } from '../useNetworkStatus.js'
+import { LiveStreamIndicator } from './LiveStreamIndicator.jsx'
 import styles from './TopBar.module.css'
 
-export function TopBar() {
+/**
+ * @param {{ streamStatus?: 'live' | 'reconnecting' | 'stale', onStreamRefresh?: () => void }} props
+ */
+export function TopBar({ streamStatus, onStreamRefresh }) {
   const { preference, setPreference } = useAppearance()
   const { roles } = useAuth()
   const { isOnline } = useNetworkStatus()
 
   const isDark = preference === 'DARK'
   const nextPreference = isDark ? 'LIGHT' : 'DARK'
+
+  const isDispatchRole = roles.includes('DISPATCHER') || roles.includes('MANAGER')
+
   const currentSurface = roles.includes('TECHNICIAN')
     ? 'Field'
     : roles.includes('DISPATCHER')
@@ -43,6 +50,14 @@ export function TopBar() {
             <span aria-hidden="true">⚠</span>
             Offline
           </div>
+        )}
+
+        {/* Live stream indicator — shown for dispatcher and manager roles only */}
+        {isDispatchRole && streamStatus && (
+          <LiveStreamIndicator
+            status={streamStatus}
+            onRefresh={onStreamRefresh}
+          />
         )}
 
         <button

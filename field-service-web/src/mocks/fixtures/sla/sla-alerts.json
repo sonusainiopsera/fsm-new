@@ -1,0 +1,37 @@
+{
+  "alerts": [
+    {
+      "workOrderId": "wo-board-001",
+      "reference": "REF-B001",
+      "title": "HVAC Repair — Unit 3B",
+      "priority": "CRITICAL",
+      "state": "ASSIGNED",
+      "riskLevel": "breached",
+      "minutesRemaining": -15,
+      "triggerReason": "Response window elapsed without dispatch",
+      "projectionBasis": "SLA policy P1"
+    },
+    {
+      "workOrderId": "wo-board-005",
+      "reference": "REF-B005",
+      "title": "Emergency Generator Fault",
+      "priority": "HIGH",
+      "state": "NEW",
+      "riskLevel": "at_risk",
+      "minutesRemaining": 25,
+      "triggerReason": "No technician assigned within first half of window",
+      "projectionBasis": "Predictive model v2"
+    },
+    {
+      "workOrderId": "wo-board-002",
+      "reference": "REF-B002",
+      "title": "Electrical Panel Inspection",
+      "priority": "HIGH",
+      "state": "IN_PROGRESS",
+      "riskLevel": "at_risk",
+      "minutesRemaining": 42,
+      "triggerReason": "Job duration exceeding estimate",
+      "projectionBasis": "Historical completion rate"
+    }
+  ]
+}

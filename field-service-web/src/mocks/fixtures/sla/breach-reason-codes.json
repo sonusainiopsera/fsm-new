@@ -1,0 +1,12 @@
+{
+  "codes": [
+    { "code": "RESOURCE_UNAVAILABLE", "label": "Resource unavailable at time of breach" },
+    { "code": "PARTS_DELAY", "label": "Required parts not available" },
+    { "code": "ACCESS_DENIED", "label": "Site access denied or restricted" },
+    { "code": "WEATHER_IMPACT", "label": "Severe weather prevented attendance" },
+    { "code": "CUSTOMER_REQUEST", "label": "Postponed at customer request" },
+    { "code": "THIRD_PARTY_DELAY", "label": "Third-party contractor delay" },
+    { "code": "ESCALATION_REQUIRED", "label": "Specialist escalation required" },
+    { "code": "OTHER", "label": "Other — see notes" }
+  ]
+}

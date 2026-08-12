@@ -1,0 +1,22 @@
+{
+  "atRiskFrame": {
+    "eventType": "SLA_AT_RISK",
+    "workOrderId": "wo-board-005",
+    "riskLevel": "at_risk",
+    "minutesRemaining": 25,
+    "triggerReason": "No technician assigned within first half of window",
+    "projectionBasis": "Predictive model v2"
+  },
+  "breachedFrame": {
+    "eventType": "SLA_BREACHED",
+    "workOrderId": "wo-board-001",
+    "riskLevel": "breached",
+    "minutesRemaining": -15,
+    "triggerReason": "Response window elapsed without dispatch",
+    "projectionBasis": "SLA policy P1"
+  },
+  "heartbeatFrame": {
+    "eventType": "heartbeat",
+    "ts": "2026-08-12T10:00:00Z"
+  }
+}

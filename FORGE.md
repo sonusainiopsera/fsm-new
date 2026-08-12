@@ -602,3 +602,10 @@
 - **Files:** 13 (+867/-0)
 - **Duration:** 744ss
 - **Approach:** N/A
+
+## WO-147: User Story: WO-147 - Dispatcher SLA risk indicators and alert centre UI
+- **Status:** completed
+- **Commit:** `a05d82c`
+- **Files:** 15 (+1955/-13)
+- **Duration:** 674ss
+- **Approach:** Implemented the full SLA risk indicator and alert centre feature set. The useSlaAlertStream hook manages native EventSource lifecycle with ticket-per-attempt (POST /api/v1/auth/stream-ticket before each connection), immediate close on error to prevent native auto-retry, jittered exponential backoff (1s base, 30s cap), Last-Event-ID propagation on reconnect, and staleness detection via a configurable threshold (3× heartbeatIntervalMs). A single-flight 401 handler calls refreshToken then retries once; second failure routes to signOut. SlaRiskChip renders icon + text + colour for healthy/at_risk/breached states (not colour-alone per BR-34), formats minutes remaining, and shows a stale affordance plus an attribution button for breached rows. AlertCentre uses TanStack Query with refetchInterval=15s when stale, sorts by urgency (breached < at_risk; ties by minutesRemaining ASC), and shows a stale banner with manual refresh. LiveStreamIndicator in TopBar shows live/reconnecting/stale with accessible ARIA labels. BreachReasonDialog loads server-provided reason codes and maps 400/403/409/429/5xx to distinct UI feedback. eventKeyMap.js updated to invalidate ['slaAlerts'] on WorkOrderAtRisk/WorkOrderBreached events. Access tokens are never in SSE URLs; only single-use opaque tickets are used as query params.
