@@ -114,6 +114,15 @@ ai:
       timeout-duration: 10s
   metrics:
     cost-per-1k-tokens: 0.002
+  audit:
+    # Indicative retention defaults — pending ratification by Data Governance.
+    # These values MUST be overridden in production via environment-specific config.
+    copilot-retention-days: 365
+    photo-caption-retention-days: 90
+    max-prompt-chars: 4096
+    max-response-chars: 4096
+    purge-job-batch-size: 500
+    purge-cron: "0 30 2 * * *"
 
 springdoc:
   api-docs:

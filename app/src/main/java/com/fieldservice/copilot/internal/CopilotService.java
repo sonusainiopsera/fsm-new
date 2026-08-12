@@ -2,6 +2,7 @@ package com.fieldservice.copilot.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fieldservice.aiaudit.api.AiInteractionLogService;
 import com.fieldservice.aigateway.api.AiCompletionRequest;
 import com.fieldservice.aigateway.api.AiGatewayPort;
 import com.fieldservice.aigateway.api.AiStreamCallback;
@@ -329,19 +330,17 @@ public class CopilotService {
     private void logInteraction(UUID interactionId, UUID userId, UUID workOrderId,
                                  AiInteractionLogService.Outcome outcome,
                                  Instant startTime, int tokenCount) {
-        try {
-            logService.record(AiInteractionLogService.InteractionRecord.builder()
-                    .interactionId(interactionId)
-                    .actorUserId(userId)
-                    .workOrderId(workOrderId)
-                    .outcome(outcome)
-                    .latency(Duration.between(startTime, Instant.now()))
-                    .tokenCount(tokenCount)
-                    .redactionSummary("pii_removed")
-                    .build());
-        } catch (Exception e) {
-            // Log service must never propagate — only log internally
-            log.error("copilot_interaction_log_error interaction_id={}", interactionId, e);
-        }
+        long latencyMs = Duration.between(startTime, Instant.now()).toMillis();
+        logService.record(AiInteractionLogService.LogEntry.builder()
+                .interactionId(interactionId)
+                .interactionType(AiInteractionLogService.InteractionType.COPILOT_QUESTION)
+                .actorUserId(userId)
+                .workOrderId(workOrderId)
+                .outcome(outcome)
+                .latencyMs(latencyMs)
+                .completionTokens(tokenCount)
+                .redactionSummaryJson("{}")
+                .redactorVersion("1.0")
+                .build());
     }
 }

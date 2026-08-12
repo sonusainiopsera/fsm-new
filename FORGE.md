@@ -525,3 +525,10 @@
 - **Files:** 12 (+1295/-4)
 - **Duration:** 1397ss
 - **Approach:** Implemented the copilot streaming endpoint as a Spring SSE controller returning an SseEmitter. The controller validates the request and acquires a per-user concurrent stream slot before spawning a virtual thread to run the blocking pipeline. CopilotService orchestrates: (1) grounding context retrieval with row-level AccessScope predicates, (2) sufficiency evaluation — INSUFFICIENT grounding short-circuits to a no_grounded_basis terminal event with zero provider calls enforcing the safety invariant, (3) PII redaction and prompt assembly, (4) AiGatewayPort.completeStreaming() with AiStreamCallback emitting typed SSE events. All token events carry advisory=true and a basis array. The stream-ticket security filter chain was extended to cover the copilot path. A no-op AiInteractionLogService stub follows the @ConditionalOnMissingBean pattern.
+
+## WO-180: User Story: WO-180 - AI interaction audit log with redaction evidence and retention
+- **Status:** completed
+- **Commit:** `6834042`
+- **Files:** 21 (+1534/-95)
+- **Duration:** 788ss
+- **Approach:** Created the aiaudit module as a new bounded context under app/src/main/java/com/fieldservice/aiaudit/ with public API surface (api/) and package-private internals (internal/). V47 Flyway migration adds ai_interaction (append-only audit table) and ai_interaction_rating (unique per interaction). AiInteractionLogService is a new public interface in aiaudit.api replacing the old copilot.internal stub; CopilotService and NoOpAiInteractionLogService were updated to use it. The service impl writes the record + outbox event in the caller's transaction (REQUIRED propagation) and increments Micrometer counters. Retention periods are configurable per interaction type and stored on each row at insert time — changing config does not silently alter historical rows. The purge job uses a PostgreSQL advisory lock and bounded batch deletion. The rating controller enforces row-scope (403 non-disclosure for other users' interactions) and idempotency-key replay.
