@@ -37,6 +37,8 @@ import com.fieldservice.workorder.domain.WorkOrder;
 import com.fieldservice.workorder.domain.WorkOrderStatus;
 import com.fieldservice.workorder.repository.WorkOrderRepository;
 import com.fieldservice.workorder.repository.WorkOrderRequiredCompetencyRepository;
+import com.fieldservice.workorder.web.AssignmentWarning;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
@@ -105,8 +107,10 @@ public class RecommendationOrchestrator {
     private final RecommendationCursor              cursor;
     private final StockQueryService                 stockQueryService;
     private final TechnicianPositionCachePort       positionCache;
+    private final PartsWarningAssembler             partsWarningAssembler;
     private final NamedParameterJdbcTemplate        namedJdbc;
     private final Timer                             durationTimer;
+    private final Counter                           partsDegradedCounter;
 
     public RecommendationOrchestrator(
             WorkOrderRepository workOrderRepository,
@@ -121,6 +125,7 @@ public class RecommendationOrchestrator {
             RecommendationCursor cursor,
             StockQueryService stockQueryService,
             TechnicianPositionCachePort positionCache,
+            PartsWarningAssembler partsWarningAssembler,
             JdbcTemplate jdbcTemplate,
             MeterRegistry meterRegistry) {
         this.workOrderRepository  = workOrderRepository;
@@ -135,10 +140,14 @@ public class RecommendationOrchestrator {
         this.cursor               = cursor;
         this.stockQueryService    = stockQueryService;
         this.positionCache        = positionCache;
+        this.partsWarningAssembler = partsWarningAssembler;
         this.namedJdbc            = new NamedParameterJdbcTemplate(jdbcTemplate);
         this.durationTimer = Timer.builder("dispatch.recommendation.duration")
                 .description("End-to-end recommendation pipeline latency")
                 .publishPercentileHistogram()
+                .register(meterRegistry);
+        this.partsDegradedCounter = Counter.builder("dispatch.parts.degraded")
+                .description("Number of times parts availability data could not be loaded")
                 .register(meterRegistry);
     }
 
@@ -244,6 +253,10 @@ public class RecommendationOrchestrator {
         Map<UUID, Integer> requiredParts = loadRequiredParts(workOrderId);
         PartsAvailabilityResult partsAvailability = buildPartsAvailability(
                 requiredParts, eligibleIds, scoringData);
+        if (partsAvailability.degraded()) {
+            partsDegradedCounter.increment();
+        }
+        List<AssignmentWarning> partsWarnings = partsWarningAssembler.assemble(partsAvailability);
         List<CandidateScoringData> scoringInputs = buildScoringInputs(
                 eligibleIds, scoringData, travelMatrix, partsAvailability);
 
@@ -291,8 +304,9 @@ public class RecommendationOrchestrator {
 
         RecommendationMeta meta = new RecommendationMeta(
                 snapshotId, generatedAt, weightSetVersion,
-                travelEstimateDegraded, false,
-                eligibility.eligible().size(), truncated, exclusionSummary);
+                travelEstimateDegraded, partsAvailability.degraded(),
+                eligibility.eligible().size(), truncated, exclusionSummary,
+                partsWarnings);
 
         List<CandidateDto> data = buildCandidateDtos(page, startIdx);
 
