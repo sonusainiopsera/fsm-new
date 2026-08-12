@@ -1,0 +1,59 @@
+spring:
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/fieldservice}
+    username: ${DATASOURCE_USERNAME:fieldservice}
+    password: ${DATASOURCE_PASSWORD:fieldservice}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        envers:
+          audit_table_suffix: _AUD
+          revision_field_name: rev
+          revision_type_field_name: revtype
+          store_data_at_delete: true
+        jdbc:
+          time_zone: UTC
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
+  data:
+    web:
+      pageable:
+        max-page-size: 50
+        default-page-size: 20
+        one-indexed-parameters: false
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    com.fieldservice: INFO
+    org.hibernate.envers: WARN
