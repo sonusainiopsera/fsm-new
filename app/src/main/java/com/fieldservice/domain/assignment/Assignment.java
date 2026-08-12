@@ -61,6 +61,18 @@ public class Assignment implements ScopedEntity {
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "parts_warning_code", length = 100)
+    private String partsWarningCode;
+
+    @Column(name = "parts_shortfall_summary", columnDefinition = "TEXT")
+    private String partsShortfallSummary;
+
+    @Column(name = "parts_warning_acknowledged")
+    private Boolean partsWarningAcknowledged;
+
+    @Column(name = "parts_warning_acknowledgement_reason", columnDefinition = "TEXT")
+    private String partsWarningAcknowledgementReason;
+
     @Version
     @Column(name = "version", nullable = false)
     private Integer version;
@@ -119,4 +131,16 @@ public class Assignment implements ScopedEntity {
     public Integer getVersion() {
         return version;
     }
+
+    public String getPartsWarningCode() { return partsWarningCode; }
+    public void setPartsWarningCode(String partsWarningCode) { this.partsWarningCode = partsWarningCode; }
+
+    public String getPartsShortfallSummary() { return partsShortfallSummary; }
+    public void setPartsShortfallSummary(String partsShortfallSummary) { this.partsShortfallSummary = partsShortfallSummary; }
+
+    public Boolean getPartsWarningAcknowledged() { return partsWarningAcknowledged; }
+    public void setPartsWarningAcknowledged(Boolean partsWarningAcknowledged) { this.partsWarningAcknowledged = partsWarningAcknowledged; }
+
+    public String getPartsWarningAcknowledgementReason() { return partsWarningAcknowledgementReason; }
+    public void setPartsWarningAcknowledgementReason(String r) { this.partsWarningAcknowledgementReason = r; }
 }

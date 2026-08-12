@@ -13,7 +13,8 @@ record TechnicianScoringData(
         Double homeLatitude,
         Double homeLongitude,
         List<String> certificationCodes,
-        double bookedHours
+        double bookedHours,
+        UUID vehicleStockLocationId
 ) {
     TechnicianScoringData {
         certificationCodes = certificationCodes == null ? List.of() : List.copyOf(certificationCodes);
@@ -26,6 +27,7 @@ record TechnicianScoringData(
         private final Double homeLongitude;
         private final List<String> certificationCodes = new ArrayList<>();
         private double bookedHours = 0.0;
+        private UUID vehicleStockLocationId;
 
         Builder(UUID technicianId, String displayName, Double homeLatitude, Double homeLongitude) {
             this.technicianId = technicianId;
@@ -36,10 +38,11 @@ record TechnicianScoringData(
 
         void addCert(String code) { certificationCodes.add(code); }
         void bookedHours(double h) { this.bookedHours = h; }
+        void vehicleStockLocationId(UUID id) { this.vehicleStockLocationId = id; }
 
         TechnicianScoringData build() {
             return new TechnicianScoringData(technicianId, displayName, homeLatitude, homeLongitude,
-                    certificationCodes, bookedHours);
+                    certificationCodes, bookedHours, vehicleStockLocationId);
         }
     }
 }

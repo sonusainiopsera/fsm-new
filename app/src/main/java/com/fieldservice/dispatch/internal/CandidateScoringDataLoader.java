@@ -32,7 +32,8 @@ class CandidateScoringDataLoader {
                 t.display_name         AS display_name,
                 s.latitude             AS home_lat,
                 s.longitude            AS home_lon,
-                ct.code                AS cert_code
+                ct.code                AS cert_code,
+                sl.id::text            AS vehicle_stock_location_id
             FROM technician t
             LEFT JOIN site s
                 ON s.id = t.home_base_site_id
@@ -40,6 +41,10 @@ class CandidateScoringDataLoader {
                 ON tc.technician_id = t.id AND tc.active = true
             LEFT JOIN certification_type ct
                 ON ct.id = tc.certification_type_id
+            LEFT JOIN stock_location sl
+                ON sl.technician_id = t.id
+                AND sl.location_type = 'VEHICLE'
+                AND sl.is_active = true
             WHERE t.id = ANY(CAST(:ids AS uuid[]))
             ORDER BY t.id
             """;
@@ -79,6 +84,9 @@ class CandidateScoringDataLoader {
                         toDouble(row[2]), toDouble(row[3])));
             if (row[4] != null) {
                 builders.get(tid).addCert((String) row[4]);
+            }
+            if (row[5] != null) {
+                builders.get(tid).vehicleStockLocationId(UUID.fromString((String) row[5]));
             }
         }
 

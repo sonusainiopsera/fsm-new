@@ -1,5 +1,7 @@
 package com.fieldservice.dispatch.scoring;
 
+import com.fieldservice.inventory.api.PartsAvailabilityStatus;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -17,7 +19,8 @@ import java.util.UUID;
  * @param travelTime                estimate from the geo travel-time port (may be degraded)
  * @param bookedHours               technician's current scheduled workload in hours
  * @param teamMeanBookedHours       mean booked hours across the eligible candidate pool
- * @param requiredPartsAvailable    advisory: whether all required parts are in stock
+ * @param partsAvailabilityStatus   advisory parts availability verdict for this candidate
+ *                                  ({@code null} treated as FULLY_STOCKED — no required parts)
  */
 public record ScoringContext(
         UUID technicianId,
@@ -27,14 +30,15 @@ public record ScoringContext(
         TravelTimeEstimate travelTime,
         double bookedHours,
         double teamMeanBookedHours,
-        boolean requiredPartsAvailable
+        PartsAvailabilityStatus partsAvailabilityStatus
 ) {
     public ScoringContext {
-        heldCertificationCodes    = heldCertificationCodes    == null ? List.of() : List.copyOf(heldCertificationCodes);
+        heldCertificationCodes     = heldCertificationCodes    == null ? List.of() : List.copyOf(heldCertificationCodes);
         requiredCertificationCodes = requiredCertificationCodes == null ? Set.of() : Set.copyOf(requiredCertificationCodes);
         if (travelTime == null) travelTime = TravelTimeEstimate.DEGRADED;
         if (bookedHours < 0) bookedHours = 0;
         if (teamMeanBookedHours < 0) teamMeanBookedHours = 0;
         if (priorJobTypeExperienceCount < 0) priorJobTypeExperienceCount = 0;
+        if (partsAvailabilityStatus == null) partsAvailabilityStatus = PartsAvailabilityStatus.FULLY_STOCKED;
     }
 }

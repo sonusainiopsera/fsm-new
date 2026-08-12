@@ -9,6 +9,13 @@ import com.fieldservice.dispatch.api.WorkOrderRequirements;
 import com.fieldservice.dispatch.scoring.ScoredCandidate;
 import com.fieldservice.domain.workorder.WorkOrderCompetency;
 import com.fieldservice.domain.workorder.WorkOrderCompetencyRepository;
+import com.fieldservice.domain.inventory.WorkOrderRequiredPartRepository;
+import com.fieldservice.inventory.api.CandidateAvailabilityResult;
+import com.fieldservice.inventory.api.PartsAvailabilityQuery;
+import com.fieldservice.inventory.api.PartsAvailabilityResult;
+import com.fieldservice.inventory.api.PartsAvailabilityStatus;
+import com.fieldservice.inventory.api.RequiredPartQuantity;
+import com.fieldservice.inventory.api.StockQueryService;
 import com.fieldservice.dispatch.scoring.ScoringContext;
 import com.fieldservice.dispatch.scoring.ScoringEngine;
 import com.fieldservice.dispatch.scoring.ScoringWeights;
@@ -73,6 +80,8 @@ public class RecommendationOrchestrator {
     private final RecommendationSnapshotCandidateRepository candidateRepository;
     private final RecommendationCursorCodec cursorCodec;
     private final ObjectMapper objectMapper;
+    private final WorkOrderRequiredPartRepository requiredPartRepository;
+    private final StockQueryService stockQueryService;
 
     public RecommendationOrchestrator(
             EligibilityService eligibilityService,
@@ -83,7 +92,9 @@ public class RecommendationOrchestrator {
             RecommendationSnapshotRepository snapshotRepository,
             RecommendationSnapshotCandidateRepository candidateRepository,
             RecommendationCursorCodec cursorCodec,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            WorkOrderRequiredPartRepository requiredPartRepository,
+            StockQueryService stockQueryService) {
         this.eligibilityService = eligibilityService;
         this.travelTimePort = travelTimePort;
         this.scoringEngine = scoringEngine;
@@ -93,6 +104,8 @@ public class RecommendationOrchestrator {
         this.candidateRepository = candidateRepository;
         this.cursorCodec = cursorCodec;
         this.objectMapper = objectMapper;
+        this.requiredPartRepository = requiredPartRepository;
+        this.stockQueryService = stockQueryService;
     }
 
     @Transactional
@@ -151,6 +164,27 @@ public class RecommendationOrchestrator {
             }
         }
 
+        // Parts availability — one batch call for all candidates
+        List<RequiredPartQuantity> requiredParts = requiredPartRepository
+                .findByWorkOrderId(workOrder.getId()).stream()
+                .map(rp -> new RequiredPartQuantity(rp.getPartId(), rp.getRequiredQuantity()))
+                .toList();
+
+        Set<UUID> vehicleLocationIds = techData.stream()
+                .map(TechnicianScoringData::vehicleStockLocationId)
+                .filter(id -> id != null)
+                .collect(Collectors.toSet());
+
+        PartsAvailabilityResult partsResult;
+        boolean partsDataDegraded = false;
+        try {
+            partsResult = stockQueryService.batchCheckAvailability(
+                    new PartsAvailabilityQuery(requiredParts, vehicleLocationIds, Set.of()));
+        } catch (Exception e) {
+            partsResult = PartsAvailabilityResult.empty();
+            partsDataDegraded = true;
+        }
+
         // Build scoring contexts
         double totalBookedHours = techData.stream().mapToDouble(TechnicianScoringData::bookedHours).sum();
         double teamMeanBookedHours = techData.isEmpty() ? 0.0 : totalBookedHours / techData.size();
@@ -167,6 +201,19 @@ public class RecommendationOrchestrator {
                     ? new TravelTimeEstimate(travelEntry.estimatedMinutes(), travelEntry.degraded())
                     : TravelTimeEstimate.DEGRADED;
 
+            PartsAvailabilityStatus partsStatus = PartsAvailabilityStatus.FULLY_STOCKED;
+            if (td.vehicleStockLocationId() != null) {
+                CandidateAvailabilityResult candidateResult =
+                        partsResult.byVehicleLocation().get(td.vehicleStockLocationId());
+                if (candidateResult != null) {
+                    partsStatus = candidateResult.status();
+                } else if (!requiredParts.isEmpty()) {
+                    partsStatus = PartsAvailabilityStatus.UNAVAILABLE;
+                }
+            } else if (!requiredParts.isEmpty()) {
+                partsStatus = PartsAvailabilityStatus.COLLECTABLE;
+            }
+
             contexts.add(new ScoringContext(
                     tid,
                     td.certificationCodes(),
@@ -175,9 +222,11 @@ public class RecommendationOrchestrator {
                     travelEstimate,
                     td.bookedHours(),
                     teamMeanBookedHours,
-                    true
+                    partsStatus
             ));
         }
+
+        final boolean finalPartsDataDegraded = partsDataDegraded;
 
         List<ScoredCandidate> ranked = scoringEngine.rank(contexts, weights);
 
@@ -187,7 +236,7 @@ public class RecommendationOrchestrator {
 
         RecommendationSnapshot snapshot = new RecommendationSnapshot(
                 workOrder.getId(), generatedAt, actorId, weightSetVersion,
-                travelDegraded, false, candidatePoolSize, truncated);
+                travelDegraded, finalPartsDataDegraded, candidatePoolSize, truncated);
         snapshotRepository.save(snapshot);
 
         List<RecommendationSnapshotCandidate> snapshotCandidates = new ArrayList<>();
@@ -257,7 +306,7 @@ public class RecommendationOrchestrator {
         }
     }
 
-    private static WorkOrderRequirements buildRequirements(WorkOrder wo) {
+    private WorkOrderRequirements buildRequirements(WorkOrder wo) {
         Double lat = null;
         Double lon = null;
         if (wo.getSite() != null) {
@@ -265,11 +314,10 @@ public class RecommendationOrchestrator {
             if (wo.getSite().getLongitude() != null) lon = wo.getSite().getLongitude().doubleValue();
         }
 
-        Set<String> certs = wo.getCompetencies() != null
-                ? wo.getCompetencies().stream()
-                    .map(c -> c.getCertificationTypeCode())
-                    .collect(Collectors.toSet())
-                : Set.of();
+        // Load competencies from repository (WorkOrder does not carry a direct collection)
+        Set<String> certs = workOrderCompetencyRepository.findByWorkOrderId(wo.getId()).stream()
+                .map(WorkOrderCompetency::getCompetencyCode)
+                .collect(Collectors.toSet());
 
         return new WorkOrderRequirements(
                 certs,
@@ -279,6 +327,14 @@ public class RecommendationOrchestrator {
                 lon,
                 250.0
         );
+    }
+
+    // WorkOrderCompetencyRepository is needed for buildRequirements
+    private WorkOrderCompetencyRepository workOrderCompetencyRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setWorkOrderCompetencyRepository(WorkOrderCompetencyRepository repo) {
+        this.workOrderCompetencyRepository = repo;
     }
 
     private List<ScoredCandidate> applyPageCursor(List<ScoredCandidate> ranked,

@@ -6,6 +6,8 @@ import com.fieldservice.domain.inventory.StockBalance;
 import com.fieldservice.domain.inventory.StockBalanceRepository;
 import com.fieldservice.domain.inventory.StockLocation;
 import com.fieldservice.domain.inventory.StockLocationRepository;
+import com.fieldservice.inventory.api.PartsAvailabilityQuery;
+import com.fieldservice.inventory.api.PartsAvailabilityResult;
 import com.fieldservice.inventory.api.PartRecord;
 import com.fieldservice.inventory.api.StockQueryService;
 import com.fieldservice.inventory.api.StockRecord;
@@ -53,16 +55,50 @@ class StockQueryServiceImpl implements StockQueryService {
     private final StockBalanceRepository stockBalanceRepository;
     private final StockLocationRepository stockLocationRepository;
     private final ScopedQueryExecutor scopedQueryExecutor;
+    private final PartsAvailabilityLookupService lookupService;
+    private final AvailabilityCacheGateway availabilityCache;
+    private final PartsAvailabilityMetrics availabilityMetrics;
 
     StockQueryServiceImpl(
             PartRepository partRepository,
             StockBalanceRepository stockBalanceRepository,
             StockLocationRepository stockLocationRepository,
-            ScopedQueryExecutor scopedQueryExecutor) {
+            ScopedQueryExecutor scopedQueryExecutor,
+            PartsAvailabilityLookupService lookupService,
+            AvailabilityCacheGateway availabilityCache,
+            PartsAvailabilityMetrics availabilityMetrics) {
         this.partRepository = partRepository;
         this.stockBalanceRepository = stockBalanceRepository;
         this.stockLocationRepository = stockLocationRepository;
         this.scopedQueryExecutor = scopedQueryExecutor;
+        this.lookupService = lookupService;
+        this.availabilityCache = availabilityCache;
+        this.availabilityMetrics = availabilityMetrics;
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('DISPATCHER', 'ADMIN', 'MANAGER')")
+    public PartsAvailabilityResult batchCheckAvailability(PartsAvailabilityQuery query) {
+        if (query.requiredParts().isEmpty()) {
+            return PartsAvailabilityResult.empty();
+        }
+        String key = CacheKeyBuilder.build(query);
+        try {
+            return availabilityCache.get(key)
+                    .map(cached -> {
+                        availabilityMetrics.recordCacheHit();
+                        return cached;
+                    })
+                    .orElseGet(() -> {
+                        availabilityMetrics.recordCacheMiss();
+                        PartsAvailabilityResult result = lookupService.lookup(query);
+                        availabilityCache.put(key, result);
+                        return result;
+                    });
+        } catch (Exception e) {
+            availabilityMetrics.recordDegraded();
+            return lookupService.lookup(query);
+        }
     }
 
     @Override

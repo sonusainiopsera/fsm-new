@@ -23,6 +23,22 @@ import java.util.UUID;
 public interface StockQueryService {
 
     /**
+     * Checks parts availability in batch across candidate vehicle locations and reachable warehouses.
+     *
+     * <p>Issues a bounded number of database queries independent of candidate count,
+     * satisfying the 3-second p95 recommendation budget (AC-2).
+     *
+     * <p>When {@link PartsAvailabilityQuery#requiredParts()} is empty the method returns
+     * {@link PartsAvailabilityResult#empty()} immediately without touching the database.
+     *
+     * <p>CUSTOMER is denied. All other authenticated roles may call this method.
+     *
+     * @param query required parts and candidate/warehouse location IDs from the caller
+     * @return per-candidate availability classification, job verdict, and freshness timestamp
+     */
+    PartsAvailabilityResult batchCheckAvailability(PartsAvailabilityQuery query);
+
+    /**
      * Returns a paginated list of active and inactive parts from the catalog.
      *
      * <p>CUSTOMER is denied with 403. All other authenticated roles receive the full
