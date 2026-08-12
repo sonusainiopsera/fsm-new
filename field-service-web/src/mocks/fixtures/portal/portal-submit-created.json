@@ -1,0 +1,10 @@
+{
+  "data": {
+    "workOrderId": "c0000000-0000-0000-0000-000000000001",
+    "reference": "REF-PORTAL-001",
+    "state": "NEW",
+    "origin": "PORTAL",
+    "respondByAt": "2026-08-13T12:00:00Z",
+    "resolveByAt": "2026-08-15T12:00:00Z"
+  }
+}

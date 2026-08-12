@@ -1,0 +1,9 @@
+{
+  "code": "VALIDATION_ERROR",
+  "message": "Request validation failed.",
+  "fieldErrors": [
+    { "field": "faultDescription", "message": "faultDescription must be between 4 and 2000 characters" },
+    { "field": "siteId", "message": "siteId is required" }
+  ],
+  "traceId": "trace-400-portal"
+}

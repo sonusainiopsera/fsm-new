@@ -1,0 +1,20 @@
+{
+  "data": {
+    "workOrderId": "c0000000-0000-0000-0000-000000000001",
+    "reference": "REF-PORTAL-001",
+    "statusLabel": "Technician Assigned",
+    "statusDescription": "A technician has been assigned and will be in contact with you shortly.",
+    "respondByAt": "2026-08-13T12:00:00Z",
+    "resolveByAt": "2026-08-15T12:00:00Z",
+    "appointmentWindow": null,
+    "technician": null,
+    "milestones": [
+      { "at": "2026-08-12T10:00:00Z", "label": "Request Received" }
+    ],
+    "freshness": {
+      "observedAt": "2026-08-12T14:00:00Z",
+      "staleAfterSeconds": 60,
+      "degraded": true
+    }
+  }
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "a0000000-0000-0000-0000-000000000001",
+    "name": "Main Office",
+    "address": "1 Alpha Street, London"
+  },
+  {
+    "id": "a0000000-0000-0000-0000-000000000002",
+    "name": "Warehouse",
+    "address": "2 Beta Road, London"
+  }
+]
