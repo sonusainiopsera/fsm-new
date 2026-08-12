@@ -228,6 +228,36 @@ class LayeredArchitectureTest {
     }
 
     // ==========================================================================
+    // WO-151 Parts availability — dispatch → inventory boundary rules
+    // ==========================================================================
+
+    /**
+     * Dispatch must never read inventory domain entities or repository interfaces.
+     * All availability data must flow through the StockQueryService port in inventory.api.
+     */
+    @Test
+    @DisplayName("dispatch must not access inventory domain entities or repositories")
+    void dispatch_must_not_access_inventory_domain_or_repositories() {
+        ArchRule domainRule = noClasses()
+                .that().resideInAPackage("com.fieldservice.dispatch..")
+                .should().accessClassesThat()
+                .resideInAPackage("com.fieldservice.inventory.domain..")
+                .because("Dispatch must access inventory data exclusively through the " +
+                         "StockQueryService port in inventory.api, not via domain entities. " +
+                         "See docs/arch/module-boundaries.md §inventory-availability-port.");
+
+        ArchRule repoRule = noClasses()
+                .that().resideInAPackage("com.fieldservice.dispatch..")
+                .should().accessClassesThat()
+                .resideInAPackage("com.fieldservice.inventory.repository..")
+                .because("Dispatch must not access inventory repositories directly. " +
+                         "Use StockQueryService from inventory.api.");
+
+        domainRule.check(PROD_CLASSES);
+        repoRule.check(PROD_CLASSES);
+    }
+
+    // ==========================================================================
     // WO-198 SLA policy / role matrix admin console architecture rules
     // ==========================================================================
 

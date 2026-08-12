@@ -4,6 +4,7 @@ import com.fieldservice.workorder.lifecycle.WorkOrderEvent;
 import com.fieldservice.workorder.lifecycle.WorkOrderState;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -15,7 +16,8 @@ public record TransitionResponse(
         String toState,
         int version,
         Set<String> legalNextEvents,
-        Instant occurredAt) {
+        Instant occurredAt,
+        List<AssignmentWarning> warnings) {
 
     public static TransitionResponse of(UUID workOrderId,
                                          WorkOrderState fromState,
@@ -29,6 +31,24 @@ public record TransitionResponse(
                 toState.name(),
                 version,
                 legalNextEvents.stream().map(Enum::name).collect(Collectors.toUnmodifiableSet()),
-                occurredAt);
+                occurredAt,
+                List.of());
+    }
+
+    public static TransitionResponse ofWithWarnings(UUID workOrderId,
+                                                     WorkOrderState fromState,
+                                                     WorkOrderState toState,
+                                                     int version,
+                                                     Set<WorkOrderEvent> legalNextEvents,
+                                                     Instant occurredAt,
+                                                     List<AssignmentWarning> warnings) {
+        return new TransitionResponse(
+                workOrderId,
+                fromState.name(),
+                toState.name(),
+                version,
+                legalNextEvents.stream().map(Enum::name).collect(Collectors.toUnmodifiableSet()),
+                occurredAt,
+                warnings == null ? List.of() : List.copyOf(warnings));
     }
 }

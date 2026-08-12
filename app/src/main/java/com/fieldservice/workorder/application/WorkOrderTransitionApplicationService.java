@@ -1,5 +1,12 @@
 package com.fieldservice.workorder.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fieldservice.inventory.api.AvailabilityStatus;
+import com.fieldservice.inventory.api.CandidateAvailability;
+import com.fieldservice.inventory.api.PartsAvailabilityQuery;
+import com.fieldservice.inventory.api.PartsAvailabilityResult;
+import com.fieldservice.inventory.api.StockQueryService;
 import com.fieldservice.platform.api.DomainEvent;
 import com.fieldservice.platform.api.DomainEventPublisher;
 import com.fieldservice.platform.api.exception.BusinessGuardException;
@@ -9,6 +16,7 @@ import com.fieldservice.platform.security.AccessScope;
 import com.fieldservice.platform.security.RequestScopedAccessScope;
 import com.fieldservice.platform.security.ScopedAccessDeniedException;
 import com.fieldservice.platform.util.UuidV7;
+import com.fieldservice.workorder.domain.Assignment;
 import com.fieldservice.workorder.domain.WorkOrder;
 import com.fieldservice.workorder.domain.WorkOrderStatus;
 import com.fieldservice.workorder.lifecycle.GuardContext;
@@ -27,7 +35,9 @@ import com.fieldservice.workorder.holds.HoldReasonValidationException;
 import com.fieldservice.workorder.holds.WorkOrderHold;
 import com.fieldservice.workorder.holds.WorkOrderHoldRepository;
 import com.fieldservice.workorder.lifecycle.WorkOrderVersionConflictException;
+import com.fieldservice.workorder.repository.AssignmentRepository;
 import com.fieldservice.workorder.repository.WorkOrderRepository;
+import com.fieldservice.workorder.web.AssignmentWarning;
 import com.fieldservice.workorder.web.TransitionRequest;
 import com.fieldservice.workorder.web.TransitionResponse;
 import jakarta.annotation.PostConstruct;
@@ -35,6 +45,9 @@ import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -44,7 +57,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -74,6 +91,10 @@ public class WorkOrderTransitionApplicationService {
     private final WorkOrderHoldRepository workOrderHoldRepository;
     private final SlaPolicyService slaPolicyService;
     private final SlaBreachService slaBreachService;
+    private final StockQueryService stockQueryService;
+    private final AssignmentRepository assignmentRepository;
+    private final NamedParameterJdbcTemplate namedJdbc;
+    private final ObjectMapper objectMapper;
 
     public WorkOrderTransitionApplicationService(
             ScopedQueryExecutor scopedQueryExecutor,
@@ -86,7 +107,11 @@ public class WorkOrderTransitionApplicationService {
             HoldReasonService holdReasonService,
             WorkOrderHoldRepository workOrderHoldRepository,
             SlaPolicyService slaPolicyService,
-            SlaBreachService slaBreachService) {
+            SlaBreachService slaBreachService,
+            StockQueryService stockQueryService,
+            AssignmentRepository assignmentRepository,
+            JdbcTemplate jdbcTemplate,
+            ObjectMapper objectMapper) {
         this.scopedQueryExecutor      = scopedQueryExecutor;
         this.workOrderRepository      = workOrderRepository;
         this.accessScope              = accessScope;
@@ -98,6 +123,10 @@ public class WorkOrderTransitionApplicationService {
         this.workOrderHoldRepository  = workOrderHoldRepository;
         this.slaPolicyService         = slaPolicyService;
         this.slaBreachService         = slaBreachService;
+        this.stockQueryService        = stockQueryService;
+        this.assignmentRepository     = assignmentRepository;
+        this.namedJdbc                = new NamedParameterJdbcTemplate(jdbcTemplate);
+        this.objectMapper             = objectMapper;
     }
 
     @PostConstruct
@@ -172,6 +201,12 @@ public class WorkOrderTransitionApplicationService {
         applyHoldIntervalChanges(request, workOrderId, fromState, scope.userId(), occurredAt,
                 workOrder, legalEvents);
 
+        // 5.6 Parts availability pre-check (advisory — never a hard gate)
+        List<AssignmentWarning> assignmentWarnings = List.of();
+        if (request.event() == WorkOrderEvent.ASSIGN && request.technicianId() != null) {
+            assignmentWarnings = checkPartsAvailability(workOrderId, request.technicianId());
+        }
+
         // 6. Apply state transition
         WorkOrderStatus newStatus = WorkOrderStatus.valueOf(descriptor.toState().name());
         if (request.event() == WorkOrderEvent.ASSIGN && request.technicianId() != null) {
@@ -188,6 +223,11 @@ public class WorkOrderTransitionApplicationService {
         } catch (ObjectOptimisticLockingFailureException e) {
             log.warn("transition_concurrent_conflict work_order_id={} actor={}", workOrderId, scope.userId());
             throw new WorkOrderVersionConflictException("Concurrent modification detected; retry with latest version", e);
+        }
+
+        // 7.5 Persist assignment audit row with warning data (ASSIGN only)
+        if (request.event() == WorkOrderEvent.ASSIGN && request.technicianId() != null) {
+            persistAssignmentAudit(workOrderId, request, assignmentWarnings);
         }
 
         // 8. Publish outbox event within the same transaction — Envers revision written on commit
@@ -219,8 +259,8 @@ public class WorkOrderTransitionApplicationService {
         log.info("transition_applied work_order_id={} from_state={} event={} to_state={} version={} actor={}",
                 workOrderId, fromState, request.event(), toState, workOrder.getVersion(), scope.userId());
 
-        return TransitionResponse.of(workOrder.getId(), fromState, toState,
-                workOrder.getVersion(), legalNextEvents, occurredAt);
+        return TransitionResponse.ofWithWarnings(workOrder.getId(), fromState, toState,
+                workOrder.getVersion(), legalNextEvents, occurredAt, assignmentWarnings);
     }
 
     private void applyHoldIntervalChanges(TransitionRequest request,
@@ -304,6 +344,88 @@ public class WorkOrderTransitionApplicationService {
                         workOrderId, guardId, refused.code(), actorId);
                 throw new BusinessGuardException(refused.code(), refused.message());
             }
+        }
+    }
+
+    private List<AssignmentWarning> checkPartsAvailability(UUID workOrderId, UUID technicianId) {
+        try {
+            // Load required parts for work order
+            Map<UUID, Integer> requiredParts = new HashMap<>();
+            namedJdbc.query(
+                    "SELECT part_id::text, quantity_required FROM work_order_required_part " +
+                    "WHERE work_order_id = :woId::uuid",
+                    new MapSqlParameterSource("woId", workOrderId.toString()),
+                    rs -> requiredParts.put(UUID.fromString(rs.getString(1)), rs.getInt(2)));
+
+            if (requiredParts.isEmpty()) return List.of();
+
+            // Load technician vehicle location
+            Set<UUID> vehicleLocationIds = new HashSet<>();
+            namedJdbc.query(
+                    "SELECT id::text FROM stock_location WHERE technician_id = :techId::uuid " +
+                    "AND location_type = 'VEHICLE'",
+                    new MapSqlParameterSource("techId", technicianId.toString()),
+                    rs -> vehicleLocationIds.add(UUID.fromString(rs.getString(1))));
+
+            // Load warehouse locations
+            Set<UUID> warehouseLocationIds = new HashSet<>();
+            namedJdbc.query(
+                    "SELECT id::text FROM stock_location WHERE location_type = 'WAREHOUSE'",
+                    new MapSqlParameterSource(),
+                    rs -> warehouseLocationIds.add(UUID.fromString(rs.getString(1))));
+
+            PartsAvailabilityResult result = stockQueryService.queryAvailability(
+                    new PartsAvailabilityQuery(requiredParts, vehicleLocationIds, warehouseLocationIds));
+
+            List<AssignmentWarning> warnings = new ArrayList<>();
+            for (UUID locId : vehicleLocationIds) {
+                CandidateAvailability av = result.byLocationId().get(locId);
+                if (av == null) continue;
+                if (av.status() == AvailabilityStatus.FULLY_STOCKED) continue;
+                String code = switch (av.status()) {
+                    case UNAVAILABLE       -> AssignmentWarning.CODE_UNAVAILABLE;
+                    case PARTIALLY_STOCKED -> AssignmentWarning.CODE_PARTIALLY_STOCKED;
+                    case COLLECTABLE       -> AssignmentWarning.CODE_COLLECTABLE;
+                    default                -> null;
+                };
+                if (code == null) continue;
+                String message = switch (av.status()) {
+                    case UNAVAILABLE       -> "One or more required parts are unavailable on vehicle or at warehouses";
+                    case PARTIALLY_STOCKED -> "Some required parts are only partially available";
+                    case COLLECTABLE       -> "Required parts are not on vehicle but can be collected from a warehouse";
+                    default                -> "Parts availability warning";
+                };
+                warnings.add(new AssignmentWarning(code, message, av.shortfalls()));
+            }
+            return warnings;
+        } catch (Exception e) {
+            log.warn("transition_parts_check_failed workOrderId={} technicianId={} reason={}",
+                    workOrderId, technicianId, e.getMessage());
+            return List.of();
+        }
+    }
+
+    private void persistAssignmentAudit(UUID workOrderId, TransitionRequest request,
+                                         List<AssignmentWarning> warnings) {
+        try {
+            Assignment assignment = new Assignment(workOrderId, request.technicianId());
+            if (!warnings.isEmpty()) {
+                AssignmentWarning first = warnings.get(0);
+                String shortfallJson = null;
+                try {
+                    shortfallJson = objectMapper.writeValueAsString(first.shortfalls());
+                } catch (JsonProcessingException e) {
+                    log.warn("assignment_audit_json_failed reason={}", e.getMessage());
+                }
+                assignment.applyWarning(
+                        first.code(),
+                        shortfallJson,
+                        request.acknowledgeWarnings(),
+                        request.warningAcknowledgementReason());
+            }
+            assignmentRepository.save(assignment);
+        } catch (Exception e) {
+            log.warn("assignment_audit_persist_failed workOrderId={} reason={}", workOrderId, e.getMessage());
         }
     }
 

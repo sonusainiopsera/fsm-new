@@ -1,5 +1,7 @@
 package com.fieldservice.dispatch.scoring;
 
+import com.fieldservice.inventory.api.CandidateAvailability;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +17,8 @@ import java.util.UUID;
  * @param travelTime             travel-time port result for this candidate
  * @param partsAvailabilityScore fraction of required parts available at this technician's
  *                               home depot in [0.0, 1.0]; 1.0 when no parts are required
+ * @param candidateAvailability  rich parts availability detail; null when no parts are required
+ *                               or when the availability lookup was skipped
  */
 public record CandidateScoringData(
         UUID technicianId,
@@ -22,7 +26,8 @@ public record CandidateScoringData(
         int priorJobTypeExperience,
         double bookedHours,
         TravelTimeResult travelTime,
-        double partsAvailabilityScore) {
+        double partsAvailabilityScore,
+        CandidateAvailability candidateAvailability) {
 
     public CandidateScoringData {
         if (certificationCodes == null) certificationCodes = List.of();

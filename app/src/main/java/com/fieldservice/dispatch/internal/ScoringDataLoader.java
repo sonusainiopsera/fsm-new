@@ -21,12 +21,13 @@ import java.util.UUID;
 /**
  * Loads technician data required for scoring from the database.
  *
- * <p>Issues four SQL statements for the entire eligible set (no N+1):
+ * <p>Issues five SQL statements for the entire eligible set (no N+1):
  * <ol>
  *   <li>Home base coordinates (technician + site join)</li>
  *   <li>Active certification codes</li>
  *   <li>Prior experience count for the fault category</li>
  *   <li>Today's booked hours (scheduled but not yet completed work orders)</li>
+ *   <li>Vehicle stock location ID (for parts availability lookup)</li>
  * </ol>
  */
 @Component
@@ -143,6 +144,21 @@ public class ScoringDataLoader {
                     bookedHoursByTech.put(id, hours);
                 });
 
+        // ── Statement 5: vehicle stock location IDs ───────────────────────────
+        Map<UUID, UUID> vehicleLocationByTech = new HashMap<>();
+        namedJdbc.query("""
+                SELECT sl.technician_id::text, sl.id::text
+                FROM stock_location sl
+                WHERE sl.technician_id::text IN (:ids)
+                  AND sl.location_type = 'VEHICLE'
+                """,
+                idsParam,
+                rs -> {
+                    UUID techId = UUID.fromString(rs.getString(1));
+                    UUID locId  = UUID.fromString(rs.getString(2));
+                    vehicleLocationByTech.put(techId, locId);
+                });
+
         // ── Assemble ──────────────────────────────────────────────────────────
         Map<UUID, TechnicianScoringInput> result = new HashMap<>(eligibleIds.size());
         for (UUID id : eligibleIds) {
@@ -153,7 +169,8 @@ public class ScoringDataLoader {
                     Double.isNaN(coords[1]) ? null : coords[1],
                     certsByTech.getOrDefault(id, List.of()),
                     experienceByTech.getOrDefault(id, 0),
-                    bookedHoursByTech.getOrDefault(id, 0.0)
+                    bookedHoursByTech.getOrDefault(id, 0.0),
+                    vehicleLocationByTech.get(id)
             ));
         }
 
@@ -171,6 +188,7 @@ public class ScoringDataLoader {
      * @param certificationCodes active certification codes the technician holds
      * @param priorJobExperience count of prior completed work orders matching the fault category
      * @param bookedHours        hours already booked for the service date
+     * @param vehicleLocationId  vehicle stock location ID; null when technician has no vehicle
      */
     public record TechnicianScoringInput(
             UUID         technicianId,
@@ -178,6 +196,7 @@ public class ScoringDataLoader {
             Double       homeLongitude,
             List<String> certificationCodes,
             int          priorJobExperience,
-            double       bookedHours) {
+            double       bookedHours,
+            UUID         vehicleLocationId) {
     }
 }

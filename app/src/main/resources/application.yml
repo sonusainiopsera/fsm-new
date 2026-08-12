@@ -70,6 +70,8 @@ app:
     poll-interval-ms: 500
     poll-initial-delay-ms: 0
   inventory:
+    parts-cache:
+      ttl-seconds: 60
     reconciliation:
       enabled: true
       interval-ms: 60000

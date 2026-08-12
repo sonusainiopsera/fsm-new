@@ -5,6 +5,8 @@ import com.fieldservice.dispatch.api.EligibilityService;
 import com.fieldservice.dispatch.api.ExcludedCandidate;
 import com.fieldservice.dispatch.api.WorkOrderRequirements;
 import com.fieldservice.dispatch.scoring.CandidateScoringData;
+import com.fieldservice.dispatch.scoring.FactorBreakdown;
+import com.fieldservice.dispatch.scoring.PartsAvailabilityFactor;
 import com.fieldservice.dispatch.scoring.ScoredCandidate;
 import com.fieldservice.dispatch.scoring.ScoringContext;
 import com.fieldservice.dispatch.scoring.ScoringEngine;
@@ -21,6 +23,10 @@ import com.fieldservice.dispatch.web.dto.RecommendationResponse;
 import com.fieldservice.geo.api.Coordinates;
 import com.fieldservice.geo.api.TravelMatrixResult;
 import com.fieldservice.geo.api.TravelTimePort;
+import com.fieldservice.inventory.api.CandidateAvailability;
+import com.fieldservice.inventory.api.PartsAvailabilityQuery;
+import com.fieldservice.inventory.api.PartsAvailabilityResult;
+import com.fieldservice.inventory.api.StockQueryService;
 import com.fieldservice.platform.api.exception.BusinessGuardException;
 import com.fieldservice.platform.security.ScopedAccessDeniedException;
 import com.fieldservice.platform.persistence.ScopedQueryExecutor;
@@ -34,16 +40,23 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -77,6 +90,8 @@ public class RecommendationOrchestrator {
     /** Default reach radius used when the work order has no explicit reach configuration. */
     private static final double DEFAULT_REACH_KM = 200.0;
 
+    private static final long PARTS_FRESHNESS_SECONDS = 60L;
+
     private final WorkOrderRepository               workOrderRepository;
     private final WorkOrderRequiredCompetencyRepository competencyRepository;
     private final ScopedQueryExecutor               scopedQueryExecutor;
@@ -87,6 +102,8 @@ public class RecommendationOrchestrator {
     private final ScoringWeightsLoader              weightsLoader;
     private final RecommendationSnapshotRepository  snapshotRepository;
     private final RecommendationCursor              cursor;
+    private final StockQueryService                 stockQueryService;
+    private final NamedParameterJdbcTemplate        namedJdbc;
     private final Timer                             durationTimer;
 
     public RecommendationOrchestrator(
@@ -100,6 +117,8 @@ public class RecommendationOrchestrator {
             ScoringWeightsLoader weightsLoader,
             RecommendationSnapshotRepository snapshotRepository,
             RecommendationCursor cursor,
+            StockQueryService stockQueryService,
+            JdbcTemplate jdbcTemplate,
             MeterRegistry meterRegistry) {
         this.workOrderRepository  = workOrderRepository;
         this.competencyRepository = competencyRepository;
@@ -111,6 +130,8 @@ public class RecommendationOrchestrator {
         this.weightsLoader        = weightsLoader;
         this.snapshotRepository   = snapshotRepository;
         this.cursor               = cursor;
+        this.stockQueryService    = stockQueryService;
+        this.namedJdbc            = new NamedParameterJdbcTemplate(jdbcTemplate);
         this.durationTimer = Timer.builder("dispatch.recommendation.duration")
                 .description("End-to-end recommendation pipeline latency")
                 .publishPercentileHistogram()
@@ -214,10 +235,13 @@ public class RecommendationOrchestrator {
             travelEstimateDegraded = !eligibleIds.isEmpty();
         }
 
-        // ── 8. Build CandidateScoringData ─────────────────────────────────────────
+        // ── 8. Build CandidateScoringData (with parts availability) ──────────────
         ScoringWeights weights = weightsLoader.get();
+        Map<UUID, Integer> requiredParts = loadRequiredParts(workOrderId);
+        PartsAvailabilityResult partsAvailability = buildPartsAvailability(
+                requiredParts, eligibleIds, scoringData);
         List<CandidateScoringData> scoringInputs = buildScoringInputs(
-                eligibleIds, scoringData, travelMatrix);
+                eligibleIds, scoringData, travelMatrix, partsAvailability);
 
         // ── 9. Score ──────────────────────────────────────────────────────────────
         double teamMeanBookedHours = eligibleIds.isEmpty() ? 0.0
@@ -313,7 +337,8 @@ public class RecommendationOrchestrator {
     private List<CandidateScoringData> buildScoringInputs(
             List<UUID> eligibleIds,
             Map<UUID, ScoringDataLoader.TechnicianScoringInput> scoringData,
-            TravelMatrixResult travelMatrix) {
+            TravelMatrixResult travelMatrix,
+            PartsAvailabilityResult partsAvailability) {
 
         Map<UUID, TravelMatrixResult.Entry> travelByTech = travelMatrix.entries().stream()
                 .collect(Collectors.toMap(TravelMatrixResult.Entry::technicianId, e -> e));
@@ -321,12 +346,18 @@ public class RecommendationOrchestrator {
         List<CandidateScoringData> inputs = new ArrayList<>(eligibleIds.size());
         for (UUID id : eligibleIds) {
             ScoringDataLoader.TechnicianScoringInput sd = scoringData.getOrDefault(id,
-                    new ScoringDataLoader.TechnicianScoringInput(id, null, null, List.of(), 0, 0.0));
+                    new ScoringDataLoader.TechnicianScoringInput(id, null, null, List.of(), 0, 0.0, null));
 
             TravelMatrixResult.Entry travelEntry = travelByTech.get(id);
             TravelTimeResult travelTime = (travelEntry != null)
                     ? new TravelTimeResult(id, travelEntry.estimatedMinutes(), travelEntry.degraded())
                     : TravelTimeResult.degraded(id);
+
+            UUID vehicleLocId = sd.vehicleLocationId();
+            CandidateAvailability availability = vehicleLocId != null
+                    ? partsAvailability.byLocationId().get(vehicleLocId) : null;
+            double partsScore = availability != null
+                    ? PartsAvailabilityFactor.scoreFor(availability.status()) : 1.0;
 
             inputs.add(new CandidateScoringData(
                     id,
@@ -334,10 +365,59 @@ public class RecommendationOrchestrator {
                     sd.priorJobExperience(),
                     sd.bookedHours(),
                     travelTime,
-                    1.0 // parts availability: default to 1.0 (no degradation)
+                    partsScore,
+                    availability
             ));
         }
         return inputs;
+    }
+
+    private Map<UUID, Integer> loadRequiredParts(UUID workOrderId) {
+        Map<UUID, Integer> result = new HashMap<>();
+        try {
+            namedJdbc.query(
+                    "SELECT part_id::text, quantity_required FROM work_order_required_part " +
+                    "WHERE work_order_id = :woId::uuid",
+                    new MapSqlParameterSource("woId", workOrderId.toString()),
+                    rs -> result.put(UUID.fromString(rs.getString(1)), rs.getInt(2)));
+        } catch (Exception e) {
+            log.warn("dispatch.parts.load_required_failed workOrderId={} reason={}", workOrderId, e.getMessage());
+        }
+        return result;
+    }
+
+    private PartsAvailabilityResult buildPartsAvailability(
+            Map<UUID, Integer> requiredParts,
+            List<UUID> eligibleIds,
+            Map<UUID, ScoringDataLoader.TechnicianScoringInput> scoringData) {
+
+        Set<UUID> vehicleLocationIds = new HashSet<>();
+        for (UUID id : eligibleIds) {
+            ScoringDataLoader.TechnicianScoringInput sd = scoringData.get(id);
+            if (sd != null && sd.vehicleLocationId() != null) {
+                vehicleLocationIds.add(sd.vehicleLocationId());
+            }
+        }
+
+        // Load all warehouse location IDs
+        Set<UUID> warehouseLocationIds = new HashSet<>();
+        try {
+            namedJdbc.query(
+                    "SELECT id::text FROM stock_location WHERE location_type = 'WAREHOUSE'",
+                    new MapSqlParameterSource(),
+                    rs -> warehouseLocationIds.add(UUID.fromString(rs.getString(1))));
+        } catch (Exception e) {
+            log.warn("dispatch.parts.load_warehouses_failed reason={}", e.getMessage());
+        }
+
+        PartsAvailabilityQuery query = new PartsAvailabilityQuery(
+                requiredParts, vehicleLocationIds, warehouseLocationIds);
+        try {
+            return stockQueryService.queryAvailability(query);
+        } catch (Exception e) {
+            log.warn("dispatch.parts.availability_failed reason={}", e.getMessage());
+            return new PartsAvailabilityResult(Map.of(), Instant.now(), true);
+        }
     }
 
     private int findStartIndex(List<ScoredCandidate> ranked, RecommendationCursor.Payload payload) {
@@ -360,9 +440,7 @@ public class RecommendationOrchestrator {
         for (int i = 0; i < page.size(); i++) {
             ScoredCandidate c = page.get(i);
             List<FactorDto> factors = c.breakdown().stream()
-                    .map(f -> new FactorDto(
-                            f.factorCode(), f.rawValue(), f.normalisedValue(),
-                            f.weight(), f.weightedContribution(), f.explanation(), f.degraded()))
+                    .map(this::toFactorDto)
                     .toList();
             dtos.add(new CandidateDto(
                     c.technicianId(),
@@ -373,6 +451,19 @@ public class RecommendationOrchestrator {
                     c.degraded()));
         }
         return dtos;
+    }
+
+    private FactorDto toFactorDto(FactorBreakdown f) {
+        if (f.partsAvailability() == null) {
+            return new FactorDto(f.factorCode(), f.rawValue(), f.normalisedValue(),
+                    f.weight(), f.weightedContribution(), f.explanation(), f.degraded());
+        }
+        CandidateAvailability av = f.partsAvailability();
+        boolean stale = Duration.between(av.asOf(), Instant.now()).toSeconds() > PARTS_FRESHNESS_SECONDS;
+        return new FactorDto(
+                f.factorCode(), f.rawValue(), f.normalisedValue(),
+                f.weight(), f.weightedContribution(), f.explanation(), f.degraded(),
+                av.status().name(), av.shortfalls(), av.asOf(), stale);
     }
 
     private List<ExclusionSummaryDto> buildExclusionSummary(EligibilityResult eligibility) {

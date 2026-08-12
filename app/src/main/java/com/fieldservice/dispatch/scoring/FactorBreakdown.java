@@ -1,5 +1,7 @@
 package com.fieldservice.dispatch.scoring;
 
+import com.fieldservice.inventory.api.CandidateAvailability;
+
 /**
  * Immutable per-factor result for a single candidate.
  *
@@ -11,15 +13,26 @@ package com.fieldservice.dispatch.scoring;
  * @param explanation          human-readable sentence stating what drove this score
  * @param degraded             true when the factor used a fallback value because input data
  *                             was unavailable (e.g. travel estimate timed out)
+ * @param partsAvailability    rich parts availability detail; non-null only for
+ *                             PARTS_AVAILABILITY factor entries
  */
 public record FactorBreakdown(
-        String  factorCode,
-        double  rawValue,
-        double  normalisedValue,
-        double  weight,
-        double  weightedContribution,
-        String  explanation,
-        boolean degraded) {
+        String              factorCode,
+        double              rawValue,
+        double              normalisedValue,
+        double              weight,
+        double              weightedContribution,
+        String              explanation,
+        boolean             degraded,
+        CandidateAvailability partsAvailability) {
+
+    /** Convenience constructor for factors that carry no parts availability data. */
+    public FactorBreakdown(String factorCode, double rawValue, double normalisedValue,
+                           double weight, double weightedContribution,
+                           String explanation, boolean degraded) {
+        this(factorCode, rawValue, normalisedValue, weight, weightedContribution,
+             explanation, degraded, null);
+    }
 
     public FactorBreakdown {
         if (normalisedValue < 0.0 || normalisedValue > 1.0) {

@@ -37,6 +37,18 @@ public class Assignment {
     @Version
     private Integer version;
 
+    @Column(name = "parts_warning_code", length = 50)
+    private String partsWarningCode;
+
+    @Column(name = "parts_shortfall_json", columnDefinition = "TEXT")
+    private String partsShortfallJson;
+
+    @Column(name = "acknowledge_warnings")
+    private Boolean acknowledgeWarnings;
+
+    @Column(name = "warning_acknowledgement_reason", length = 500)
+    private String warningAcknowledgementReason;
+
     protected Assignment() {}
 
     public Assignment(UUID workOrderId, UUID technicianId) {
@@ -45,11 +57,22 @@ public class Assignment {
         this.technicianId = technicianId;
     }
 
-    public UUID    getId()          { return id; }
-    public UUID    getWorkOrderId() { return workOrderId; }
-    public UUID    getTechnicianId(){ return technicianId; }
-    public Instant getAssignedAt()  { return assignedAt; }
-    public Instant getReleasedAt()  { return releasedAt; }
-    public Instant getCreatedAt()   { return createdAt; }
-    public Integer getVersion()     { return version; }
+    public void applyWarning(String warningCode, String shortfallJson,
+                              Boolean ackWarnings, String ackReason) {
+        this.partsWarningCode             = warningCode;
+        this.partsShortfallJson           = shortfallJson;
+        this.acknowledgeWarnings          = ackWarnings;
+        this.warningAcknowledgementReason = ackReason;
+    }
+
+    public UUID    getId()                          { return id; }
+    public UUID    getWorkOrderId()                 { return workOrderId; }
+    public UUID    getTechnicianId()                { return technicianId; }
+    public Instant getAssignedAt()                  { return assignedAt; }
+    public Instant getReleasedAt()                  { return releasedAt; }
+    public Instant getCreatedAt()                   { return createdAt; }
+    public Integer getVersion()                     { return version; }
+    public String  getPartsWarningCode()            { return partsWarningCode; }
+    public Boolean getAcknowledgeWarnings()         { return acknowledgeWarnings; }
+    public String  getWarningAcknowledgementReason(){ return warningAcknowledgementReason; }
 }
