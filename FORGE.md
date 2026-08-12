@@ -504,3 +504,10 @@
 - **Files:** 15 (+1610/-14)
 - **Duration:** 1211ss
 - **Approach:** Added SLA breach recording as an append-and-revise domain feature inside the sla module. The sla_breach table stores one row per (work_order_id, breach_type) pair, enforced by a unique index for idempotency. SlaBreachEntity is package-private and @Audited; SlaBreachService is the public facade handling atomic recordBreach (breach row + flag clear + SlaBreached outbox event in one transaction), idempotent finalise on work order closure, re-attributable reason codes with Envers revision, and JdbcTemplate-based paginated listing that JOINs work_order for priority filtering. SlaRiskEvaluator gained evaluateBreaches() returning 0–2 BreachDecision objects and WorkOrderRiskSnapshot gained a responseDeadline field. SlaEvaluationScheduler now routes breach decisions before at-risk flag logic. WorkOrderTransitionApplicationService calls finalise() on CLOSED/CANCELLED. SlaBreachController exposes role-guarded endpoints with 403 non-disclosure for non-existent breaches.
+
+## WO-154: User Story: WO-154 - Technician today's-jobs API with row scope and ETag caching
+- **Status:** completed
+- **Commit:** `ac1b6bc`
+- **Files:** 8 (+1062/-0)
+- **Duration:** 991ss
+- **Approach:** Implemented a technician-scoped day-list endpoint using JdbcTemplate for a multi-table JOIN (work_order + site + asset). Row-scope is applied as a SQL WHERE predicate (assigned_technician_id = ?) — never a post-filter. The day-window query includes jobs scheduled within [dayStart, dayEnd) plus carry-over open states (ASSIGNED, EN_ROUTE, IN_PROGRESS, ON_HOLD) with earlier/null scheduled windows. Strong ETag is SHA-256(technicianId:date:count:maxVersion). ContactMasker strips to digits, exposing only the last 4. A Flyway migration adds scheduled_window_start/end to work_order and work_order_aud, contact_phone to site, and a covering index on (assigned_technician_id, scheduled_window_start) INCLUDE (state).
