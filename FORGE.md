@@ -455,3 +455,10 @@
 - **Files:** 22 (+1459/-0)
 - **Duration:** 1864ss
 - **Approach:** Built two independently testable units: (1) WorkOrderEnrichmentPort/Adapter in the workorder.enrichment package — a public interface that assembles asset identity, fault details, customer/site PII context, and prior service history using ScopedQueryExecutor so access control is applied as a query predicate; (2) the com.fieldservice.copilot package with PiiRedactor (NFKD-normalised literal substitution + pattern sweeps), GroundingSufficiencyEvaluator (3-rule ordered list), GroundingContextRetriever, and PromptAssembler. Redaction is enforced structurally: GroundingContext is package-private so no external code can bypass it to reach AiCompletionRequest. PromptAssembler is the sole permitted constructor of copilot AI requests and carries @PreAuthorize.
+
+## WO-191: User Story: WO-191 - Rectification and cryptographic erasure of subject data
+- **Status:** completed
+- **Commit:** `84c6a0b`
+- **Files:** 20 (+1518/-0)
+- **Duration:** 998ss
+- **Approach:** N/A
