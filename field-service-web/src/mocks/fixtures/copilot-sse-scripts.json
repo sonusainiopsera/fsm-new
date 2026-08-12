@@ -1,0 +1,83 @@
+{
+  "happyPath": {
+    "description": "Successful streamed answer with 5 token events then complete",
+    "events": [
+      { "type": "token",    "data": { "chunkIndex": 0, "text": "The compressor " } },
+      { "type": "token",    "data": { "chunkIndex": 1, "text": "on this unit has " } },
+      { "type": "token",    "data": { "chunkIndex": 2, "text": "required bypass " } },
+      { "type": "token",    "data": { "chunkIndex": 3, "text": "valve replacement " } },
+      { "type": "token",    "data": { "chunkIndex": 4, "text": "twice in the past 12 months." } },
+      { "type": "complete", "data": {
+          "interactionId": "interaction-001",
+          "basis": {
+            "assetId":    "asset-001",
+            "assetName":  "Carrier 30XW — Chiller Unit B",
+            "priorWorkOrders": [
+              { "id": "wo-hist-001", "reference": "WO-0031", "summary": "Bypass valve replacement" },
+              { "id": "wo-hist-002", "reference": "WO-0018", "summary": "Compressor inspection and re-gas" }
+            ]
+          }
+        }
+      }
+    ]
+  },
+
+  "outOfOrderChunks": {
+    "description": "Token chunks arrive out of order — rendering must be deterministic",
+    "events": [
+      { "type": "token",    "data": { "chunkIndex": 2, "text": "three" } },
+      { "type": "token",    "data": { "chunkIndex": 0, "text": "one " } },
+      { "type": "token",    "data": { "chunkIndex": 1, "text": "two " } },
+      { "type": "complete", "data": {
+          "interactionId": "interaction-002",
+          "basis": { "assetId": null, "assetName": null, "priorWorkOrders": [] }
+        }
+      }
+    ],
+    "expectedAnswer": "one two three"
+  },
+
+  "noGroundedBasis": {
+    "description": "Provider signals no grounded basis — no fabricated answer",
+    "events": [
+      { "type": "no_grounded_basis", "data": {} }
+    ]
+  },
+
+  "degradedAfterPartial": {
+    "description": "Stream sends two tokens then a degraded event — PARTIAL state",
+    "events": [
+      { "type": "token",    "data": { "chunkIndex": 0, "text": "Initial check " } },
+      { "type": "token",    "data": { "chunkIndex": 1, "text": "suggests the pump " } },
+      { "type": "degraded", "data": {} }
+    ]
+  },
+
+  "degradedEmpty": {
+    "description": "Stream sends degraded immediately with no prior tokens — DEGRADED state",
+    "events": [
+      { "type": "degraded", "data": {} }
+    ]
+  },
+
+  "errorAfterPartial": {
+    "description": "Stream sends tokens then a named error event — PARTIAL state",
+    "events": [
+      { "type": "token", "data": { "chunkIndex": 0, "text": "Check the " } },
+      { "type": "error", "data": {} }
+    ]
+  },
+
+  "markupInChunk": {
+    "description": "Chunk contains HTML markup — must render literally as text, never as HTML",
+    "events": [
+      { "type": "token",    "data": { "chunkIndex": 0, "text": "<script>alert('xss')</script>" } },
+      { "type": "token",    "data": { "chunkIndex": 1, "text": " Normal text." } },
+      { "type": "complete", "data": {
+          "interactionId": "interaction-003",
+          "basis": { "assetId": null, "assetName": null, "priorWorkOrders": [] }
+        }
+      }
+    ]
+  }
+}

@@ -15,7 +15,7 @@
  * @module app/technician/JobDetailView
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useJobDetail } from './useJobDetail.js';
@@ -25,6 +25,8 @@ import { AssetHistoryList } from './components/AssetHistoryList.jsx';
 import { SlaCountdownChip } from './components/SlaCountdownChip.jsx';
 import { TransitionActionBar } from './components/TransitionActionBar.jsx';
 import { LoadingState, EmptyState, ErrorState } from '../../components/index.js';
+import { CopilotSheet } from '../../features/copilot/CopilotSheet.jsx';
+import copilotStyles from '../../features/copilot/CopilotSheet.module.css';
 import styles from './JobDetailView.module.css';
 
 export function JobDetailView() {
@@ -33,6 +35,8 @@ export function JobDetailView() {
   const qc          = useQueryClient();
 
   const { data: job, isLoading, isError, error, refetch } = useJobDetail(jobId);
+
+  const [copilotOpen, setCopilotOpen] = useState(false);
 
   // Start position reporting when job is EN_ROUTE or IN_PROGRESS; stops on unmount
   usePositionReporting(job?.state ?? null, jobId);
@@ -112,6 +116,26 @@ export function JobDetailView() {
         allowedTransitions={job.allowedTransitions ?? []}
         holdReasons={job.holdReasons ?? []}
         onSuccess={handleTransitionSuccess}
+      />
+
+      {/* Copilot FAB — only rendered when server capability flag is on */}
+      {job.copilotEnabled === true && (
+        <div className={styles.copilotFabContainer}>
+          <button
+            type="button"
+            className={copilotStyles.copilotFab}
+            onClick={() => setCopilotOpen(true)}
+            aria-label="Open copilot assistant"
+          >
+            ✦ Copilot
+          </button>
+        </div>
+      )}
+
+      <CopilotSheet
+        open={copilotOpen}
+        workOrderId={job.id}
+        onClose={() => setCopilotOpen(false)}
       />
     </div>
   );

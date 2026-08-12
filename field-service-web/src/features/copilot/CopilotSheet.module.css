@@ -1,0 +1,458 @@
+/* ─── Overlay and sheet ──────────────────────────────────────────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 200;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--color-surface, #fff);
+  border-radius: 16px 16px 0 0;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* ─── Sheet header ───────────────────────────────────────────────────────── */
+
+.sheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--color-border, #f3f4f6);
+}
+
+.sheetTitle {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #111827);
+  margin: 0;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--color-text-secondary, #6b7280);
+  font-size: 1.25rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.closeBtn:hover {
+  background: var(--color-surface-hover, #f9fafb);
+}
+
+/* ─── Scrollable body ────────────────────────────────────────────────────── */
+
+.sheetBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Advisory label (sticky, always visible while answer is shown) ──────── */
+
+.advisoryBanner {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface-advisory, #fffbeb);
+  border: 1px solid var(--color-border-advisory, #fcd34d);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 12px;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.advisoryText {
+  font-size: 0.8125rem;
+  color: var(--color-text-advisory, #92400e);
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ─── Answer region (reserved height to prevent CLS) ────────────────────── */
+
+.answerRegion {
+  min-height: 120px;
+  position: relative;
+}
+
+.answerText {
+  font-size: 0.9375rem;
+  color: var(--color-text-primary, #111827);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+/* Streaming skeleton — prevents layout jump while tokens arrive */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 120px;
+}
+
+.skeletonLine {
+  height: 14px;
+  border-radius: 4px;
+  background: var(--color-skeleton, #e5e7eb);
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonLine:nth-child(2) { width: 90%; }
+.skeletonLine:nth-child(3) { width: 70%; }
+.skeletonLine:nth-child(4) { width: 80%; }
+
+@keyframes shimmer {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* ─── State panels ───────────────────────────────────────────────────────── */
+
+.statePanel {
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.statePanelTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.statePanelMessage {
+  font-size: 0.875rem;
+  margin: 0 0 16px;
+  color: var(--color-text-secondary, #6b7280);
+}
+
+.statePanel--refused {
+  background: var(--color-surface-neutral, #f9fafb);
+}
+
+.statePanel--refused .statePanelTitle {
+  color: var(--color-text-primary, #111827);
+}
+
+.statePanel--degraded {
+  background: var(--color-surface-error-soft, #fef2f2);
+}
+
+.statePanel--degraded .statePanelTitle {
+  color: var(--color-error, #dc2626);
+}
+
+.statePanel--capped {
+  background: var(--color-surface-warning-soft, #fffbeb);
+}
+
+.statePanel--capped .statePanelTitle {
+  color: var(--color-warning-dark, #92400e);
+}
+
+.statePanel--partial {
+  background: var(--color-surface-warning-soft, #fffbeb);
+}
+
+.statePanel--partial .statePanelTitle {
+  color: var(--color-warning-dark, #92400e);
+}
+
+.retryBtn {
+  min-height: 44px;
+  padding: 0 20px;
+  background: var(--color-brand, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.retryBtn:hover {
+  background: var(--color-brand-dark, #1d4ed8);
+}
+
+/* ─── Basis section ──────────────────────────────────────────────────────── */
+
+.basisSection {
+  border: 1px solid var(--color-border, #f3f4f6);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.basisToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  background: var(--color-surface-muted, #f9fafb);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #6b7280);
+}
+
+.basisToggle:hover {
+  background: var(--color-surface-hover, #f3f4f6);
+}
+
+.basisToggleIcon {
+  font-size: 0.75rem;
+}
+
+.basisCount {
+  font-weight: 400;
+  color: var(--color-text-tertiary, #9ca3af);
+}
+
+.basisContent {
+  padding: 12px;
+  border-top: 1px solid var(--color-border, #f3f4f6);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.basisAsset {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.basisPriorSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.basisLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.basisValue {
+  font-size: 0.875rem;
+  color: var(--color-text-primary, #111827);
+}
+
+.basisList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.basisItem {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.basisLink {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  min-height: 44px;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--color-text-primary, #111827);
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border, #f3f4f6);
+  border-radius: 6px;
+  gap: 2px;
+}
+
+.basisLink:hover {
+  background: var(--color-surface-hover, #f9fafb);
+}
+
+.basisRef {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-brand, #2563eb);
+  font-variant-numeric: tabular-nums;
+}
+
+.basisSummary {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary, #6b7280);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Helpfulness rating ─────────────────────────────────────────────────── */
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.ratingPrompt {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #6b7280);
+  flex: 1;
+}
+
+.ratingBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--color-border-input, #d1d5db);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.ratingBtn:hover:not(:disabled) {
+  background: var(--color-surface-hover, #f9fafb);
+}
+
+.ratingBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.ratingSelected {
+  border-color: var(--color-brand, #2563eb);
+  background: var(--color-brand-soft, #eff6ff);
+}
+
+.ratingThanks {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary, #6b7280);
+  font-style: italic;
+}
+
+/* ─── Question input area ────────────────────────────────────────────────── */
+
+.questionRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding-top: 4px;
+}
+
+.questionInput {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-input, #d1d5db);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background: var(--color-input-bg, #fff);
+  color: var(--color-text-primary, #111827);
+  min-height: 44px;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.questionInput:focus {
+  outline: 2px solid var(--color-brand, #2563eb);
+  outline-offset: 1px;
+}
+
+.askBtn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 16px;
+  background: var(--color-brand, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.askBtn:hover:not(:disabled) {
+  background: var(--color-brand-dark, #1d4ed8);
+}
+
+.askBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Partial content warning ────────────────────────────────────────────── */
+
+.partialBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-warning-dark, #92400e);
+  background: var(--color-surface-warning-soft, #fffbeb);
+  border: 1px solid var(--color-border-advisory, #fcd34d);
+  border-radius: 4px;
+  padding: 2px 8px;
+  display: inline-block;
+}
+
+/* ─── Copilot FAB (floating action button in JobDetailView) ──────────────── */
+
+.copilotFab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  background: var(--color-brand, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 22px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.copilotFab:hover {
+  background: var(--color-brand-dark, #1d4ed8);
+}
+
+.copilotFab:focus-visible {
+  outline: 2px solid var(--color-brand, #2563eb);
+  outline-offset: 3px;
+}
