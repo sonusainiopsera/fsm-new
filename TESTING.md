@@ -59,6 +59,60 @@ docker stop $(docker ps -q --filter "label=org.testcontainers.sessionId") 2>/dev
 
 ---
 
+## Technician regression suite (WO-160)
+
+### Overview
+
+The technician regression suite validates the full field-execution journey across
+frontend and backend boundaries. It is a blocking CI stage with a wall-clock budget
+of **≤ 8 min** on a 4-core runner.
+
+### Running locally
+
+**Frontend E2E (Playwright — requires `npm run dev` running):**
+
+```bash
+cd field-service-web
+
+# Full technician E2E suite
+npx playwright test --project=technician-mobile
+
+# Golden-path spec only
+npx playwright test e2e/technician/goldenPath.spec.js --project=technician-mobile
+
+# Accessibility gate only
+npx playwright test e2e/technician/accessibility.spec.js --project=technician-mobile
+
+# View report after a run
+npx playwright show-report playwright-report
+```
+
+**Backend integration (Testcontainers — requires Docker):**
+
+```bash
+./mvnw test -pl app -Dtest=TechnicianJourneyIT
+```
+
+### Interpreting failures
+
+| Category | What to look at first |
+|---|---|
+| **Guard refusal (422)** | `traceId` in the response → server log for `LabourTimeRecordedGuard` or `InsufficientStockGuard`. Verify labour_time_record row exists for the work order before COMPLETE. |
+| **Conflict (409)** | Current work order state in DB (`SELECT state, version FROM work_order WHERE id = ?`). Illegal transition attempted from the wrong source state. |
+| **Idempotency** | Check outbox_event count for the aggregate ID. More than one row for the same event_type means the idempotency filter was bypassed or the Idempotency-Key header was not sent. |
+| **Accessibility** | Open the Playwright HTML report (`playwright-report/index.html`). Axe violation shows `id`, `impact`, and `nodes` with CSS selectors. Fix the element referenced in `nodes[0].target`. |
+| **Layout (horizontal scroll)** | `document.documentElement.scrollWidth > clientWidth` at 360px. Usually caused by a fixed-width element or `min-width` that exceeds the viewport. Inspect the element at `body > *` level in DevTools. |
+| **Touch target** | `boundingBox().height < 44` on a nav item or button. Add `min-height: 44px; min-width: 44px` to the offending component. |
+| **Container startup** | Testcontainers log shows `DockerNotAvailableException` or `ContainerLaunchException`. This is infrastructure, not application failure. Restart Docker and retry. |
+
+### Non-flakiness requirement
+
+The suite must pass on **three consecutive CI runs** before merging. Flakiness is
+surfaced (not masked) by the `retries: 1` policy — a spec that passes only on retry
+is flagged as potentially flaky and should be investigated before the run counts.
+
+---
+
 ## Test isolation — choosing a strategy
 
 Two strategies are available. Pick based on whether the test needs real committed rows.

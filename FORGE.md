@@ -574,3 +574,10 @@
 - **Files:** 24 (+1749/-94)
 - **Duration:** 622ss
 - **Approach:** Added a dedicated /technician/* route group with a TechnicianShell that provides the 360 px mobile-first PWA layout. The shell owns the NotConnectedBanner (driven by useConnectivity hook), an appearance toggle wired to the existing AppearanceProvider, bottom navigation with 44px minimum touch targets, a Suspense boundary per lazy screen, and a skip-waiting SW update prompt. The service worker was rewritten to use StaleWhileRevalidate for the day-list GET with a 12-hour shift TTL and network-only passthrough for all mutations. The useConnectivity hook combines navigator.onLine, a debounced heartbeat, and query-error classification to provide a reliable connectivity signal.
+
+## WO-160: User Story: WO-160 - End-to-end technician field execution regression suite
+- **Status:** completed
+- **Commit:** `6029543`
+- **Files:** 12 (+1715/-7)
+- **Duration:** 1538ss
+- **Approach:** Added a dedicated 'technician-mobile' Playwright project pointing to e2e/ with 360x800 viewport, deviceScaleFactor 2, mobile user agent, trace always-on and video on-first-failure with 1 retry. Frontend E2E specs use page.route() for API mocking (no real backend required locally). Backend TechnicianJourneyIT extends AbstractIntegrationTest, re-inserts baseline fixtures in @BeforeEach via JDBC with ON CONFLICT DO NOTHING, and asserts by fresh work order UUIDs so outbox/audit assertions are noise-free. V136 Flyway fixture provides journey-specific stock and work-order data automatically loaded in test profile.

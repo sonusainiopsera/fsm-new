@@ -92,3 +92,27 @@ VALUES
      'ff000000-0000-0000-0000-000000000033',
      'Chiller Seed-Beta-1', 'CHILLER', 'SN-CHLL-SEED-001', 0)
 ON CONFLICT (id) DO NOTHING;
+
+-- =============================================================================
+-- Journey regression fixtures (WO-160): stock at non-zero and zero for
+-- specific parts at TECH_1 Van A (IDs in e3000000-* range).
+-- Used by TechnicianJourneyIT and the Playwright technician-mobile E2E suite.
+-- =============================================================================
+
+-- Ensure PN-002 has non-zero stock at TECH_1 Van A for parts-consumption tests.
+-- Idempotent: updates to at least 10 if a lower value already exists.
+INSERT INTO stock_balance (id, part_id, location_id, quantity_on_hand, version)
+VALUES ('e3000000-0000-0000-0000-000000000001',
+        '50000000-0000-0000-0000-000000000002',   -- PN-002 Air Filter
+        '60000000-0000-0000-0000-000000000011',   -- TECH_1 Van A
+        10, 0)
+ON CONFLICT (part_id, location_id) DO UPDATE
+    SET quantity_on_hand = GREATEST(stock_balance.quantity_on_hand, 10);
+
+-- Ensure PN-004 has zero stock at TECH_1 Van A for over-consumption tests.
+INSERT INTO stock_balance (id, part_id, location_id, quantity_on_hand, version)
+VALUES ('e3000000-0000-0000-0000-000000000002',
+        '50000000-0000-0000-0000-000000000004',   -- PN-004 Contactor 24V
+        '60000000-0000-0000-0000-000000000011',   -- TECH_1 Van A
+        0, 0)
+ON CONFLICT (part_id, location_id) DO NOTHING;
