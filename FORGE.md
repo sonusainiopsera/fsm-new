@@ -595,3 +595,10 @@
 - **Files:** 30 (+1924/-0)
 - **Duration:** 1000ss
 - **Approach:** Created the geo module from scratch following the aigateway module pattern. The public API surface (geo.api) exposes TravelTimePort, TravelCoordinate, TravelMatrixResult, and TravelMatrixEntry. The implementation (geo.internal) wires Resilience4j (TimeLimiter 1.5s, jittered Retry 2 attempts, CircuitBreaker 50%/20-call window) around a Spring RestClient that POSTs batched matrix requests. Redis caching uses CoordinateRounder (3 decimal places ≈ 111m) to hash keys as travel:{originHash}:{destHash} with 300s TTL. HaversineEstimator provides the fallback with configurable average speed. TravelTimeEgressAllowList validates the provider host at startup (SSRF protection). GeoMetrics publishes all four required Micrometer meters. The adapter never throws — all failure modes return degraded Haversine entries.
+
+## WO-136: User Story: WO-136 - Recommendations endpoint with keyset pagination and snapshots
+- **Status:** completed
+- **Commit:** `00755bb`
+- **Files:** 13 (+867/-0)
+- **Duration:** 744ss
+- **Approach:** N/A
