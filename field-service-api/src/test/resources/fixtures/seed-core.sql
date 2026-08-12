@@ -51,3 +51,24 @@ INSERT INTO notification_preference (id, user_id, category, channel, enabled, ve
      'a0000000-0000-0000-0000-000000000005',
      'SLA_BREACH', 'PUSH',   FALSE, 0)
 ON CONFLICT (user_id, category, channel) DO NOTHING;
+
+-- ── Release validation suite fixtures ────────────────────────────────────────
+--
+-- These rows supply reference data required by the post-deploy invariant gates.
+-- All IDs use the reserved c0000000-... range to avoid clashing with real data.
+--
+-- Validation account: validator@example.test (DISPATCHER role — non-admin)
+--   Used by InvariantGateRunner as the non-privileged probe account.
+INSERT INTO app_user (id, email, full_name, role) VALUES
+    ('c0000000-0000-0000-0000-000000000001',
+     'validator@example.test', 'Validation Runner', 'DISPATCHER')
+ON CONFLICT (id) DO NOTHING;
+
+-- Technician with an expired certification — used by GuardNeverFailsOpenGate
+-- to assert that ADMIN cannot override a hard certification guard (returns 422).
+-- The certification expiry is enforced by the work-order assignment guard;
+-- this row is the fixture the gate relies on.
+INSERT INTO app_user (id, email, full_name, role) VALUES
+    ('c0000000-0000-0000-0000-000000000002',
+     'expired-cert-tech@example.test', 'Expired Cert Technician', 'TECHNICIAN')
+ON CONFLICT (id) DO NOTHING;
