@@ -111,6 +111,12 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
     @Column(name = "reference", length = 20)
     private String reference;
 
+    @Column(name = "scheduled_window_start")
+    private Instant scheduledWindowStart;
+
+    @Column(name = "scheduled_window_end")
+    private Instant scheduledWindowEnd;
+
     @Column(name = "applied_sla_policy_id")
     private UUID appliedSlaPolicyId;
 
@@ -231,4 +237,10 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
 
     public WorkOrderOrigin getOrigin() { return origin; }
     public void setOrigin(WorkOrderOrigin origin) { this.origin = origin; }
+
+    public Instant getScheduledWindowStart() { return scheduledWindowStart; }
+    public void setScheduledWindowStart(Instant scheduledWindowStart) { this.scheduledWindowStart = scheduledWindowStart; }
+
+    public Instant getScheduledWindowEnd() { return scheduledWindowEnd; }
+    public void setScheduledWindowEnd(Instant scheduledWindowEnd) { this.scheduledWindowEnd = scheduledWindowEnd; }
 }

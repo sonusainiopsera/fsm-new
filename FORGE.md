@@ -504,3 +504,10 @@
 - **Files:** 21 (+1508/-1)
 - **Duration:** 1212ss
 - **Approach:** Extended the pure SlaRiskEvaluator with a separate evaluateBreaches() method returning List<RiskDecision.Breached> — keeps the evaluator I/O-free while supporting both RESPONSE and RESOLUTION breach detection in one sweep pass. WorkOrderRiskSnapshot gained effectiveResponseDueAt (pause-adjusted). SlaEvaluationScheduler calls evaluateBreaches() before evaluate() each tick and routes each Breached decision to SlaBreachService.detect() (REQUIRES_NEW per breach, idempotent via unique index). detect() atomically writes the breach row, closes open risk flags with reason 'breached', and publishes SlaBreached outbox event. SlaBreachPort public interface exposes finalise(); WorkOrderTransitionServiceImpl calls it on all terminal transitions (idempotent — writeFinalOverrun is a no-op when already set). SlaBreachController (DISPATCHER/MANAGER/ADMIN) exposes paginated GET with filtering and POST /{id}/reason with Bean Validation on the controlled-vocabulary enum.
+
+## WO-154: User Story: WO-154 - Technician today's-jobs API with row scope and ETag caching
+- **Status:** completed
+- **Commit:** `f13e581`
+- **Files:** 10 (+1024/-0)
+- **Duration:** 1311ss
+- **Approach:** N/A
