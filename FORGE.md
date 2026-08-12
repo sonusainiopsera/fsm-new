@@ -497,3 +497,10 @@
 - **Files:** 15 (+1356/-0)
 - **Duration:** 1387ss
 - **Approach:** N/A
+
+## WO-144: User Story: WO-144 - Breach recording with overrun minutes and reason codes
+- **Status:** completed
+- **Commit:** `fa4d1a2`
+- **Files:** 15 (+1610/-14)
+- **Duration:** 1211ss
+- **Approach:** Added SLA breach recording as an append-and-revise domain feature inside the sla module. The sla_breach table stores one row per (work_order_id, breach_type) pair, enforced by a unique index for idempotency. SlaBreachEntity is package-private and @Audited; SlaBreachService is the public facade handling atomic recordBreach (breach row + flag clear + SlaBreached outbox event in one transaction), idempotent finalise on work order closure, re-attributable reason codes with Envers revision, and JdbcTemplate-based paginated listing that JOINs work_order for priority filtering. SlaRiskEvaluator gained evaluateBreaches() returning 0–2 BreachDecision objects and WorkOrderRiskSnapshot gained a responseDeadline field. SlaEvaluationScheduler now routes breach decisions before at-risk flag logic. WorkOrderTransitionApplicationService calls finalise() on CLOSED/CANCELLED. SlaBreachController exposes role-guarded endpoints with 403 non-disclosure for non-existent breaches.

@@ -19,6 +19,7 @@ import com.fieldservice.workorder.lifecycle.TransitionGuard;
 import com.fieldservice.workorder.lifecycle.WorkOrderEvent;
 import com.fieldservice.workorder.lifecycle.WorkOrderState;
 import com.fieldservice.workorder.lifecycle.WorkOrderTransitionService;
+import com.fieldservice.sla.internal.SlaBreachService;
 import com.fieldservice.sla.internal.SlaPolicyService;
 import com.fieldservice.workorder.holds.HoldReason;
 import com.fieldservice.workorder.holds.HoldReasonService;
@@ -72,6 +73,7 @@ public class WorkOrderTransitionApplicationService {
     private final HoldReasonService holdReasonService;
     private final WorkOrderHoldRepository workOrderHoldRepository;
     private final SlaPolicyService slaPolicyService;
+    private final SlaBreachService slaBreachService;
 
     public WorkOrderTransitionApplicationService(
             ScopedQueryExecutor scopedQueryExecutor,
@@ -83,7 +85,8 @@ public class WorkOrderTransitionApplicationService {
             EntityManager entityManager,
             HoldReasonService holdReasonService,
             WorkOrderHoldRepository workOrderHoldRepository,
-            SlaPolicyService slaPolicyService) {
+            SlaPolicyService slaPolicyService,
+            SlaBreachService slaBreachService) {
         this.scopedQueryExecutor      = scopedQueryExecutor;
         this.workOrderRepository      = workOrderRepository;
         this.accessScope              = accessScope;
@@ -94,6 +97,7 @@ public class WorkOrderTransitionApplicationService {
         this.holdReasonService        = holdReasonService;
         this.workOrderHoldRepository  = workOrderHoldRepository;
         this.slaPolicyService         = slaPolicyService;
+        this.slaBreachService         = slaBreachService;
     }
 
     @PostConstruct
@@ -204,6 +208,11 @@ public class WorkOrderTransitionApplicationService {
                 MDC.get("traceId"),
                 scope.userId(),
                 payload));
+
+        // 9. Finalise SLA breach overrun when work order reaches a terminal state
+        if (toState == WorkOrderState.CLOSED || toState == WorkOrderState.CANCELLED) {
+            slaBreachService.finalise(workOrderId, occurredAt);
+        }
 
         Set<WorkOrderEvent> legalNextEvents = transitionService.legalEventsFrom(toState);
 

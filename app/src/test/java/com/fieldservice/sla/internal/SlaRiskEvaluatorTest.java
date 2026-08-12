@@ -93,7 +93,7 @@ class SlaRiskEvaluatorTest {
             Instant now = BASE.plusSeconds(60 * 60); // only 60 min elapsed
             WorkOrderRiskSnapshot snapshot = new WorkOrderRiskSnapshot(
                     UUID.randomUUID(), "IN_PROGRESS", BASE,
-                    resolutionDue, atRiskAt, 0, false,
+                    resolutionDue, null, atRiskAt, 0, false,
                     projectedCompletion, "parts_delay");
 
             RiskDecision decision = evaluator.evaluate(snapshot, now);
@@ -138,7 +138,7 @@ class SlaRiskEvaluatorTest {
             Instant now = BASE.plusSeconds(200 * 60);
             WorkOrderRiskSnapshot snapshot = new WorkOrderRiskSnapshot(
                     UUID.randomUUID(), "IN_PROGRESS", BASE,
-                    resolutionDue, atRiskAt, cumulativeHoldMin, false,
+                    resolutionDue, null, atRiskAt, cumulativeHoldMin, false,
                     null, null);
 
             RiskDecision decision = evaluator.evaluate(snapshot, now);
@@ -215,7 +215,7 @@ class SlaRiskEvaluatorTest {
                                                    int cumulativeHoldMin, boolean paused) {
         return new WorkOrderRiskSnapshot(
                 UUID.randomUUID(), state, createdAt,
-                resolutionDue, atRiskAt, cumulativeHoldMin, paused,
+                resolutionDue, null /* responseDeadline */, atRiskAt, cumulativeHoldMin, paused,
                 null, null);
     }
 }

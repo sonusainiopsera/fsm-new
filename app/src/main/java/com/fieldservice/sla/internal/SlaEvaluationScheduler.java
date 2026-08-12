@@ -54,6 +54,7 @@ class SlaEvaluationScheduler {
     private final SlaRiskEvaluator        evaluator;
     private final DistributedSweepLock    sweepLock;
     private final SlaRiskFlagRepository   flagRepo;
+    private final SlaBreachService        breachService;
     private final DomainEventPublisher    eventPublisher;
     private final TransactionTemplate     txTemplate;
     private final JdbcTemplate            jdbc;
@@ -71,6 +72,7 @@ class SlaEvaluationScheduler {
     SlaEvaluationScheduler(SlaRiskEvaluator evaluator,
                             DistributedSweepLock sweepLock,
                             SlaRiskFlagRepository flagRepo,
+                            SlaBreachService breachService,
                             DomainEventPublisher eventPublisher,
                             TransactionTemplate txTemplate,
                             JdbcTemplate jdbc,
@@ -79,6 +81,7 @@ class SlaEvaluationScheduler {
         this.evaluator       = evaluator;
         this.sweepLock       = sweepLock;
         this.flagRepo        = flagRepo;
+        this.breachService   = breachService;
         this.eventPublisher  = eventPublisher;
         this.txTemplate      = txTemplate;
         this.jdbc            = jdbc;
@@ -174,6 +177,21 @@ class SlaEvaluationScheduler {
     private static final String REASON_RECOVERED = "recovered_healthy";
 
     private SweepRowResult processRow(WorkOrderRiskSnapshot snapshot, Instant now) {
+        // Breach detection — runs before at-risk logic; each breach is recorded independently
+        List<SlaRiskEvaluator.BreachDecision> breaches = evaluator.evaluateBreaches(snapshot, now);
+        for (SlaRiskEvaluator.BreachDecision breach : breaches) {
+            txTemplate.execute(status -> {
+                breachService.recordBreach(
+                        snapshot.workOrderId(),
+                        breach.breachType(),
+                        breach.effectiveDeadline(),
+                        now,
+                        breach.overrunMinutes(),
+                        breach.pausedMinutesExcluded());
+                return null;
+            });
+        }
+
         RiskDecision decision = evaluator.evaluate(snapshot, now);
 
         if (decision.isHealthy()) {
@@ -283,8 +301,8 @@ class SlaEvaluationScheduler {
         Object[] params;
         if (afterId == null) {
             sql = """
-                    SELECT w.id, w.state, w.created_at, w.resolution_deadline, w.at_risk_at,
-                           w.cumulative_hold_minutes,
+                    SELECT w.id, w.state, w.created_at, w.response_deadline, w.resolution_deadline,
+                           w.at_risk_at, w.cumulative_hold_minutes,
                            (SELECT count(*) > 0 FROM sla_clock_pause p
                             WHERE p.work_order_id = w.id AND p.resumed_at IS NULL) AS is_paused
                     FROM work_order w
@@ -295,8 +313,8 @@ class SlaEvaluationScheduler {
             params = new Object[]{batchSize};
         } else {
             sql = """
-                    SELECT w.id, w.state, w.created_at, w.resolution_deadline, w.at_risk_at,
-                           w.cumulative_hold_minutes,
+                    SELECT w.id, w.state, w.created_at, w.response_deadline, w.resolution_deadline,
+                           w.at_risk_at, w.cumulative_hold_minutes,
                            (SELECT count(*) > 0 FROM sla_clock_pause p
                             WHERE p.work_order_id = w.id AND p.resumed_at IS NULL) AS is_paused
                     FROM work_order w
@@ -314,6 +332,8 @@ class SlaEvaluationScheduler {
                 rs.getTimestamp("created_at").toInstant(),
                 rs.getTimestamp("resolution_deadline") != null
                         ? rs.getTimestamp("resolution_deadline").toInstant() : null,
+                rs.getTimestamp("response_deadline") != null
+                        ? rs.getTimestamp("response_deadline").toInstant() : null,
                 rs.getTimestamp("at_risk_at") != null
                         ? rs.getTimestamp("at_risk_at").toInstant() : null,
                 rs.getInt("cumulative_hold_minutes"),
