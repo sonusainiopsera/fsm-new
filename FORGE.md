@@ -336,3 +336,10 @@
 - **Files:** 18 (+1690/-4)
 - **Duration:** 1351ss
 - **Approach:** N/A
+
+## WO-165: User Story: WO-165 - Backlog and workload balance guardrail projections
+- **Status:** completed
+- **Commit:** `9992959`
+- **Files:** 11 (+1548/-5)
+- **Duration:** 1030ss
+- **Approach:** N/A

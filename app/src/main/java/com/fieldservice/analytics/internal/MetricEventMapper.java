@@ -16,17 +16,21 @@ final class MetricEventMapper {
     private static final Map<String, Set<String>> MAPPING = Map.of(
             "WORK_ORDER_CREATED",    Set.of("wo.created_count",    "wo.backlog_count",
                                             "quality.first_time_fix.provisional",
-                                            "quality.unclassifiable.count"),
+                                            "quality.unclassifiable.count",
+                                            "backlog.open.count",  "backlog.on_hold.count"),
             "WORK_ORDER_TRANSITION", Set.of("wo.completion_rate",  "wo.sla_compliance",
                                             "wo.first_time_fix_rate", "wo.backlog_count",
                                             "quality.first_time_fix.matured",
                                             "quality.first_time_fix.provisional",
                                             "quality.repeat_visit.count",
-                                            "quality.unclassifiable.count"),
-            "ASSIGNMENT_CREATED",    Set.of("wo.backlog_count",    "technician.utilization"),
+                                            "quality.unclassifiable.count",
+                                            "backlog.open.count",  "backlog.on_hold.count",
+                                            "workforce.workload_balance.cv"),
+            "ASSIGNMENT_CREATED",    Set.of("wo.backlog_count",    "technician.utilization",
+                                            "backlog.open.count",  "workforce.workload_balance.cv"),
             "SLA_BREACH",            Set.of("wo.sla_compliance"),
             "SLA_AT_RISK",           Set.of("wo.sla_compliance"),
-            "LABOUR_ENTRY_ADDED",    Set.of("technician.utilization")
+            "LABOUR_ENTRY_ADDED",    Set.of("technician.utilization", "workforce.workload_balance.cv")
     );
 
     private MetricEventMapper() {}

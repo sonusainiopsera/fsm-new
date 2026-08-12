@@ -13,5 +13,14 @@ public enum WorkOrderStatus {
     ON_HOLD,
     COMPLETED,
     CLOSED,
-    CANCELLED
+    CANCELLED;
+
+    /**
+     * Returns the set of states that represent an open (non-terminal) work order.
+     * Analytics and backlog queries use this vocabulary to count active jobs without
+     * hardcoding a state list that could diverge from the lifecycle definition.
+     */
+    public static java.util.Set<WorkOrderStatus> openStates() {
+        return java.util.EnumSet.of(NEW, ASSIGNED, EN_ROUTE, IN_PROGRESS, ON_HOLD);
+    }
 }
