@@ -56,7 +56,8 @@ class ScopedRepositoryFitnessTest {
     void all_scoped_entity_repositories_extend_scoped_repository() {
         // Known production repositories serving ScopedEntity types
         Set<String> scopedRepositoryNames = Set.of(
-                "com.fieldservice.workorder.repository.WorkOrderRepository"
+                "com.fieldservice.workorder.repository.WorkOrderRepository",
+                "com.fieldservice.portal.repository.PortalAccountUserRepository"
         );
 
         for (String repoName : scopedRepositoryNames) {

@@ -343,3 +343,10 @@
 - **Files:** 11 (+1548/-5)
 - **Duration:** 1030ss
 - **Approach:** N/A
+
+## WO-169: User Story: WO-169 - Customer account linkage and row-scope access predicate
+- **Status:** completed
+- **Commit:** `3809cf5`
+- **Files:** 18 (+1586/-3)
+- **Duration:** 719ss
+- **Approach:** N/A

@@ -275,3 +275,49 @@ VALUES
     ('00000000-0000-7017-8000-000000000004', 'CUSTOMER'),
     ('00000000-0000-7017-8000-000000000005', 'ADMIN')
 ON CONFLICT DO NOTHING;
+
+-- ---- Portal customer account users (WO-169, two isolated accounts + one orphan) ----
+-- UUID prefix: 00000000-0000-7019-8000-XXXXXXXXXXXX
+-- Account A: Acme Facilities Ltd  (00000000-0000-7012-8000-000000000001)
+-- Account B: Bluestone Property Group (00000000-0000-7012-8000-000000000002)
+--
+-- Scenario coverage:
+--   USER_ACME  (7019-0001) → linked to Acme    (positive: can see Acme's WOs/sites)
+--   USER_BLUE  (7019-0002) → linked to Bluestone (positive: can see Bluestone's WOs/sites)
+--   ORPHAN     (7019-0003) → NO portal_account_user row (fail-closed test)
+--
+-- Adversarial tests: USER_ACME probing Bluestone resources must receive 404 (not 403).
+-- BCrypt hash of 'TestPassword123!': $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC
+
+INSERT INTO app_user (id, email, password_hash, full_name, active, version)
+VALUES
+    ('00000000-0000-7019-8000-000000000001', 'portal.acme@example.test',
+     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC',
+     'Portal User Acme', TRUE, 0),
+    ('00000000-0000-7019-8000-000000000002', 'portal.blue@example.test',
+     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC',
+     'Portal User Bluestone', TRUE, 0),
+    ('00000000-0000-7019-8000-000000000003', 'portal.orphan@example.test',
+     '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4o1TDH7SqC',
+     'Portal Orphan User', TRUE, 0)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO role_assignment (user_id, role_name)
+VALUES
+    ('00000000-0000-7019-8000-000000000001', 'CUSTOMER'),
+    ('00000000-0000-7019-8000-000000000002', 'CUSTOMER'),
+    ('00000000-0000-7019-8000-000000000003', 'CUSTOMER')
+ON CONFLICT DO NOTHING;
+
+-- Portal account linkage rows (only for USER_ACME and USER_BLUE; ORPHAN has none by design)
+INSERT INTO portal_account_user (id, user_id, account_id, status, activated_at, version)
+VALUES
+    ('00000000-0000-7019-8000-000000000011',
+     '00000000-0000-7019-8000-000000000001',
+     '00000000-0000-7012-8000-000000000001',
+     'ACTIVE', NOW() - INTERVAL '1 day', 0),
+    ('00000000-0000-7019-8000-000000000012',
+     '00000000-0000-7019-8000-000000000002',
+     '00000000-0000-7012-8000-000000000002',
+     'ACTIVE', NOW() - INTERVAL '1 day', 0)
+ON CONFLICT DO NOTHING;

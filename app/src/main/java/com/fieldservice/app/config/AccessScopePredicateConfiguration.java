@@ -7,6 +7,7 @@ import com.fieldservice.inventory.domain.StockLocation;
 import com.fieldservice.platform.persistence.ScopedEntity;
 import com.fieldservice.platform.security.AccessScopePredicateFactory;
 import com.fieldservice.platform.security.EntityScopeSpec;
+import com.fieldservice.portal.domain.PortalAccountUser;
 import com.fieldservice.site.domain.Site;
 import com.fieldservice.workorder.domain.WorkOrder;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +47,8 @@ public class AccessScopePredicateConfiguration {
             CustomerAccount.class,
             Asset.class,
             Part.class,
-            StockLocation.class
+            StockLocation.class,
+            PortalAccountUser.class
     );
 
     @Bean
