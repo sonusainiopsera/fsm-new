@@ -219,6 +219,12 @@ app:
       lock-enabled: ${APP_SLA_SWEEP_LOCK_ENABLED:true}
       # Master kill-switch: set to false to pause the sweep without removing the bean
       enabled: ${APP_SLA_SWEEP_ENABLED:true}
+    alert-stream:
+      heartbeat-interval-seconds: ${APP_SLA_ALERT_STREAM_HEARTBEAT_INTERVAL_SECONDS:15}
+      replay-buffer-size: ${APP_SLA_ALERT_STREAM_REPLAY_BUFFER_SIZE:500}
+      replay-horizon-seconds: ${APP_SLA_ALERT_STREAM_REPLAY_HORIZON_SECONDS:300}
+      max-concurrent-per-user: ${APP_SLA_ALERT_STREAM_MAX_CONCURRENT_PER_USER:3}
+      emitter-timeout-ms: ${APP_SLA_ALERT_STREAM_EMITTER_TIMEOUT_MS:65000}
 
   cert:
     sweep:

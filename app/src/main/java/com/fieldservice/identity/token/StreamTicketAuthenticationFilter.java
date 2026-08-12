@@ -48,7 +48,9 @@ public class StreamTicketAuthenticationFilter extends OncePerRequestFilter {
     static final String TICKET_PARAM = "ticket";
     static final String STREAM_PATH_PREFIX = "/api/v1/streams/";
     // Additional stream paths that require ticket authentication
-    private static final List<String> EXTRA_STREAM_SUFFIXES = List.of("/copilot/stream");
+    private static final List<String> EXTRA_STREAM_SUFFIXES = List.of(
+            "/copilot/stream",
+            "/sla/alerts/stream");
     private static final String GENERIC_401_MESSAGE = "Authentication required.";
 
     private final StreamTicketService streamTicketService;
