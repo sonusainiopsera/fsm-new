@@ -74,6 +74,7 @@ public class WorkOrderController {
                 wo.getResponseDueAt(),
                 wo.getResolutionDueAt(),
                 wo.getAtRiskAt(),
-                wo.getAppliedSlaPolicyId());
+                wo.getAppliedSlaPolicyId(),
+                null);
     }
 }

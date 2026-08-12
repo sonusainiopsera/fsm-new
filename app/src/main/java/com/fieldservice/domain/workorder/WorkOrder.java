@@ -243,4 +243,16 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
 
     public Instant getScheduledWindowEnd() { return scheduledWindowEnd; }
     public void setScheduledWindowEnd(Instant scheduledWindowEnd) { this.scheduledWindowEnd = scheduledWindowEnd; }
+
+    @Column(name = "fault_signature", columnDefinition = "text[]")
+    private String[] faultSignature = new String[0];
+
+    public String[] getFaultSignature() { return faultSignature != null ? faultSignature : new String[0]; }
+    public void setFaultSignature(String[] faultSignature) { this.faultSignature = faultSignature != null ? faultSignature : new String[0]; }
+
+    @Column(name = "excluded_from_sla_compliance", nullable = false)
+    private boolean excludedFromSlaCompliance = false;
+
+    public boolean isExcludedFromSlaCompliance() { return excludedFromSlaCompliance; }
+    public void setExcludedFromSlaCompliance(boolean excluded) { this.excludedFromSlaCompliance = excluded; }
 }

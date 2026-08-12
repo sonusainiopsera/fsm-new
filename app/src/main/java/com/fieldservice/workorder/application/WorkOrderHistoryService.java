@@ -73,16 +73,19 @@ public class WorkOrderHistoryService {
     private final WorkOrderRepository workOrderRepository;
     private final ScopedQueryExecutor scopedQueryExecutor;
     private final AccessScopeResolver scopeResolver;
+    private final com.fieldservice.domain.workorder.WorkOrderDuplicateLinkRepository duplicateLinkRepository;
 
     public WorkOrderHistoryService(
             EntityManager entityManager,
             WorkOrderRepository workOrderRepository,
             ScopedQueryExecutor scopedQueryExecutor,
-            AccessScopeResolver scopeResolver) {
+            AccessScopeResolver scopeResolver,
+            com.fieldservice.domain.workorder.WorkOrderDuplicateLinkRepository duplicateLinkRepository) {
         this.entityManager = entityManager;
         this.workOrderRepository = workOrderRepository;
         this.scopedQueryExecutor = scopedQueryExecutor;
         this.scopeResolver = scopeResolver;
+        this.duplicateLinkRepository = duplicateLinkRepository;
     }
 
     /**
@@ -188,7 +191,46 @@ public class WorkOrderHistoryService {
                     buildDetail(olderSnapshot, snapshot, isCustomer)));
         }
 
+        // Append duplicate-link events for this work order (as source or as surviving target)
+        addDuplicateLinkEvents(workOrderId, isCustomer, events);
+
+        // Re-sort merged list newest first
+        events.sort((a, b) -> b.occurredAt().compareTo(a.occurredAt()));
+
         return PagedResponse.of(events, PageMeta.of(page, pageSize, total), PageLinks.none());
+    }
+
+    private void addDuplicateLinkEvents(UUID workOrderId, boolean isCustomer,
+                                         List<TimelineEventDto> events) {
+        if (isCustomer) return; // link events are internal
+
+        // Source side: this WO was linked as a duplicate
+        duplicateLinkRepository.findBySourceWorkOrderId(workOrderId).ifPresent(link -> {
+            java.util.Map<String, String> detail = new java.util.LinkedHashMap<>();
+            detail.put("targetWorkOrderId", link.getTargetWorkOrderId().toString());
+            detail.put("reason", truncateDetail(link.getReason()));
+            detail.put("cancellationReasonCode", "DUPLICATE_REQUEST");
+            events.add(new TimelineEventDto("DUPLICATE_LINKED", link.getLinkedAt(),
+                    link.getLinkedBy() != null ? link.getLinkedBy().toString() : null,
+                    java.util.Map.copyOf(detail)));
+        });
+
+        // Target side: another WO was linked as a duplicate of this one
+        duplicateLinkRepository.findByTargetWorkOrderId(workOrderId).forEach(link -> {
+            java.util.Map<String, String> detail = new java.util.LinkedHashMap<>();
+            detail.put("sourceWorkOrderId", link.getSourceWorkOrderId().toString());
+            detail.put("reason", truncateDetail(link.getReason()));
+            events.add(new TimelineEventDto("DUPLICATE_RECEIVED", link.getLinkedAt(),
+                    link.getLinkedBy() != null ? link.getLinkedBy().toString() : null,
+                    java.util.Map.copyOf(detail)));
+        });
+    }
+
+    private static String truncateDetail(String value) {
+        if (value == null) return null;
+        return value.length() <= MAX_FIELD_VALUE_LENGTH
+                ? value
+                : value.substring(0, MAX_FIELD_VALUE_LENGTH) + TRUNCATION_SUFFIX;
     }
 
     // -------------------------------------------------------------------------

@@ -25,13 +25,19 @@ import com.fieldservice.sla.SlaDeadlines;
 import com.fieldservice.sla.SlaPolicy;
 import com.fieldservice.sla.SlaPolicyProvider;
 import com.fieldservice.workorder.api.dto.CreateWorkOrderRequest;
+import com.fieldservice.workorder.duplicates.DuplicateCandidate;
+import com.fieldservice.workorder.duplicates.DuplicateDetectionService;
+import com.fieldservice.workorder.duplicates.FaultSignatureNormalizer;
 import jakarta.persistence.EntityManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -56,6 +62,8 @@ import java.util.UUID;
 @Transactional
 public class WorkOrderCreateService {
 
+    private static final Logger log = LoggerFactory.getLogger(WorkOrderCreateService.class);
+
     /** Portal-submitted requests may not exceed this priority. */
     private static final WorkOrderPriority CUSTOMER_PRIORITY_CEILING = WorkOrderPriority.MEDIUM;
 
@@ -69,6 +77,8 @@ public class WorkOrderCreateService {
     private final DomainEventPublisher eventPublisher;
     private final AccessScopeResolver scopeResolver;
     private final EntityManager entityManager;
+    private final FaultSignatureNormalizer signatureNormalizer;
+    private final DuplicateDetectionService duplicateDetectionService;
 
     public WorkOrderCreateService(
             WorkOrderRepository workOrderRepository,
@@ -80,7 +90,9 @@ public class WorkOrderCreateService {
             SlaPolicyProvider slaPolicyProvider,
             DomainEventPublisher eventPublisher,
             AccessScopeResolver scopeResolver,
-            EntityManager entityManager) {
+            EntityManager entityManager,
+            FaultSignatureNormalizer signatureNormalizer,
+            DuplicateDetectionService duplicateDetectionService) {
         this.workOrderRepository = workOrderRepository;
         this.customerRepository  = customerRepository;
         this.siteRepository      = siteRepository;
@@ -91,7 +103,12 @@ public class WorkOrderCreateService {
         this.eventPublisher      = eventPublisher;
         this.scopeResolver       = scopeResolver;
         this.entityManager       = entityManager;
+        this.signatureNormalizer  = signatureNormalizer;
+        this.duplicateDetectionService = duplicateDetectionService;
     }
+
+    /** Result of a work order creation, including advisory duplicate candidates. */
+    public record CreateResult(WorkOrder workOrder, List<DuplicateCandidate> duplicateCandidates) {}
 
     /**
      * Creates a new work order and stamps SLA deadlines.
@@ -103,7 +120,7 @@ public class WorkOrderCreateService {
      * @throws ScopedAccessDeniedException if CUSTOMER tries to create outside their account (AC-7)
      */
     @PreAuthorize("hasAnyAuthority('DISPATCHER', 'ADMIN', 'MANAGER', 'CUSTOMER')")
-    public WorkOrder create(CreateWorkOrderRequest req) {
+    public CreateResult create(CreateWorkOrderRequest req) {
         Instant now = Instant.now();
 
         AccessScope scope = scopeResolver.resolve();
@@ -140,6 +157,7 @@ public class WorkOrderCreateService {
         wo.setTitle(req.title());
         wo.setFaultDescription(req.faultDescription());
         wo.setDescription(req.faultDescription()); // backward-compat mirror
+        wo.setFaultSignature(signatureNormalizer.normalize(req.faultDescription()));
         wo.setResponseDueAt(deadlines.responseDueAt());
         wo.setResolutionDueAt(deadlines.resolutionDueAt());
         wo.setAtRiskAt(deadlines.atRiskAt());
@@ -152,6 +170,7 @@ public class WorkOrderCreateService {
             if (!req.siteId().equals(asset.getSiteId())) {
                 throw new AssetSiteMismatchException(req.assetId(), req.siteId());
             }
+            wo.setAssetId(req.assetId());
         }
 
         // Persist work order first so the ID is available for reference generation
@@ -165,7 +184,15 @@ public class WorkOrderCreateService {
 
         publishCreatedEvent(saved, policy, now);
 
-        return saved;
+        // Advisory duplicate detection — never blocks creation; degrades to empty list on error
+        List<DuplicateCandidate> candidates = List.of();
+        try {
+            candidates = duplicateDetectionService.detect(saved);
+        } catch (Exception ex) {
+            log.warn("duplicate.detection.degraded: workOrderId={}, error={}", saved.getId(), ex.getMessage());
+        }
+
+        return new CreateResult(saved, candidates);
     }
 
     /**
@@ -185,7 +212,7 @@ public class WorkOrderCreateService {
      * @throws com.fieldservice.sla.SlaPolicyUnavailableException if no active policy for priority
      */
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public WorkOrder createForPortal(CreateWorkOrderRequest req, UUID customerId) {
+    public CreateResult createForPortal(CreateWorkOrderRequest req, UUID customerId) {
         Instant now = Instant.now();
 
         WorkOrderPriority priority = WorkOrderPriority.valueOf(req.priority());
@@ -212,6 +239,7 @@ public class WorkOrderCreateService {
         wo.setTitle(req.title());
         wo.setFaultDescription(req.faultDescription());
         wo.setDescription(req.faultDescription());
+        wo.setFaultSignature(signatureNormalizer.normalize(req.faultDescription()));
         wo.setResponseDueAt(deadlines.responseDueAt());
         wo.setResolutionDueAt(deadlines.resolutionDueAt());
         wo.setAtRiskAt(deadlines.atRiskAt());
@@ -224,6 +252,7 @@ public class WorkOrderCreateService {
             if (!req.siteId().equals(asset.getSiteId())) {
                 throw new AssetSiteMismatchException(req.assetId(), req.siteId());
             }
+            wo.setAssetId(req.assetId());
         }
 
         WorkOrder saved = workOrderRepository.save(wo);
@@ -235,7 +264,14 @@ public class WorkOrderCreateService {
 
         publishCreatedEvent(saved, policy, now);
 
-        return saved;
+        List<DuplicateCandidate> candidates = List.of();
+        try {
+            candidates = duplicateDetectionService.detect(saved);
+        } catch (Exception ex) {
+            log.warn("duplicate.detection.degraded: workOrderId={}, error={}", saved.getId(), ex.getMessage());
+        }
+
+        return new CreateResult(saved, candidates);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────

@@ -21,6 +21,7 @@ import com.fieldservice.platform.security.ScopedAccessDeniedException;
 import com.fieldservice.workorder.GuardRefusedException;
 import com.fieldservice.workorder.IllegalWorkOrderTransitionException;
 import com.fieldservice.workorder.WorkOrderVersionConflictException;
+import com.fieldservice.workorder.duplicates.DuplicateLinkException;
 import com.fieldservice.sla.SlaPolicyUnavailableException;
 import com.fieldservice.workorder.holds.InvalidHoldReasonCodeException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -533,6 +534,22 @@ public class GlobalExceptionHandler {
         String path = cv.getPropertyPath().toString();
         int dot = path.lastIndexOf('.');
         return dot >= 0 ? path.substring(dot + 1) : path;
+    }
+
+    @ExceptionHandler(DuplicateLinkException.class)
+    public ResponseEntity<ErrorEnvelope> handleDuplicateLink(
+            DuplicateLinkException ex,
+            HttpServletRequest request) {
+        String tid = traceId();
+        log.debug("Duplicate link refused: code={}, path={}", ex.getCode(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .header(TRACE_HEADER, tid)
+                .body(new ErrorEnvelope(
+                        ErrorEnvelope.Code.VALIDATION_ERROR,
+                        ex.getMessage(),
+                        List.of(),
+                        tid,
+                        Instant.now()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

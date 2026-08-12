@@ -201,6 +201,14 @@ app:
     # Row ceiling for synchronous export; requests above this generate asynchronously
     sync-export-row-ceiling: ${APP_AUDIT_SYNC_EXPORT_ROW_CEILING:5000}
 
+  duplicate:
+    # Hours back from now to search for open work orders when detecting duplicates
+    window-hours: ${APP_DUPLICATE_WINDOW_HOURS:72}
+    # Minimum fault-signature token overlap to include a candidate via signature match
+    min-signature-overlap: ${APP_DUPLICATE_MIN_SIGNATURE_OVERLAP:1}
+    # Maximum candidates returned per detection call
+    max-candidates: ${APP_DUPLICATE_MAX_CANDIDATES:5}
+
   sla:
     sweep:
       # Interval between SLA risk sweep ticks in milliseconds (worker profile only)

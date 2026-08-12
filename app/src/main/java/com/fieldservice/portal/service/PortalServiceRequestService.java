@@ -121,7 +121,7 @@ public class PortalServiceRequestService {
                 null
         );
 
-        WorkOrder workOrder = workOrderCreateService.createForPortal(createReq, accountId);
+        WorkOrder workOrder = workOrderCreateService.createForPortal(createReq, accountId).workOrder();
 
         log.info("portal.service_request_submitted: accountId={} workOrderId={} reference={}",
                 accountId, workOrder.getId(), workOrder.getReference());

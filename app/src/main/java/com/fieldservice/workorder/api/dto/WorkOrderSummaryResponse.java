@@ -5,11 +5,15 @@ import com.fieldservice.domain.workorder.WorkOrderState;
 import org.springframework.lang.Nullable;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * Read-only summary of a work order returned by POST /api/v1/work-orders (201) and
  * GET /api/v1/work-orders/{id}.
+ *
+ * <p>{@code duplicateCandidates} is non-null only in creation (201) responses;
+ * read (GET) responses include it as null and Jackson omits it (non_null serialisation).
  */
 public record WorkOrderSummaryResponse(
         UUID id,
@@ -29,5 +33,6 @@ public record WorkOrderSummaryResponse(
         @Nullable Instant responseDeadlineAt,
         @Nullable Instant resolutionDeadlineAt,
         @Nullable Instant atRiskAt,
-        @Nullable UUID appliedSlaPolicyId
+        @Nullable UUID appliedSlaPolicyId,
+        @Nullable List<DuplicateCandidateDto> duplicateCandidates
 ) {}

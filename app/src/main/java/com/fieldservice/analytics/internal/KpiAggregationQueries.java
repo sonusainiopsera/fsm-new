@@ -108,7 +108,8 @@ class KpiAggregationQueries {
                     "  COUNT(*) AS total " +
                     "FROM work_order " +
                     "WHERE state IN ('COMPLETED', 'CLOSED') " +
-                    "  AND updated_at >= now() - INTERVAL '7 days'");
+                    "  AND updated_at >= now() - INTERVAL '7 days' " +
+                    "  AND excluded_from_sla_compliance = false");
 
             long compliant = toLong(row.get("compliant"));
             long total     = toLong(row.get("total"));
