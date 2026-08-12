@@ -182,6 +182,19 @@ app:
       # Maximum simultaneous copilot streams per authenticated user
       max-concurrent-per-user: ${COPILOT_STREAM_MAX_CONCURRENT:1}
 
+  ai:
+    audit:
+      # Retention days for COPILOT_QUESTION interactions (indicative — pending compliance ratification)
+      copilot-retention-days: ${AI_AUDIT_COPILOT_RETENTION_DAYS:365}
+      # Retention days for PHOTO_CAPTION interactions (indicative — pending compliance ratification)
+      photo-caption-retention-days: ${AI_AUDIT_PHOTO_CAPTION_RETENTION_DAYS:90}
+      # Maximum characters stored for redacted_prompt and response_text; longer values are truncated
+      max-text-chars: ${AI_AUDIT_MAX_TEXT_CHARS:4000}
+      # Maximum rows deleted per purge-job invocation (worker profile)
+      purge-batch-size: ${AI_AUDIT_PURGE_BATCH_SIZE:500}
+      # Cron expression for the daily purge job (worker profile); default 03:00 UTC
+      purge-cron: ${AI_AUDIT_PURGE_CRON:0 0 3 * * *}
+
   sla:
     sweep:
       # Interval between SLA risk sweep ticks in milliseconds (worker profile only)
