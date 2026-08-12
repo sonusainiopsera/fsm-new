@@ -469,3 +469,10 @@
 - **Files:** 25 (+2873/-1)
 - **Duration:** 821ss
 - **Approach:** Implemented the three privacy administration screens (Classification Registry, Retention Schedule, DSAR Queue) plus the DSAR Request Detail page and ErasureConfirmDialog as React components, each gated behind PRIVACY_ADMIN/ADMIN role checks via PermissionDeniedState. All API communication is via a new privacyClient.js and TanStack Query hooks (useClassifications, useRetentionPolicies, useDsarRequests, useSubjectRights). Visual values use exclusively var(--token-*) CSS custom properties. The destructive erasure flow requires typing 'CONFIRM_ERASURE' before the submit button is enabled. Export URLs are fetched fresh per click with gcTime:0. Unratified retention rows carry an 'Indicative placeholder' label. At-risk countdown treatment is driven solely by the server-supplied atRisk flag. Routes were lazy-loaded and wired into the admin surface; PRIVACY_ADMIN was added to KNOWN_ROLES and nav manifest.
+
+## WO-120: User Story: WO-120 - Scheduled pre-expiry certification alert sweep on worker
+- **Status:** completed
+- **Commit:** `c265a0a`
+- **Files:** 15 (+1362/-0)
+- **Duration:** 724ss
+- **Approach:** Implemented a daily certification expiry alert sweep following the SlaEvaluationScheduler pattern. Created V45 Flyway migration adding certification_alert_state table with a unique index on (technician_certification_id, alert_stage, validity_key) where validity_key = expires_on.toString() — making re-issue reset structurally automatic. CohortClassifier is a framework-free class that classifies certifications into WARNING/URGENT/EXPIRED cohorts using configurable day windows. CertificationExpirySweep is @Profile('worker') @Scheduled with PostgreSQL advisory lock (LOCK_KEY='CERT_SW'), keyset pagination, and per-certification REQUIRES_NEW transaction isolation via CertificationAlertPublisher. CertificationAlertConsumer provides two inner @Component EventHandler beans for idempotent notification dispatch. All configuration is externalised to app.cert.sweep.* properties with environment variable overrides.

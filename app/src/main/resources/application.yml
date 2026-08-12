@@ -188,6 +188,21 @@ app:
       # Master kill-switch: set to false to pause the sweep without removing the bean
       enabled: ${APP_SLA_SWEEP_ENABLED:true}
 
+  cert:
+    sweep:
+      # Spring cron expression for the daily certification expiry sweep (worker profile only)
+      cron: ${APP_CERT_SWEEP_CRON:0 0 2 * * *}
+      # Days before expiry that triggers a WARNING alert (default 30)
+      warning-window-days: ${APP_CERT_SWEEP_WARNING_WINDOW_DAYS:30}
+      # Days before expiry that triggers an URGENT alert (default 7)
+      urgent-window-days: ${APP_CERT_SWEEP_URGENT_WINDOW_DAYS:7}
+      # Maximum certifications evaluated per sweep batch
+      batch-size: ${APP_CERT_SWEEP_BATCH_SIZE:500}
+      # Master kill-switch: set to false to pause the sweep without redeploying
+      enabled: ${APP_CERT_SWEEP_ENABLED:true}
+      # Set to false to skip the advisory lock in test environments
+      lock-enabled: ${APP_CERT_SWEEP_LOCK_ENABLED:true}
+
   idempotency:
     # How long an IN_PROGRESS record holds its lease before it can be reclaimed (crash recovery)
     lease-duration: ${APP_IDEMPOTENCY_LEASE_DURATION:PT30S}
