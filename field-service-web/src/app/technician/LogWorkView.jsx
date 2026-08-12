@@ -27,6 +27,7 @@ import { mapApiError } from '../../shared/api/errorMapping.js';
 import { TimeEntryCard } from './components/TimeEntryCard.jsx';
 import { PartsRowsList, partsRowReducer, createEmptyRow, buildShortfallMessage } from './components/PartsRowsList.jsx';
 import { HoldReasonSheet } from './components/HoldReasonSheet.jsx';
+import { PhotoStrip } from './components/PhotoStrip.jsx';
 import { useJobDetail } from './useJobDetail.js';
 import { LoadingState, ErrorState } from '../../components/index.js';
 import styles from './LogWorkView.module.css';
@@ -52,6 +53,9 @@ export function LogWorkView() {
   // Complete state
   const [completeKey, setCompleteKey]   = useState(() => newAttemptKey());
   const [completeError, setCompleteError] = useState(null);
+
+  // Photos
+  const [photos, setPhotos] = useState([]);
 
   // Hold sheet for shortfall path
   const [holdSheetOpen, setHoldSheetOpen]     = useState(false);
@@ -166,6 +170,10 @@ export function LogWorkView() {
     partsMutation.mutate({ lines, locationId: null });
   }, [assertOnline, partsMutation, rows]);
 
+  const handlePhotoAdded = useCallback((photo) => {
+    setPhotos((prev) => [...prev, photo]);
+  }, []);
+
   const handleShortfall = useCallback((partCode, shortfallDetail) => {
     setHoldSheetNote(buildShortfallMessage(partCode, shortfallDetail));
     setHoldSheetOpen(true);
@@ -214,6 +222,13 @@ export function LogWorkView() {
           dispatch={dispatch}
           onShortfall={handleShortfall}
           isPending={partsMutation.isPending}
+        />
+
+        <PhotoStrip
+          workOrderId={jobId}
+          photos={photos}
+          onPhotoAdded={handlePhotoAdded}
+          disabled={anyPending}
         />
 
         {rows.length > 0 && !partsSubmitted && (

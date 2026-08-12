@@ -1,0 +1,84 @@
+.capture {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.captureBtn {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 2px dashed var(--color-border, #ccc);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-primary, #2563eb);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+}
+
+.captureBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.progressBar {
+  height: 4px;
+  background: var(--color-bg-subtle, #e5e7eb);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-primary, #2563eb);
+  transition: width 0.15s linear;
+}
+
+.errorState {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--color-error-bg, #fef2f2);
+  border: 1px solid var(--color-error-border, #fca5a5);
+}
+
+.errorMsg {
+  flex: 1 1 auto;
+  font-size: 0.85rem;
+  color: var(--color-error-text, #dc2626);
+}
+
+.retryBtn,
+.cancelErrBtn {
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: none;
+}
+
+.retryBtn {
+  background: var(--color-primary, #2563eb);
+  color: #fff;
+}
+
+.cancelErrBtn {
+  background: transparent;
+  color: var(--color-text-secondary, #6b7280);
+  border: 1px solid var(--color-border, #d1d5db);
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
