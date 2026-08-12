@@ -560,3 +560,10 @@
 - **Files:** 13 (+1205/-1)
 - **Duration:** 1185ss
 - **Approach:** Implemented a Server-Sent Events stream for SLA risk and breach alerts at GET /api/v1/sla/alerts/stream. The endpoint is secured via the existing StreamTicketAuthenticationFilter (extended with /sla/alerts/stream suffix) so single-use IP-bound tickets are required — Bearer tokens never appear in the URL. A thread-safe SlaAlertEmitterRegistry manages per-user concurrent stream caps (429 + Retry-After on violation), heartbeat scheduling via virtual thread ScheduledExecutorService, fan-out with event-id deduplication, and five Micrometer meters. A bounded ArrayDeque SlaAlertReplayBuffer with ReentrantLock and a sealed ResumeResult (Events | ResyncRequired) enables Last-Event-ID resume. Two inner @Component EventHandler adapters in SlaAlertFanoutService consume SlaRiskFlagged and SlaBreached outbox events, enrich payloads from WorkOrderRepository, store in the replay buffer, and fan out — throwing DeliveryFailedException if subscribers existed but delivery failed so the outbox retries. Configuration is driven by @ConfigurationProperties(app.sla.alert-stream.*) registered via SlaConfiguration.
+
+## WO-146: User Story: WO-146 - SLA escalation notification fan-out to dispatcher and manager
+- **Status:** completed
+- **Commit:** `540df02`
+- **Files:** 20 (+2051/-1)
+- **Duration:** 1033ss
+- **Approach:** N/A

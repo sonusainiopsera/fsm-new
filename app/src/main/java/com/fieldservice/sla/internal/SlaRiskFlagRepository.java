@@ -37,6 +37,13 @@ interface SlaRiskFlagRepository extends JpaRepository<SlaRiskFlag, UUID> {
     long countByTriggerReason(@Param("reason") String reason);
 
     /**
+     * Returns open flags (not yet cleared) where manager escalation has not been sent,
+     * for the grace-period escalation checker to process.
+     */
+    @Query("SELECT f FROM SlaRiskFlag f WHERE f.clearedAt IS NULL AND f.managerEscalatedAt IS NULL")
+    List<SlaRiskFlag> findOpenFlagsForGracePeriodEscalation();
+
+    /**
      * Bulk-closes all open flags for a terminal-state work order.
      * Used when a work order reaches COMPLETED, CLOSED, or CANCELLED mid-sweep.
      */

@@ -55,6 +55,10 @@ class SlaRiskFlag {
     @Column(name = "created_by_system", nullable = false)
     private boolean createdBySystem = true;
 
+    /** Set once when the grace-period escalation check sends the manager notification. */
+    @Column(name = "manager_escalated_at")
+    private Instant managerEscalatedAt;
+
     @Version
     @Column(name = "version", nullable = false)
     private Integer version;
@@ -84,6 +88,8 @@ class SlaRiskFlag {
         return clearedAt == null;
     }
 
+    void markManagerEscalated(Instant at) { this.managerEscalatedAt = at; }
+
     UUID getId() { return id; }
     UUID getWorkOrderId() { return workOrderId; }
     String getFlagType() { return flagType; }
@@ -94,5 +100,6 @@ class SlaRiskFlag {
     Instant getClearedAt() { return clearedAt; }
     String getClearReason() { return clearReason; }
     boolean isCreatedBySystem() { return createdBySystem; }
+    Instant getManagerEscalatedAt() { return managerEscalatedAt; }
     Integer getVersion() { return version; }
 }

@@ -225,6 +225,11 @@ app:
       replay-horizon-seconds: ${APP_SLA_ALERT_STREAM_REPLAY_HORIZON_SECONDS:300}
       max-concurrent-per-user: ${APP_SLA_ALERT_STREAM_MAX_CONCURRENT_PER_USER:3}
       emitter-timeout-ms: ${APP_SLA_ALERT_STREAM_EMITTER_TIMEOUT_MS:65000}
+    escalation:
+      suppression-window-seconds: ${APP_SLA_ESCALATION_SUPPRESSION_WINDOW_SECONDS:1800}
+      grace-period-cron: ${APP_SLA_ESCALATION_GRACE_PERIOD_CRON:0 */5 * * * *}
+      deep-link-template: ${APP_SLA_ESCALATION_DEEP_LINK_TEMPLATE:/work-orders?ref={ref}}
+      enabled: ${APP_SLA_ESCALATION_ENABLED:true}
 
   cert:
     sweep:
