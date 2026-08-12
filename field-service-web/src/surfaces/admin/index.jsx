@@ -19,6 +19,8 @@ const TechniciansPage           = lazy(() => import('../../features/admin/techni
 const SkillsPage                = lazy(() => import('../../features/admin/skills/SkillsPage.jsx'))
 const CertificationTypesPage    = lazy(() => import('../../features/admin/certifications/CertificationTypesPage.jsx'))
 const TechnicianCertificationsPage = lazy(() => import('../../features/admin/certifications/TechnicianCertificationsPage.jsx'))
+// Readiness report — MANAGER and ADMIN only (Phase 1 exit gate)
+const ReadinessReportPage        = lazy(() => import('../../features/admin/readiness/ReadinessReportPage.jsx'))
 // Privacy administration — PRIVACY_ADMIN and ADMIN only
 const ClassificationRegistryPage = lazy(() => import('../../features/admin/privacy/ClassificationRegistryPage.jsx'))
 const RetentionSchedulePage      = lazy(() => import('../../features/admin/privacy/RetentionSchedulePage.jsx'))
@@ -40,6 +42,8 @@ export default function AdminSurface() {
       <Route path="technicians/:id/certifications" element={<S><TechnicianCertificationsPage /></S>} />
       <Route path="skills" element={<S><SkillsPage /></S>} />
       <Route path="certification-types" element={<S><CertificationTypesPage /></S>} />
+      {/* Readiness report route */}
+      <Route path="readiness" element={<S><ReadinessReportPage /></S>} />
       {/* Privacy administration routes */}
       <Route path="privacy" element={<Navigate to="classifications" replace />} />
       <Route path="privacy/classifications" element={<S><ClassificationRegistryPage /></S>} />

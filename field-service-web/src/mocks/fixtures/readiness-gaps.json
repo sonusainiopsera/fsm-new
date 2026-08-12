@@ -1,0 +1,38 @@
+{
+  "data": [
+    {
+      "technicianId": "00000000-0000-0000-0000-000000000022",
+      "employeeCode": "EMP-R02",
+      "displayName": "Readiness Tech 2 (missing cert)",
+      "missingFields": [],
+      "missingCertificationTypes": ["GAS_SAFE"],
+      "expiredCertificationTypes": [],
+      "expiringSoonCertificationTypes": []
+    },
+    {
+      "technicianId": "00000000-0000-0000-0000-000000000023",
+      "employeeCode": "EMP-R03",
+      "displayName": "Readiness Tech 3 (expired cert)",
+      "missingFields": [],
+      "missingCertificationTypes": [],
+      "expiredCertificationTypes": ["GAS_SAFE"],
+      "expiringSoonCertificationTypes": []
+    },
+    {
+      "technicianId": "00000000-0000-0000-0000-000000000024",
+      "employeeCode": null,
+      "displayName": "Readiness Tech 4 (missing field)",
+      "missingFields": ["employee_no"],
+      "missingCertificationTypes": [],
+      "expiredCertificationTypes": [],
+      "expiringSoonCertificationTypes": []
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 25,
+    "totalElements": 3,
+    "totalPages": 1
+  },
+  "links": {}
+}

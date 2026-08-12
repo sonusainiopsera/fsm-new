@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "id": "00000000-0000-0000-0001-000000000001",
+      "isoWeek": "2026-W33",
+      "readinessPercent": 40.00,
+      "completeTechnicians": 2,
+      "activeTechnicians": 5,
+      "gateMet": false,
+      "definitionVersion": "a1b2c3d4",
+      "generatedAt": "2026-08-12T10:00:00Z",
+      "applicable": true
+    },
+    {
+      "id": "00000000-0000-0000-0001-000000000002",
+      "isoWeek": "2026-W32",
+      "readinessPercent": 20.00,
+      "completeTechnicians": 1,
+      "activeTechnicians": 5,
+      "gateMet": false,
+      "definitionVersion": "a1b2c3d4",
+      "generatedAt": "2026-08-05T10:00:00Z",
+      "applicable": true
+    }
+  ],
+  "meta": {
+    "page": 0,
+    "size": 25,
+    "totalElements": 2,
+    "totalPages": 1
+  },
+  "links": {}
+}

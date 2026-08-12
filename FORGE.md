@@ -476,3 +476,10 @@
 - **Files:** 15 (+1362/-0)
 - **Duration:** 724ss
 - **Approach:** Implemented a daily certification expiry alert sweep following the SlaEvaluationScheduler pattern. Created V45 Flyway migration adding certification_alert_state table with a unique index on (technician_certification_id, alert_stage, validity_key) where validity_key = expires_on.toString() — making re-issue reset structurally automatic. CohortClassifier is a framework-free class that classifies certifications into WARNING/URGENT/EXPIRED cohorts using configurable day windows. CertificationExpirySweep is @Profile('worker') @Scheduled with PostgreSQL advisory lock (LOCK_KEY='CERT_SW'), keyset pagination, and per-certification REQUIRES_NEW transaction isolation via CertificationAlertPublisher. CertificationAlertConsumer provides two inner @Component EventHandler beans for idempotent notification dispatch. All configuration is externalised to app.cert.sweep.* properties with environment variable overrides.
+
+## WO-122: User Story: WO-122 - Certification data-readiness completeness report and gate
+- **Status:** completed
+- **Commit:** `db4591d`
+- **Files:** 27 (+2485/-0)
+- **Duration:** 918ss
+- **Approach:** Implemented WO-122 with a configuration-driven completeness definition in readiness_requirement (Envers-audited, ADMIN CRUD), a framework-free CompletenessEvaluator pure evaluator (no Spring, no JPA), ReadinessReportService computing aggregate/gate/gaps/CSV/snapshots, and ReadinessReportController exposing six endpoints at /api/v1/reports/certification-readiness/*. V46 migration creates readiness_requirement + readiness_snapshot + Envers audit table with seed placeholder requirements. Weekly snapshots are idempotent via delete+insert on iso_week. The web surface adds ReadinessReportPage with a KPI row (readinessPercent, gate verdict, blocking count, WoW delta), a ReadinessTrendChart (Recharts line), and a drill-down DataTable of blocking technicians with CSV export link, wired into the admin surface at /admin/readiness.

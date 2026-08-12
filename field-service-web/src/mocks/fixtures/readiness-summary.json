@@ -1,0 +1,11 @@
+{
+  "readinessPercent": 40.00,
+  "completeTechnicians": 2,
+  "activeTechnicians": 5,
+  "gateTarget": 100,
+  "gateMet": false,
+  "blockingTechnicianCount": 3,
+  "definitionVersion": "a1b2c3d4",
+  "evaluatedAt": "2026-08-12T10:00:00Z",
+  "applicable": true
+}

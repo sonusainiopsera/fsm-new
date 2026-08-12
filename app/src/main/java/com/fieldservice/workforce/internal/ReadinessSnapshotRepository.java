@@ -1,0 +1,15 @@
+package com.fieldservice.workforce.internal;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+interface ReadinessSnapshotRepository extends JpaRepository<ReadinessSnapshotEntity, UUID> {
+
+    Optional<ReadinessSnapshotEntity> findByIsoWeek(String isoWeek);
+
+    Page<ReadinessSnapshotEntity> findAllByOrderByIsoWeekDesc(Pageable pageable);
+}

@@ -150,6 +150,15 @@ export const NAV_MANIFEST = [
     allowedRoles: ['ADMIN'],
     surface: SURFACES.DISPATCH,
   },
+  // Readiness report — Phase 1 exit gate (MANAGER and ADMIN only)
+  {
+    key: 'readiness-report',
+    path: '/admin/readiness',
+    label: 'Data Readiness',
+    icon: 'check-circle',
+    allowedRoles: ['MANAGER', 'ADMIN'],
+    surface: SURFACES.ADMIN,
+  },
   // Privacy administration — PRIVACY_ADMIN and ADMIN only
   {
     key: 'privacy-classifications',
