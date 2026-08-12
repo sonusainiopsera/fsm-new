@@ -316,3 +316,47 @@ Failsafe runs integration tests, JaCoCo merges the exec files, and the check goa
 
 Total wall-clock time for the integration suite is printed in the Failsafe summary at the end of
 the build.
+
+---
+
+## KPI Baseline Instrumentation Validation (WO-207)
+
+### Metric Formulas and Denominator Exclusions
+
+**Compliance Rate**: `per_priority_rate = compliant_count / total_closed`; ALL rollup = weighted SUM (NOT mean of rates). CANCELLED WOs excluded; null `resolution_due_at` = compliant (BR-21). Boundary: `updated_at <= resolution_due_at` (inclusive ≤).
+
+**Resolution Time**: `mean = AVG(elapsed_minutes)`; `median = percentile_cont(0.5)` — linear interpolation (even n: average of two middle values; odd n: middle value).
+
+**Technician Utilization**: `per_tech = field_minutes / shift_minutes`; team rollup = SUM(field)/SUM(shift) (NOT mean of per-tech rates). Zero shift → `incompleteData=true, value=null`. Over-100% → `degraded=true, DATA_QUALITY_OVERLAP`.
+
+**First-Time-Fix**: repeat-visit window = **strictly less than 30 days** on `(asset_id, fault_key)`. Cohort maturity: `matured_at = closed_at + 30d`; promotion inclusive (`matured_at <= now`). Provisional excluded from matured rate.
+
+**Self-Service Adoption**: `adoption_rate = PORTAL_count / total`. Only `WorkOrderOrigin.PORTAL` counts; `FRONT_OFFICE` and `DISPATCHER` do not. Origin is immutable.
+
+**CSAT / NPS**: CSAT = `AVG(score)` 1–5 scale. NPS = `(promoters% - detractors%) × 100` where promoters = score 9–10, detractors = score 0–6.
+
+### Running KPI Validation Tests
+
+```bash
+# All KPI validation tests (unit — no Spring, no DB)
+mvn -f app/pom.xml test \
+  -Dtest="ComplianceMetricValidationTest,ResolutionTimeValidationTest,UtilizationValidationTest,FirstTimeFixValidationTest,SatisfactionMetricValidationTest,SelfServiceAdoptionValidationTest"
+```
+
+### Golden Dataset
+
+Expected values committed in `app/src/test/resources/golden/kpi-expected-values.json`. All values are hand-derived; a test mismatch reports metric name, segment, expected numerator/denominator, and actual.
+
+### Boundary Cases
+
+| Boundary | Test | Expected |
+|---|---|---|
+| Closure exactly at deadline | `atExactDeadline_isCompliant` | COMPLIANT |
+| Closure 1 second after deadline | `oneSecondAfterDeadline_isBreach` | BREACH |
+| Repeat visit at 29 days | `gap29Days_isWithinWindow` | Linked |
+| Repeat visit at exactly 30 days | `gap30Days_isOutsideWindow` | Not linked |
+| Cohort at T+29 days | `closedLessThan30DaysAgo_isProvisional` | PROVISIONAL |
+| Cohort at exactly T+30 days | `closedExactly30DaysAgo_isMatured` | MATURED (inclusive) |
+| Zero denominators | `zeroDenominator_*` | null (not-available) |
+| FRONT_OFFICE not self-service | `frontOffice_notCountedAsSelfService` | rate excludes FO |
+| DST-spanning maturity window | `maturityClock_dstSafe_epochSecondsArithmetic` | epoch-seconds invariant |

@@ -714,3 +714,10 @@
 - **Files:** 14 (+1584/-0)
 - **Duration:** 986ss
 - **Approach:** N/A
+
+## WO-207: User Story: WO-207 - KPI Baseline Instrumentation Validation Test Suite
+- **Status:** completed
+- **Commit:** `b5bde3f`
+- **Files:** 8 (+1272/-0)
+- **Duration:** 1124ss
+- **Approach:** Created a complete KPI baseline instrumentation validation suite for six confirmed metrics. All expected values are hand-derived and committed in kpi-expected-values.json before writing any test. Tests drive computation through existing analytics public APIs (SlaComplianceCalculator, ResolutionTimeCalculator, UtilizationCalculator, CohortMaturityResolver, RepeatVisitLinker) — no formula re-implementation. Pure unit tests only (no Spring context, no DB required). Key boundary cases covered: inclusive deadline boundary, strict 30-day repeat-visit window, provisional-to-matured clock transition at exactly T+30d, DST-safe epoch-seconds arithmetic, zero-denominator not-available, FRONT_OFFICE exclusion from self-service.
