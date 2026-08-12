@@ -32,5 +32,13 @@ export default defineConfig({
       testMatch: 'tests/performance/**/*.spec.js',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'technician',
+      testMatch: 'tests/technician/**/*.spec.js',
+      use: {
+        ...devices['Pixel 5'],
+        viewport: { width: 360, height: 800 },
+      },
+    },
   ],
 });

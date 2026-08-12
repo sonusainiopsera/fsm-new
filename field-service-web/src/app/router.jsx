@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { createBrowserRouter, Navigate, useRouteError } from 'react-router-dom';
 import { AppShell } from './AppShell.jsx';
 import { LoadingState, PermissionDeniedState, ErrorState } from '../components/index.js';
+import { technicianRoutes } from './technician/routes.js';
 
 // Route-level code splitting: each surface is a separate async chunk.
 // Technician (field) and dispatcher chunks are separated so technicians on
@@ -133,6 +134,8 @@ export const router = createBrowserRouter([
           </SurfaceSuspense>
         ),
       },
+      // Technician PWA shell — mobile-first route group at /technician/*
+      technicianRoutes,
     ],
   },
   {

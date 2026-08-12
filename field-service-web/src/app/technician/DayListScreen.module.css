@@ -1,0 +1,11 @@
+.screen {
+  width: 100%;
+}
+
+.placeholder,
+.offlineNotice {
+  padding: var(--space-4);
+  font-size: var(--fs-md);
+  color: var(--color-text-secondary);
+  text-align: center;
+}

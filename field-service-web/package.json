@@ -23,7 +23,9 @@
     "test:watch": "vitest",
     "test:a11y": "playwright test --project=a11y",
     "test:performance": "playwright test --project=performance",
-    "audit:design-system": "node scripts/audit-design-system.mjs"
+    "audit:design-system": "node scripts/audit-design-system.mjs",
+    "check:bundle-size": "node scripts/check-bundle-size.mjs",
+    "test:technician": "playwright test --project=technician"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.56.2",

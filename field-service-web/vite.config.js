@@ -31,6 +31,8 @@ export default defineConfig({
           // Surface chunks — each surface is its own cacheable chunk
           if (id.includes('/surfaces/dispatch/') || id.includes('/features/workorders/')) return 'chunk-dispatch';
           if (id.includes('/surfaces/field/')) return 'chunk-field';
+          // Technician PWA shell — kept lean so it loads fast on mobile networks
+          if (id.includes('/app/technician/')) return 'chunk-technician';
           if (id.includes('/surfaces/operations/')) return 'chunk-operations';
           if (id.includes('/surfaces/portal/')) return 'chunk-portal';
           if (id.includes('/surfaces/auth/'))  return 'chunk-auth';

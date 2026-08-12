@@ -1,0 +1,78 @@
+/* NotConnectedBanner — offline status bar */
+
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-warning-subtle);
+  border-bottom: 1px solid var(--color-warning-muted);
+  /* Ensure banner never causes horizontal scroll at 360 px */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Offline indicator dot */
+.icon {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-warning-base);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.heading {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-warning-text);
+  line-height: var(--lh-tight);
+}
+
+.detail {
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Retry button — 44 × 44 px minimum touch target */
+.retryButton {
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-warning-base);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-warning-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: background-color var(--duration-micro) var(--easing-standard);
+}
+
+.retryButton:hover,
+.retryButton:focus-visible {
+  background-color: var(--color-warning-muted);
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: 2px;
+}

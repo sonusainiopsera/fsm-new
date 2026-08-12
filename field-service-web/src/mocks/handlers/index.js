@@ -494,6 +494,44 @@ const DEFAULT_ROUTES = {
     },
   },
 
+  // ── Technician: day list ─────────────────────────────────────────────────
+
+  // Technician day list — 200 OK (happy path used by both unit and Playwright tests)
+  'GET:/api/v1/technicians/me/work-orders': {
+    status: 200,
+    body: {
+      data: [
+        {
+          id: 'wo-tech-001', reference: 'WO-0042', state: 'ASSIGNED', priority: 'HIGH',
+          customerName: 'Acme Corp', siteName: 'Main Campus', siteAddress: '1 Main St, London',
+          description: 'Replace faulty circuit breaker in panel B',
+          scheduledAt: '2026-08-12T09:00:00Z',
+          responseDeadline: '2026-08-12T13:00:00Z', resolutionDeadline: '2026-08-12T17:00:00Z',
+          atRisk: false, version: 1,
+        },
+        {
+          id: 'wo-tech-002', reference: 'WO-0043', state: 'IN_PROGRESS', priority: 'URGENT',
+          customerName: 'Beta Industries', siteName: 'Southside Warehouse',
+          siteAddress: '88 Industrial Way, Manchester',
+          description: 'HVAC compressor failure — cooling plant room',
+          scheduledAt: '2026-08-12T11:30:00Z',
+          responseDeadline: '2026-08-12T12:00:00Z', resolutionDeadline: '2026-08-12T14:00:00Z',
+          atRisk: true, version: 3,
+        },
+      ],
+      page: { number: 0, size: 20, totalElements: 2, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/technicians/me/work-orders?page=0&size=20', next: null, prev: null },
+      asOf: '2026-08-12T08:00:00Z',
+    },
+    headers: { 'ETag': '"tech-day-etag-v1"' },
+  },
+
+  // Technician update status — mutation (always 200 for the happy path)
+  'PATCH:/api/v1/technicians/me/work-orders/wo-tech-001/status': {
+    status: 200,
+    body: { id: 'wo-tech-001', state: 'IN_PROGRESS', version: 2 },
+  },
+
   // ── Portal: customer self-service ────────────────────────────────────────
 
   // Customer's sites list

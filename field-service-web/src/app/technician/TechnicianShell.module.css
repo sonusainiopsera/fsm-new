@@ -1,0 +1,164 @@
+/* TechnicianShell — mobile-first PWA layout */
+
+/* Shell grid: app-bar | update-bar? | banner? | main content | bottom nav */
+.shell {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  min-height: 100dvh;
+  /* Constrain to viewport width — prevents horizontal scroll at 360 px */
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--color-surface-base);
+  color: var(--color-text-primary);
+}
+
+/* ── App bar ──────────────────────────────────────────────────────────────── */
+
+.appBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* 56 px height gives enough room for one-handed reach */
+  min-height: 56px;
+  padding: 0 var(--space-4);
+  background-color: var(--color-surface-raised);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: var(--elevation-1);
+}
+
+.appBarTitle {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--ls-tight);
+  flex: 1;
+}
+
+/* Appearance toggle — 44 × 44 px minimum hit area */
+.appearanceToggle {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: background-color var(--duration-micro) var(--easing-standard),
+              color var(--duration-micro) var(--easing-standard);
+}
+
+.appearanceToggle:hover,
+.appearanceToggle:focus-visible {
+  background-color: var(--color-surface-base);
+  color: var(--color-text-primary);
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: 2px;
+}
+
+/* ── Update bar ───────────────────────────────────────────────────────────── */
+
+.updateBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-info-subtle);
+  border-bottom: 1px solid var(--color-info-muted);
+}
+
+.updateMessage {
+  font-size: var(--fs-sm);
+  color: var(--color-info-text);
+}
+
+.updateButton {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-info-base);
+  border-radius: var(--radius-control);
+  background: var(--color-info-base);
+  color: var(--color-text-on-accent);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+
+.updateButton:hover,
+.updateButton:focus-visible {
+  background: var(--color-info-emphasis);
+  outline: 2px solid var(--color-info-emphasis);
+  outline-offset: 2px;
+}
+
+/* ── Main content area ────────────────────────────────────────────────────── */
+
+.main {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-4);
+  /* Prevent focus ring from being clipped */
+  outline: none;
+}
+
+/* ── Bottom navigation bar ────────────────────────────────────────────────── */
+
+.bottomBar {
+  display: flex;
+  align-items: stretch;
+  background-color: var(--color-surface-raised);
+  border-top: 1px solid var(--color-border);
+  /* Safe area inset for notched devices */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  box-shadow: 0 -1px 3px 0 rgb(0 0 0 / 0.06);
+}
+
+/* Nav item — 44 × 44 px minimum hit area */
+.navItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-2);
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  transition: color var(--duration-micro) var(--easing-standard);
+}
+
+.navItemActive {
+  color: var(--color-accent-base);
+}
+
+.navItem:focus-visible {
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: -2px;
+}
+
+.navIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke: currentColor;
+}
+
+.navLabel {
+  line-height: 1;
+}
