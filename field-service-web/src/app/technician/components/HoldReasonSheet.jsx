@@ -20,20 +20,26 @@ const NOTE_MAX_LENGTH = 500;
  *   onConfirm: (reasonCode: string, note: string) => void,
  *   onCancel: () => void,
  *   isPending: boolean,
+ *   defaultReasonCode?: string,
+ *   defaultNote?: string,
  * }} props
  */
-export function HoldReasonSheet({ open, holdReasons, onConfirm, onCancel, isPending }) {
-  const [selectedCode, setSelectedCode] = useState('');
-  const [note, setNote] = useState('');
+export function HoldReasonSheet({ open, holdReasons, onConfirm, onCancel, isPending, defaultReasonCode = '', defaultNote = '' }) {
+  const [selectedCode, setSelectedCode] = useState(defaultReasonCode);
+  const [note, setNote] = useState(defaultNote);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setSelectedCode(defaultReasonCode);
+      setNote(defaultNote);
+      setError('');
+    } else {
       setSelectedCode('');
       setNote('');
       setError('');
     }
-  }, [open]);
+  }, [open, defaultReasonCode, defaultNote]);
 
   if (!open) return null;
 

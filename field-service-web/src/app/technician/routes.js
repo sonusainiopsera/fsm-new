@@ -5,6 +5,7 @@ import { LoadingState } from '../../components/index.js';
 // Route-level code splitting: each screen is its own lazy chunk.
 const LazyDayList    = lazy(() => import('./DayListScreen.jsx'));
 const LazyJobDetail  = lazy(() => import('./JobDetailView.jsx').then(m => ({ default: m.JobDetailView })));
+const LazyLogWork    = lazy(() => import('./LogWorkView.jsx').then(m => ({ default: m.LogWorkView })));
 
 function ShellSuspense({ children }) {
   return (
@@ -42,6 +43,14 @@ export const technicianRoutes = {
       element: (
         <ShellSuspense>
           <LazyJobDetail />
+        </ShellSuspense>
+      ),
+    },
+    {
+      path: ':jobId/log-work',
+      element: (
+        <ShellSuspense>
+          <LazyLogWork />
         </ShellSuspense>
       ),
     },
