@@ -1,0 +1,7 @@
+{
+  "rows": [
+    { "originIndex": 0, "estimatedMinutes": 12.5 },
+    { "originIndex": 1, "estimatedMinutes": 25.0 },
+    { "originIndex": 2, "estimatedMinutes": 8.3 }
+  ]
+}

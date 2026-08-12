@@ -260,6 +260,33 @@ app:
     # Interval between purge-job runs in milliseconds
     purge-interval: ${APP_IDEMPOTENCY_PURGE_INTERVAL:300000}
 
+geo:
+  travel:
+    provider:
+      # Base URL for the travel-time provider — no trailing slash
+      base-url: ${TRAVEL_PROVIDER_BASE_URL:https://api.travel-provider.example.com/v1}
+      # API key for the provider — injected from managed secrets store; never logged
+      api-key: ${TRAVEL_PROVIDER_API_KEY:}
+      # Comma-separated list of FQDNs permitted for outbound travel egress (SSRF protection)
+      allowed-hosts: ${TRAVEL_PROVIDER_ALLOWED_HOSTS:}
+      connect-timeout: ${TRAVEL_PROVIDER_CONNECT_TIMEOUT:1s}
+      read-timeout: ${TRAVEL_PROVIDER_READ_TIMEOUT:1s}
+      # Average road speed in km/h for the Haversine fallback — lower values are more conservative
+      avg-speed-kmh: ${TRAVEL_PROVIDER_AVG_SPEED_KMH:30.0}
+    cache:
+      # TTL for Redis-cached travel-time estimates (BR-23: 5 minutes balances freshness and minimisation)
+      ttl: ${TRAVEL_CACHE_TTL:300s}
+    resilience:
+      # Total wall-clock budget for a provider call including retries (must stay within 1.5 s)
+      time-limiter-timeout: ${TRAVEL_TIME_LIMITER_TIMEOUT:1500ms}
+      # Maximum attempts (first call + retries); kept at 2 to respect the TimeLimiter budget
+      max-retry-attempts: ${TRAVEL_MAX_RETRY_ATTEMPTS:2}
+      # CircuitBreaker opens when failure rate exceeds this threshold (50% over 20-call window)
+      circuit-breaker-failure-rate-threshold: ${TRAVEL_CB_FAILURE_RATE:50}
+      circuit-breaker-sliding-window-size: ${TRAVEL_CB_WINDOW_SIZE:20}
+      # Time the breaker remains open before entering half-open probe state
+      circuit-breaker-wait-duration: ${TRAVEL_CB_WAIT_DURATION:30s}
+
 dispatch:
   eligibility:
     # Maximum number of active technicians evaluated per dispatch eligibility request
