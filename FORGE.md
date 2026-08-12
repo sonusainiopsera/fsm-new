@@ -441,3 +441,10 @@
 - **Files:** 11 (+1406/-0)
 - **Duration:** 1010ss
 - **Approach:** Implemented GET /api/v1/portal/service-requests as a scoped, paginated collection endpoint. CustomerAccessScope composes a JPA Specification that restricts results to the authenticated portal account's sites. Optional filters (StatusGroup enum, siteId FK validation, bounded date range) are ANDed in as additional Specification predicates. Page size is clamped to 50 via PageQuery. SortAllowList restricts sort fields to {createdAt, state} with UUID tie-break appended. Keyset cursor mode is activated by the controller when a cursor param is present; the controller also auto-switches the links.next URL from offset to cursor when the next page number reaches offsetThreshold. Foreign siteId is validated via SiteRepository ownership check and throws ScopeUnavailableException (→ 404). Invalid date ranges throw InvalidDateRangeException (→ 400) handled in PortalExceptionAdvice. PortalHistoryRow is a redacted record (GPS, technician, cost, internal codes excluded) with @JsonInclude.NON_NULL. Assets are batch-loaded per page to avoid N+1. Flyway V41 adds composite additive indexes only.
+
+## WO-173: User Story: WO-173 - CSAT survey issuance and response capture on closure
+- **Status:** completed
+- **Commit:** `b155ec0`
+- **Files:** 26 (+1358/-1)
+- **Duration:** 1354ss
+- **Approach:** Implemented CSAT survey issuance and response capture as an outbox-driven system. CsatIssuanceConsumer subscribes to WORK_ORDER_STATE_CHANGED events, filters for toState=CLOSED, and idempotently inserts a CsatSurvey row (guarded by existsBySourceEventId + existsByWorkOrderId + DB unique constraints). CsatSurveyDeliveryService wraps the optional NotificationPort with an IN_APP fallback when the port is unavailable. CsatSurveyService exposes paginated survey listing and response submission (with duplicate/expiry validation). PortalSurveyController wires the portal endpoints. CSAT_RESPONSE_RECORDED events drive analytics. EncryptedStringConverter protects the comment field at rest.

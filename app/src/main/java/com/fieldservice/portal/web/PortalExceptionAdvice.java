@@ -4,6 +4,8 @@ import com.fieldservice.platform.api.ApiErrorResponse;
 import com.fieldservice.platform.api.ErrorCode;
 import com.fieldservice.platform.api.FieldError;
 import com.fieldservice.portal.access.ScopeUnavailableException;
+import com.fieldservice.portal.csat.CsatAlreadyAnsweredException;
+import com.fieldservice.portal.csat.CsatWindowExpiredException;
 import com.fieldservice.portal.history.InvalidDateRangeException;
 import com.fieldservice.portal.service.PortalInvitationService;
 import org.slf4j.Logger;
@@ -113,6 +115,40 @@ public class PortalExceptionAdvice {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .header(X_TRACE_ID, traceId)
                 .body(ApiErrorResponse.forbidden(traceId));
+    }
+
+    /**
+     * Duplicate CSAT response — survey already answered.
+     * Returns 409 CONFLICT with {@code CSAT_ALREADY_ANSWERED}.
+     */
+    @ExceptionHandler(CsatAlreadyAnsweredException.class)
+    public ResponseEntity<ApiErrorResponse> handleCsatAlreadyAnswered(
+            CsatAlreadyAnsweredException ex) {
+        String traceId = resolveTraceId();
+        log.warn("portal_csat_already_answered survey_id={} trace_id={}", ex.getSurveyId(), traceId);
+        ApiErrorResponse body = ApiErrorResponse.of(
+                ErrorCode.CSAT_ALREADY_ANSWERED,
+                "This survey has already been answered.", traceId);
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .header(X_TRACE_ID, traceId)
+                .body(body);
+    }
+
+    /**
+     * CSAT response window expired — survey no longer accepting responses.
+     * Returns 422 UNPROCESSABLE_ENTITY with {@code CSAT_WINDOW_EXPIRED}.
+     */
+    @ExceptionHandler(CsatWindowExpiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleCsatWindowExpired(
+            CsatWindowExpiredException ex) {
+        String traceId = resolveTraceId();
+        log.warn("portal_csat_window_expired survey_id={} trace_id={}", ex.getSurveyId(), traceId);
+        ApiErrorResponse body = ApiErrorResponse.of(
+                ErrorCode.CSAT_WINDOW_EXPIRED,
+                "The response window for this survey has expired.", traceId);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .header(X_TRACE_ID, traceId)
+                .body(body);
     }
 
     // -------------------------------------------------------------------------

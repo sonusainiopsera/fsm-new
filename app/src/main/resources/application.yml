@@ -77,6 +77,8 @@ app:
     enabled: true
     worker-interval-ms: 1000
     retention-purge-interval-ms: 3600000
+  csat:
+    response-window-days: 7
   api:
     public-base-url: ${APP_API_PUBLIC_BASE_URL:http://localhost:8080}
   auth:

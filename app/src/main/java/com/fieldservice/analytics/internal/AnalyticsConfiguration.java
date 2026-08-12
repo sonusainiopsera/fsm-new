@@ -74,6 +74,11 @@ class AnalyticsConfiguration {
         return KpiOutboxConsumer.handlerFor("LABOUR_ENTRY_ADDED", consumer);
     }
 
+    @Bean
+    EventHandler csatResponseRecordedAnalyticsHandler(KpiOutboxConsumer consumer) {
+        return KpiOutboxConsumer.handlerFor("CSAT_RESPONSE_RECORDED", consumer);
+    }
+
     // ---------------------------------------------------------------
     // Replica DataSource (optional — falls back to primary)
     // ---------------------------------------------------------------
