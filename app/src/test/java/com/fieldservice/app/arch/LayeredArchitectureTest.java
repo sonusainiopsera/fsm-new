@@ -184,6 +184,29 @@ class LayeredArchitectureTest {
         rule.check(PROD_CLASSES);
     }
 
+    // ==========================================================================
+    // WO-135 Geo module dependency boundary rules
+    // ==========================================================================
+
+    /**
+     * The dispatch module must depend only on {@code geo.api} (the port), never on
+     * {@code geo.internal} (adapter, cache, provider). This keeps the Haversine
+     * fallback, Redis caching, and HTTP provider details hidden behind the port.
+     */
+    @Test
+    @DisplayName("dispatch module must not access geo.internal — only geo.api is allowed")
+    void dispatch_must_not_depend_on_geo_internal() {
+        ArchRule rule = noClasses()
+                .that().resideInAPackage("com.fieldservice.dispatch..")
+                .should().accessClassesThat()
+                .resideInAPackage("com.fieldservice.geo.internal..")
+                .because("Dispatch must depend only on the TravelTimePort interface in geo.api, "
+                        + "not on geo.internal adapter/cache/provider classes. "
+                        + "See docs/arch/module-boundaries.md §geo-travel-port.");
+
+        rule.check(PROD_CLASSES);
+    }
+
     /**
      * Classes outside the platform.crypto package must not call
      * {@code SubjectKeyManager.destroy()} directly.  Destruction must flow through

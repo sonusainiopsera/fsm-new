@@ -588,3 +588,10 @@
 - **Files:** 20 (+2016/-4)
 - **Duration:** 636ss
 - **Approach:** Implemented the portal service history browser (ServiceHistoryPage) and satisfaction survey (SurveyPage) as lazy-loaded React routes wired into the existing portal surface. The history browser uses TanStack Query with URL search-param filter state and a LinkPager component that navigates exclusively via server-returned links.next/links.prev — never constructing its own offsets. The survey form uses ScoreRadioGroup (accessible role=radiogroup, aria-label per option) for 1–5 score and 0–10 NPS, a length-capped comment with explicit PII notice, and defers all duplicate/expiry authority to the server via 409/422 responses. API client additions (fetchServiceHistory, fetchSurveyState, submitSurvey) follow the existing portalClient.js conventions with JSDoc types. MSW handlers and fixtures cover page 0, page 1, empty set, answerable/answered/expired surveys.
+
+## WO-135: User Story: WO-135 - Resilient travel-time provider adapter with cached degradation
+- **Status:** completed
+- **Commit:** `056f678`
+- **Files:** 23 (+1772/-0)
+- **Duration:** 868ss
+- **Approach:** Implemented the geo module travel-time adapter following the same pattern as the AI gateway module. The public surface is TravelTimePort (geo.api) with TravelMatrixResult and Coordinates records. The adapter (geo.internal) issues a single batched POST to the provider, serves results from Redis cache keyed on rounded coordinates (4dp, ~11m precision), and falls back to HaversineEstimator on any failure. Resilience4j wraps the call with TimeLimiter (1.5s), Retry (max 2 attempts, jittered exponential), and CircuitBreaker (50% failure rate / 20-call sliding window / 30s wait). SSRF is prevented by TravelProviderAllowList which validates the configured host at startup (context refresh fails for non-listed hosts). TravelHealthIndicator exposes circuit breaker state at /actuator/health. Micrometer meters geo.travel.call.duration/errors, geo.travel.degraded, and geo.travel.cache.hit are published. An ArchUnit rule added to LayeredArchitectureTest enforces dispatch → geo.api (never geo.internal).

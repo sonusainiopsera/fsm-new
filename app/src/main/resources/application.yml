@@ -87,6 +87,28 @@ app:
     access-token-ttl: ${APP_AUTH_ACCESS_TOKEN_TTL:PT15M}
     refresh-token-ttl: ${APP_AUTH_REFRESH_TOKEN_TTL:P7D}
 
+geo:
+  travel:
+    provider:
+      base-url: ${TRAVEL_PROVIDER_BASE_URL:https://maps.example.com}
+      api-key: ${TRAVEL_PROVIDER_API_KEY:}
+      allowed-hosts:
+        - ${TRAVEL_PROVIDER_ALLOWED_HOST:maps.example.com}
+      connect-timeout: 2s
+      read-timeout: 1500ms
+      travel-mode: car
+      average-speed-kph: 50.0
+    resilience:
+      time-limiter-timeout: 1500ms
+      max-attempts: 2
+      circuit-breaker-failure-rate-threshold: 50
+      circuit-breaker-window-size: 20
+      circuit-breaker-wait-duration: 30s
+      circuit-breaker-half-open-calls: 3
+    cache:
+      ttl-seconds: 300
+      coordinate-precision-decimal-places: 4
+
 ai:
   copilot:
     enabled: false

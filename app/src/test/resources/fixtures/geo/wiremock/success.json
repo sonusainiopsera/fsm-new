@@ -1,0 +1,7 @@
+{
+  "estimates": [
+    { "technicianId": "00000000-0000-0000-0001-000000000001", "estimatedMinutes": 12 },
+    { "technicianId": "00000000-0000-0000-0001-000000000002", "estimatedMinutes": 25 },
+    { "technicianId": "00000000-0000-0000-0001-000000000003", "estimatedMinutes": 7  }
+  ]
+}
