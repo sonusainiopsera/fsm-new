@@ -2,10 +2,12 @@ package com.fieldservice.workorder;
 
 import com.fieldservice.domain.workorder.WorkOrder;
 import com.fieldservice.domain.workorder.WorkOrderState;
+import com.fieldservice.workorder.api.dto.TransitionRequest;
 import com.fieldservice.workorder.lifecycle.WorkOrderEvent;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -52,7 +54,8 @@ public interface WorkOrderTransitionService {
     @PreAuthorize("hasAnyRole('DISPATCHER', 'TECHNICIAN', 'ADMIN')")
     TransitionResult applyTransition(UUID workOrderId, WorkOrderEvent event,
                                      int expectedVersion, @Nullable String reason,
-                                     @Nullable String holdReasonCode);
+                                     @Nullable String holdReasonCode,
+                                     @Nullable List<TransitionRequest.ShortfallEntry> shortfalls);
 
     /** Carries the updated work order and the state it was in before the transition. */
     record TransitionResult(WorkOrder workOrder, WorkOrderState fromState) {}

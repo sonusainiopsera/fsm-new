@@ -5,7 +5,9 @@ import com.fieldservice.domain.workorder.WorkOrderHold;
 import com.fieldservice.domain.workorder.WorkOrderHoldRepository;
 import com.fieldservice.domain.workorder.WorkOrderRepository;
 import com.fieldservice.domain.workorder.WorkOrderState;
+import com.fieldservice.outbox.payload.ReplenishmentNeededPayload;
 import com.fieldservice.outbox.payload.WorkOrderStateChangedPayload;
+import com.fieldservice.workorder.api.dto.TransitionRequest;
 import com.fieldservice.platform.api.DomainEvent;
 import com.fieldservice.platform.api.DomainEventPublisher;
 import com.fieldservice.platform.outbox.PiiRedactionUtility;
@@ -36,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -152,7 +155,8 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
     @Override
     public TransitionResult applyTransition(UUID workOrderId, WorkOrderEvent event,
                                             int expectedVersion, @Nullable String reason,
-                                            @Nullable String holdReasonCode) {
+                                            @Nullable String holdReasonCode,
+                                            @Nullable List<TransitionRequest.ShortfallEntry> shortfalls) {
 
         // 1. Load via scope (absent == out-of-scope; maps to 403 by non-disclosure contract)
         WorkOrder workOrder = scopedQueryExecutor.findById(WorkOrder.class, workOrderId, workOrderRepository);
@@ -193,7 +197,8 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
         workOrder.setState(descriptor.toState());
 
         // 6a. Hold interval management (inside the transaction so audit and hold data cannot diverge)
-        handleHoldInterval(workOrder, fromState, event, actor, holdReasonCode, reason, transitionInstant);
+        handleHoldInterval(workOrder, fromState, event, actor, holdReasonCode, reason, transitionInstant,
+                shortfalls != null ? shortfalls : Collections.emptyList());
 
         WorkOrder saved;
         try {
@@ -232,7 +237,8 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
     private void handleHoldInterval(WorkOrder workOrder, WorkOrderState fromState,
                                     WorkOrderEvent event, @Nullable UUID actor,
                                     @Nullable String holdReasonCode, @Nullable String note,
-                                    Instant transitionInstant) {
+                                    Instant transitionInstant,
+                                    List<TransitionRequest.ShortfallEntry> shortfalls) {
         if (event == WorkOrderEvent.HOLD) {
             WorkOrderHold hold = new WorkOrderHold();
             hold.setWorkOrderId(workOrder.getId());
@@ -242,9 +248,19 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
             hold.setStartedBy(actor);
             workOrderHoldRepository.save(hold);
 
+            // Record coded hold reason on work order for BR-14 breach coding (AC-9)
+            if (holdReasonCode != null) {
+                workOrder.setHoldReasonCode(holdReasonCode);
+            }
+
             // Open SLA clock pause if the hold reason flags the clock as pausing
             if (holdReasonCode != null && isClockPausingReason(holdReasonCode)) {
                 slaClockPausePort.openPause(workOrder.getId(), holdReasonCode, transitionInstant);
+            }
+
+            // Publish ReplenishmentNeeded in the same transaction for AWAITING_PARTS holds (AC-4)
+            if ("AWAITING_PARTS".equals(holdReasonCode)) {
+                publishReplenishmentNeededEvent(workOrder, actor, shortfalls, transitionInstant);
             }
 
         } else if (fromState == WorkOrderState.ON_HOLD) {
@@ -375,6 +391,41 @@ public class WorkOrderTransitionServiceImpl implements WorkOrderTransitionServic
                 actor,
                 payloadMap);
         eventPublisher.publish(domainEvent);
+    }
+
+    /**
+     * Publishes a {@link ReplenishmentNeededPayload} outbox event in the same transaction
+     * as the AWAITING_PARTS hold state change (AC-4).
+     *
+     * <p>Failure is caught and logged so a notification issue can never block or roll back
+     * a legitimate hold transition. The hold state change always commits first.
+     */
+    private void publishReplenishmentNeededEvent(WorkOrder workOrder, @Nullable UUID actor,
+                                                 List<TransitionRequest.ShortfallEntry> shortfalls,
+                                                 Instant occurredAt) {
+        try {
+            List<ReplenishmentNeededPayload.ShortfallLine> lines = shortfalls.stream()
+                    .map(s -> new ReplenishmentNeededPayload.ShortfallLine(s.partId(), s.quantity()))
+                    .collect(Collectors.toList());
+
+            var payload = new ReplenishmentNeededPayload(
+                    workOrder.getId(), lines, actor, occurredAt);
+            Map<String, Object> payloadMap = PiiRedactionUtility.toPayloadMap(payload);
+            DomainEvent domainEvent = DomainEvent.of(
+                    ReplenishmentNeededPayload.EVENT_TYPE,
+                    ReplenishmentNeededPayload.AGGREGATE_TYPE,
+                    workOrder.getId(),
+                    occurredAt,
+                    MDC.get("traceId"),
+                    actor,
+                    payloadMap);
+            eventPublisher.publish(domainEvent);
+            log.info("replenishment_needed.published: workOrderId={} shortfallCount={}",
+                    workOrder.getId(), lines.size());
+        } catch (Exception ex) {
+            log.warn("replenishment_needed.publish_failed: workOrderId={} error={}",
+                    workOrder.getId(), ex.getMessage(), ex);
+        }
     }
 
     private UUID resolveActorId() {

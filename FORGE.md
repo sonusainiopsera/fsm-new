@@ -665,3 +665,10 @@
 - **Files:** 15 (+521/-43)
 - **Duration:** 905ss
 - **Approach:** Implemented WO-137 advisory parts availability factor with ratio-based scoring and pre-assignment warning. Created StockAvailabilityPort read-only interface (implemented by StockQueryService via extends). Extended ScoringContext with partsAvailabilityRatio (0..1 van satisfaction fraction). Rewrote PartsAvailabilityFactor to compute score from the actual ratio: FULLY_STOCKED=1.0, PARTIALLY_STOCKED=max(ratio,0.5), COLLECTABLE=ratio+discount*(1-ratio), UNAVAILABLE=0.5 (neutral floor, never zero). Added configurable nearbyCollectableDiscount (property dispatch.scoring.parts.nearby-collectable-discount, default 0.6) injected via ScoringConfiguration. Created PartsWarningAssembler that identifies parts with network-wide shortfall (short at ALL candidate locations) and emits PARTS_UNAVAILABLE warning. RecommendationOrchestrator extended to: compute per-candidate van satisfaction ratio from CandidateAvailabilityResult shortfalls, build PartsAvailabilitySummary per candidate, assemble job-level PartsWarning, inject into CandidateDto and RecommendationResponse.Meta. Added Micrometer counter dispatch.parts.degraded incremented on inventory port failure. Fixed pre-existing bug: Meta was hardcoding partsDataDegraded=false instead of using the computed value. Fixed ScoringWeightsIT compilation error (was passing boolean to PartsAvailabilityStatus parameter).
+
+## WO-152: User Story: WO-152 - Awaiting-parts hold and replenishment need signalling
+- **Status:** completed
+- **Commit:** `315db78`
+- **Files:** 18 (+968/-11)
+- **Duration:** 926ss
+- **Approach:** N/A

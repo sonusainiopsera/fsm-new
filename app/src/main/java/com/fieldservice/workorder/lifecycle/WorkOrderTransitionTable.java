@@ -60,7 +60,7 @@ public final class WorkOrderTransitionTable {
                             HoldReasonRequiredGuard.GUARD_ID),
                     row(ON_HOLD,     RESUME,   IN_PROGRESS, roles(Role.TECHNICIAN, Role.DISPATCHER, Role.ADMIN)),
                     row(IN_PROGRESS, COMPLETE, COMPLETED,   roles(Role.TECHNICIAN, Role.DISPATCHER, Role.ADMIN),
-                            LabourTimeRecordedGuard.GUARD_ID),
+                            LabourTimeRecordedGuard.GUARD_ID, PartsReconciledGuard.GUARD_ID),
                     row(COMPLETED,   CLOSE,    CLOSED,      roles(Role.DISPATCHER, Role.ADMIN),
                             PartsReconciledGuard.GUARD_ID),
 

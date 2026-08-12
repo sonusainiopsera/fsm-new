@@ -255,4 +255,15 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
 
     public boolean isExcludedFromSlaCompliance() { return excludedFromSlaCompliance; }
     public void setExcludedFromSlaCompliance(boolean excluded) { this.excludedFromSlaCompliance = excluded; }
+
+    /**
+     * The coded reason when this work order was placed on hold due to parts unavailability.
+     * Recorded so a resulting SLA breach can be coded to parts under BR-14.
+     * Null when no parts-related hold has been applied.
+     */
+    @Column(name = "hold_reason_code", length = 50)
+    private String holdReasonCode;
+
+    public String getHoldReasonCode() { return holdReasonCode; }
+    public void setHoldReasonCode(String holdReasonCode) { this.holdReasonCode = holdReasonCode; }
 }
