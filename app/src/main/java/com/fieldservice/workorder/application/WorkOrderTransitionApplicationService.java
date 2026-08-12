@@ -7,6 +7,7 @@ import com.fieldservice.inventory.api.CandidateAvailability;
 import com.fieldservice.inventory.api.PartsAvailabilityQuery;
 import com.fieldservice.inventory.api.PartsAvailabilityResult;
 import com.fieldservice.inventory.api.StockQueryService;
+import com.fieldservice.inventory.application.ReplenishmentNeededPayload;
 import com.fieldservice.platform.api.DomainEvent;
 import com.fieldservice.platform.api.DomainEventPublisher;
 import com.fieldservice.platform.api.exception.BusinessGuardException;
@@ -200,6 +201,13 @@ public class WorkOrderTransitionApplicationService {
         // 5.5 Hold interval management (all within this transaction)
         applyHoldIntervalChanges(request, workOrderId, fromState, scope.userId(), occurredAt,
                 workOrder, legalEvents);
+
+        // 5.7 AWAITING_PARTS hold: record reason code on work order (BR-14) and signal replenishment
+        if (request.event() == WorkOrderEvent.HOLD
+                && "AWAITING_PARTS".equals(request.holdReasonCode())) {
+            workOrder.setPartsUnavailabilityReason("AWAITING_PARTS");
+            emitReplenishmentNeeded(workOrderId, scope.userId(), occurredAt);
+        }
 
         // 5.6 Parts availability pre-check (advisory — never a hard gate)
         List<AssignmentWarning> assignmentWarnings = List.of();
@@ -426,6 +434,53 @@ public class WorkOrderTransitionApplicationService {
             assignmentRepository.save(assignment);
         } catch (Exception e) {
             log.warn("assignment_audit_persist_failed workOrderId={} reason={}", workOrderId, e.getMessage());
+        }
+    }
+
+    /**
+     * Publishes a ReplenishmentNeeded outbox event in the same transaction as the hold.
+     *
+     * <p>Loads required parts from work_order_required_part and emits one event per part.
+     * Failure is logged but never propagated — the hold transition must not be rolled back
+     * due to a notification failure (AC7: delivery failure never blocks the hold).
+     */
+    private void emitReplenishmentNeeded(UUID workOrderId, UUID actorId, Instant occurredAt) {
+        try {
+            List<Map<String, Object>> requiredParts = namedJdbc.queryForList(
+                    "SELECT rp.part_id::text AS part_id, rp.quantity_required, " +
+                    "       p.part_number " +
+                    "FROM work_order_required_part rp " +
+                    "JOIN part p ON p.id = rp.part_id " +
+                    "WHERE rp.work_order_id = :woId::uuid",
+                    new MapSqlParameterSource("woId", workOrderId.toString()));
+
+            if (requiredParts.isEmpty()) {
+                log.debug("awaiting_parts_hold_no_required_parts work_order_id={}", workOrderId);
+                return;
+            }
+
+            for (Map<String, Object> row : requiredParts) {
+                UUID   partId     = UUID.fromString((String) row.get("part_id"));
+                int    qty        = ((Number) row.get("quantity_required")).intValue();
+                String partNumber = (String) row.get("part_number");
+
+                ReplenishmentNeededPayload payload = new ReplenishmentNeededPayload(
+                        partId, partNumber, null /* vehicle location unknown at hold time */,
+                        qty, workOrderId, "ReplenishmentNeeded");
+
+                eventPublisher.publish(new DomainEvent(
+                        UuidV7.generate(),
+                        "ReplenishmentNeeded",
+                        "WORK_ORDER",
+                        workOrderId,
+                        occurredAt,
+                        MDC.get("traceId"),
+                        actorId,
+                        payload));
+            }
+        } catch (Exception ex) {
+            log.warn("awaiting_parts_replenishment_signal_failed work_order_id={} reason={}",
+                    workOrderId, ex.getMessage(), ex);
         }
     }
 

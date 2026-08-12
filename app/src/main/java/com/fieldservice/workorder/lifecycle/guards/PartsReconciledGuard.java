@@ -26,9 +26,11 @@ public class PartsReconciledGuard implements TransitionGuard {
     public GuardResult evaluate(WorkOrderState fromState, WorkOrderEvent event, Object context) {
         GuardContext ctx = (GuardContext) context;
         if (partsRepository.existsByWorkOrderIdAndReconciledFalse(ctx.workOrderId())) {
+            String action = (event == WorkOrderEvent.COMPLETE) ? "completing" : "closing";
             return new GuardResult.Refused(
                     "PARTS_UNRECONCILED",
-                    "All parts consumption records must be reconciled before closing this work order.");
+                    "All parts consumption records must be reconciled before " + action
+                    + " this work order. Review unreconciled parts entries and confirm or adjust quantities.");
         }
         return new GuardResult.Satisfied();
     }

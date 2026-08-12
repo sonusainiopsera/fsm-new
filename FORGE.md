@@ -665,3 +665,10 @@
 - **Files:** 5 (+485/-3)
 - **Duration:** 898ss
 - **Approach:** The core parts-availability infrastructure (StockQueryService, PartsAvailabilityFactor, batched availability loading in RecommendationOrchestrator) was already in place from prior WOs. This WO adds the final missing pieces: (1) PartsWarningAssembler inspects every vehicle-location CandidateAvailability in the result, promotes the worst-case AvailabilityStatus across all candidates, and produces a single advisory AssignmentWarning (PARTS_UNAVAILABLE / PARTS_PARTIALLY_STOCKED / PARTS_COLLECTABLE) with shortfall detail — no warning when all are FULLY_STOCKED or parts list is empty. (2) RecommendationMeta gains a partsWarnings field; a backward-compatible 8-param convenience constructor preserves existing construction sites. (3) The orchestrator now increments a dispatch.parts.degraded Micrometer Counter when the inventory port returns a degraded result, and passes the assembled warnings into the meta. The existing partsDataDegraded flag was already plumbed but was hardcoded to false — it now reads partsAvailability.degraded() correctly.
+
+## WO-152: User Story: WO-152 - Awaiting-parts hold and replenishment need signalling
+- **Status:** completed
+- **Commit:** `c038222`
+- **Files:** 15 (+1218/-3)
+- **Duration:** 783ss
+- **Approach:** N/A

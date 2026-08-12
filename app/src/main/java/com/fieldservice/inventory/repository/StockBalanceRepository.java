@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,6 +17,8 @@ public interface StockBalanceRepository
         extends JpaRepository<StockBalance, UUID>, JpaSpecificationExecutor<StockBalance> {
 
     Optional<StockBalance> findByPartIdAndLocationId(UUID partId, UUID locationId);
+
+    List<StockBalance> findByLocationId(UUID locationId);
 
     /**
      * Conditionally decrements quantity_on_hand by {@code qty} only when the balance is

@@ -47,7 +47,7 @@ final class WorkOrderTransitionTable {
                             List.of("hold.reason.required")),
                     entry(IN_PROGRESS, COMPLETE, COMPLETED,
                             Set.of("TECHNICIAN", "DISPATCHER", "ADMIN"),
-                            List.of("labour.time.recorded")),
+                            List.of("labour.time.recorded", "parts.reconciled")),
                     entry(IN_PROGRESS, CANCEL, CANCELLED,
                             Set.of("DISPATCHER", "ADMIN", "MANAGER"), List.of()),
 
