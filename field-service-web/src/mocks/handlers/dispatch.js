@@ -310,10 +310,77 @@ const ERROR_503 = {
   },
 }
 
-// ── Handler factory ───────────────────────────────────────────────────────────
+// ── Assignment fixtures ───────────────────────────────────────────────────────
+
+/** Successful assign response (POST .../assign). */
+export const ASSIGN_SUCCESS = {
+  assignmentId:   'asgn-new-001',
+  workOrderId:    WORK_ORDER_ID,
+  technicianId:   'tech-alice-001',
+  state:          'ASSIGNED',
+  assignedAt:     '2026-08-12T10:05:00Z',
+  overrideRecorded: false,
+  appointmentImpactRecorded: false,
+  supersededAssignmentId: null,
+}
+
+/** Successful reassign response (POST .../reassignment). */
+export const REASSIGN_SUCCESS = {
+  assignmentId:           'asgn-new-002',
+  supersededAssignmentId: 'asgn-old-001',
+  workOrderId:            WORK_ORDER_ID,
+  technicianId:           'tech-bob-002',
+  state:                  'ASSIGNED',
+  reassignedAt:           '2026-08-12T10:06:00Z',
+  reassignmentReason:     'SLA_RISK',
+  overrideRecorded:       false,
+  appointmentImpactRecorded: false,
+}
+
+/** 422 — appointment breach unacknowledged. */
+export const ERROR_422_APPT_BREACH = {
+  code:        'APPOINTMENT_BREACH_UNACKNOWLEDGED',
+  message:     'This work order has a confirmed appointment window. Supply an appointment impact acknowledgement.',
+  fieldErrors: [],
+  traceId:     'trace-422-appt-breach',
+}
+
+/** 422 — certification guard refusal. */
+export const ERROR_422_CERT = {
+  code:        'CERTIFICATION_EXPIRED',
+  message:     'The selected technician does not hold the required ELEC-L2 certification.',
+  fieldErrors: [],
+  traceId:     'trace-422-cert',
+}
+
+/** 409 — conflict. */
+export const ERROR_409_CONFLICT = {
+  code:        'REASSIGNMENT_INVALID_STATE',
+  message:     'Work order is not in a state eligible for reassignment.',
+  fieldErrors: [],
+  traceId:     'trace-409-conflict',
+}
+
+/** 400 — field validation errors. */
+export const ERROR_400_FIELD = {
+  code:        'VALIDATION_FAILED',
+  message:     'Request validation failed.',
+  fieldErrors: [
+    { field: 'technicianId', message: 'technicianId is required' },
+  ],
+  traceId:     'trace-400-field',
+}
+
+// ── Handler factories ─────────────────────────────────────────────────────────
 
 const RECOMMENDATIONS_RE =
   /\/api\/v1\/work-orders\/([^/?]+)\/recommendations(\?.*)?$/
+
+const ASSIGN_RE =
+  /\/api\/v1\/work-orders\/([^/?]+)\/assign$/
+
+const REASSIGN_RE =
+  /\/api\/v1\/work-orders\/([^/?]+)\/reassignment$/
 
 /**
  * Creates a mock fetch for dispatch recommendation endpoints.
@@ -347,6 +414,98 @@ export function createDispatchFetch({ scenario = 'page1' } = {}) {
       default:
         // Serve page2 when the cursor param is present
         return cursor ? jsonResponse(PAGE2_RESPONSE) : jsonResponse(PAGE1_RESPONSE)
+    }
+  }
+}
+
+/**
+ * Creates a mock fetch that handles both the recommendation GET and the
+ * assignment/reassignment POST endpoints for dialog flow tests.
+ *
+ * @param {{
+ *   assignScenario?: 'success' | 'appt_breach' | 'appt_breach_then_success' |
+ *                    'cert_refused' | 'conflict' | 'retry_after' | 'field_errors' | 'error',
+ *   reassignScenario?: 'success' | 'appt_breach' | 'appt_breach_then_success' |
+ *                      'cert_refused' | 'conflict' | 'retry_after' | 'field_errors' | 'error',
+ *   onRequest?: (url: string, init: RequestInit) => void
+ * }} [opts]
+ */
+export function createAssignmentFetch({
+  assignScenario = 'success',
+  reassignScenario = 'success',
+  onRequest,
+} = {}) {
+  // Track how many times each endpoint has been called (for idempotency tests)
+  const callCounts = { assign: 0, reassign: 0 }
+  // Track whether we've served the 'breach' response yet (for breach-then-success flow)
+  const breachServed = { assign: false, reassign: false }
+
+  return async function mockFetch(url, init = {}) {
+    onRequest?.(url, init)
+
+    // Recommendations GET (return page1 always)
+    if (RECOMMENDATIONS_RE.test(url)) {
+      return jsonResponse(PAGE1_RESPONSE)
+    }
+
+    // Assign POST
+    if (ASSIGN_RE.test(url)) {
+      callCounts.assign++
+      return serveAssign(assignScenario, breachServed, 'assign')
+    }
+
+    // Reassign POST
+    if (REASSIGN_RE.test(url)) {
+      callCounts.reassign++
+      return serveReassign(reassignScenario, breachServed, 'reassign', init)
+    }
+
+    return jsonResponse({ code: 'NOT_MOCKED', message: `No mock for ${url}` }, 501)
+  }
+
+  function serveAssign(scenario, breachServed, key) {
+    switch (scenario) {
+      case 'appt_breach':
+        return jsonResponse(ERROR_422_APPT_BREACH, 422)
+      case 'appt_breach_then_success':
+        if (!breachServed[key]) { breachServed[key] = true; return jsonResponse(ERROR_422_APPT_BREACH, 422) }
+        return jsonResponse(ASSIGN_SUCCESS)
+      case 'cert_refused':
+        return jsonResponse(ERROR_422_CERT, 422)
+      case 'conflict':
+        return jsonResponse(ERROR_409_CONFLICT, 409)
+      case 'retry_after':
+        return jsonResponse({ code: 'RATE_LIMITED', message: 'Too many requests.', fieldErrors: [], traceId: 'trace-429' }, 429)
+      case 'field_errors':
+        return jsonResponse(ERROR_400_FIELD, 400)
+      case 'error':
+        return jsonResponse({ code: 'INTERNAL_ERROR', message: 'Internal server error.', fieldErrors: [], traceId: 'trace-500' }, 500)
+      case 'success':
+      default:
+        return jsonResponse(ASSIGN_SUCCESS)
+    }
+  }
+
+  function serveReassign(scenario, breachServed, key, _init) {
+    switch (scenario) {
+      case 'appt_breach':
+        return jsonResponse(ERROR_422_APPT_BREACH, 422)
+      case 'appt_breach_then_success':
+        if (!breachServed[key]) { breachServed[key] = true; return jsonResponse(ERROR_422_APPT_BREACH, 422) }
+        return jsonResponse(REASSIGN_SUCCESS)
+      case 'cert_refused':
+        return jsonResponse(ERROR_422_CERT, 422)
+      case 'conflict':
+        return jsonResponse(ERROR_409_CONFLICT, 409)
+      case 'retry_after':
+        return jsonResponse({ code: 'RATE_LIMITED', message: 'Too many requests.', fieldErrors: [], traceId: 'trace-429' }, 429)
+      case 'field_errors':
+        return jsonResponse(ERROR_400_FIELD, 400)
+      case 'error':
+        return jsonResponse({ code: 'INTERNAL_ERROR', message: 'Internal server error.', fieldErrors: [], traceId: 'trace-500' }, 500)
+      case 'success':
+      default:
+        return jsonResponse(REASSIGN_SUCCESS)
     }
   }
 }
