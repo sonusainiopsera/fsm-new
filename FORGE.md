@@ -693,3 +693,10 @@
 - **Files:** 9 (+831/-0)
 - **Duration:** 878ss
 - **Approach:** N/A
+
+## WO-140: User Story: WO-140 - Dispatcher recommendations page with factor explanations
+- **Status:** completed
+- **Commit:** `8ed1ede`
+- **Files:** 6 (+1725/-0)
+- **Duration:** 546ss
+- **Approach:** Built the dispatch recommendations page from scratch as a new feature module following existing project patterns. The data layer uses TanStack Query v5 useInfiniteQuery with keyset cursor pagination via getNextPageParam reading links.next from the server response. Candidates are de-duplicated by rank using flattenCandidates() before rendering. The component tree is DispatchRecommendationsPage → WorkOrderContextHeader + banners + ul[RecommendationCard] + LoadMore button. FactorBreakdownPanel uses useState with an aria-expanded disclosure button and renders server-supplied scores and explanation text verbatim without any client-side recomputation. All styling uses var(--token-*) design tokens with no page-local colour literals, inheriting both light and dark appearance from the token contract. The five explicit states (loading, zero-candidates, 403, 422, 5xx) all delegate to shared StateSurface primitives. MSW handlers cover all documented scenarios with typed fixture data.
