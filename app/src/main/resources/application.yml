@@ -206,6 +206,14 @@ server:
       # Example production pattern: %h %l %u %t "%m %U %H" %s %b
       pattern: '%h %l %u %t "%m %U %H" %s %b'
 
+audit:
+  trail:
+    # Minimum retention in days. One-year minimum; 24-month target recommended.
+    # This value drives query filters and documentation — no hard-coded windows allowed.
+    retention-days: 730
+    # Row ceiling below which exports are synchronous. Above this: async handle returned.
+    export-row-ceiling: 1000
+
 ---
 spring:
   config:
