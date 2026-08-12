@@ -117,6 +117,15 @@ public class WorkOrder implements ScopedEntity {
     @Column(name = "parts_unavailability_reason", length = 50)
     private String partsUnavailabilityReason;
 
+    @Column(name = "appointment_window_start")
+    private Instant appointmentWindowStart;
+
+    @Column(name = "appointment_window_end")
+    private Instant appointmentWindowEnd;
+
+    @Column(name = "appointment_confirmed", nullable = false)
+    private boolean appointmentConfirmed = false;
+
     @Version
     private Integer version;
 
@@ -165,7 +174,10 @@ public class WorkOrder implements ScopedEntity {
     public boolean         isExcludedFromSlaCompliance()   { return excludedFromSlaCompliance; }
     public String          getOrigin()                      { return origin; }
     public String          getPartsUnavailabilityReason()  { return partsUnavailabilityReason; }
-    public Integer         getVersion()                    { return version; }
+    public Instant         getAppointmentWindowStart()    { return appointmentWindowStart; }
+    public Instant         getAppointmentWindowEnd()      { return appointmentWindowEnd; }
+    public boolean         isAppointmentConfirmed()       { return appointmentConfirmed; }
+    public Integer         getVersion()                   { return version; }
 
     public void markNoPartsRequired() { this.noPartsRequired = true; }
 
@@ -216,6 +228,11 @@ public class WorkOrder implements ScopedEntity {
     public void assignTechnician(UUID technicianId) {
         this.assignedTechnicianId = technicianId;
         this.state = WorkOrderStatus.ASSIGNED;
+    }
+
+    /** Changes the assigned technician without altering lifecycle state (reassignment flow). */
+    public void reassignTechnician(UUID technicianId) {
+        this.assignedTechnicianId = technicianId;
     }
 
     /** Removes the current technician assignment (back to NEW). */

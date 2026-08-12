@@ -68,6 +68,21 @@ public class Assignment {
     @Column(name = "snapshot_stale", nullable = false)
     private boolean snapshotStale = false;
 
+    @Column(name = "end_at")
+    private Instant endAt;
+
+    @Column(name = "superseded_by")
+    private UUID supersededBy;
+
+    @Column(name = "reassignment_reason", length = 30)
+    private String reassignmentReason;
+
+    @Column(name = "reason_notes", columnDefinition = "TEXT")
+    private String reasonNotes;
+
+    @Column(name = "appointment_impact_reason", columnDefinition = "TEXT")
+    private String appointmentImpactReason;
+
     protected Assignment() {}
 
     public Assignment(UUID workOrderId, UUID technicianId) {
@@ -102,10 +117,21 @@ public class Assignment {
     public String     getOverrideReason()              { return overrideReason; }
     public boolean    isSnapshotStale()                { return snapshotStale; }
 
+    public Instant getEndAt()                     { return endAt; }
+    public UUID    getSupersededBy()              { return supersededBy; }
+    public String  getReassignmentReason()        { return reassignmentReason; }
+    public String  getReasonNotes()               { return reasonNotes; }
+    public String  getAppointmentImpactReason()   { return appointmentImpactReason; }
+
     public void setAssignedBy(UUID assignedBy)                               { this.assignedBy = assignedBy; }
     public void setRecommendationSnapshotId(UUID recommendationSnapshotId)   { this.recommendationSnapshotId = recommendationSnapshotId; }
     public void setRecommendationRank(Integer recommendationRank)            { this.recommendationRank = recommendationRank; }
     public void setRecommendationScore(BigDecimal recommendationScore)       { this.recommendationScore = recommendationScore; }
     public void setOverrideReason(String overrideReason)                     { this.overrideReason = overrideReason; }
     public void setSnapshotStale(boolean snapshotStale)                      { this.snapshotStale = snapshotStale; }
+    public void setEndAt(Instant endAt)                                      { this.endAt = endAt; }
+    public void setSupersededBy(UUID supersededBy)                           { this.supersededBy = supersededBy; }
+    public void setReassignmentReason(String reassignmentReason)             { this.reassignmentReason = reassignmentReason; }
+    public void setReasonNotes(String reasonNotes)                           { this.reasonNotes = reasonNotes; }
+    public void setAppointmentImpactReason(String appointmentImpactReason)   { this.appointmentImpactReason = appointmentImpactReason; }
 }

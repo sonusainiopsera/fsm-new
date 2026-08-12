@@ -32,4 +32,11 @@ public enum ExclusionReason {
      * to the work order site exceeds the configured maximum reach radius.
      */
     OUT_OF_REACH,
+
+    /**
+     * The technician is already committed to a confirmed customer appointment window
+     * that overlaps with the target work order's service window.
+     * Applied only during reassignment candidate generation.
+     */
+    CONFIRMED_APPOINTMENT_CONFLICT,
 }

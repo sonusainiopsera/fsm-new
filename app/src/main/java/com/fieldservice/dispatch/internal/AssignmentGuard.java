@@ -116,7 +116,8 @@ public class AssignmentGuard {
             case CERTIFICATION_MISSING  -> "Technician does not hold the required certification.";
             case CERTIFICATION_EXPIRED  -> "Technician's required certification has expired.";
             case UNAVAILABLE_IN_WINDOW  -> "Technician is unavailable during the required service window.";
-            case OUT_OF_REACH           -> "Technician's home base is outside the maximum reach radius.";
+            case OUT_OF_REACH                    -> "Technician's home base is outside the maximum reach radius.";
+            case CONFIRMED_APPOINTMENT_CONFLICT -> "Technician has a confirmed appointment conflict.";
         };
     }
 }

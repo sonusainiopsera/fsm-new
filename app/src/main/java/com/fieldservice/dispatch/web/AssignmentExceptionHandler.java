@@ -1,6 +1,7 @@
 package com.fieldservice.dispatch.web;
 
 import com.fieldservice.dispatch.internal.AssignmentValidationException;
+import com.fieldservice.dispatch.internal.ReassignmentNotPermittedException;
 import com.fieldservice.platform.api.ApiErrorResponse;
 import com.fieldservice.platform.api.ErrorCode;
 import com.fieldservice.platform.api.FieldError;
@@ -82,6 +83,21 @@ public class AssignmentExceptionHandler {
                         ErrorCode.WORK_ORDER_ILLEGAL_TRANSITION,
                         ex.getMessage(),
                         legalEventErrors,
+                        traceId));
+    }
+
+    @ExceptionHandler(ReassignmentNotPermittedException.class)
+    public ResponseEntity<ApiErrorResponse> handleReassignmentNotPermitted(ReassignmentNotPermittedException ex) {
+        String traceId = resolveTraceId();
+        List<FieldError> details = List.of(
+                new FieldError("currentState", ex.getCurrentState().name()));
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .header("X-Trace-Id", traceId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiErrorResponse.withFieldErrors(
+                        ErrorCode.WORK_ORDER_ILLEGAL_TRANSITION,
+                        ex.getMessage(),
+                        details,
                         traceId));
     }
 
