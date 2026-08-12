@@ -1,0 +1,32 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--token-space-1, 4px);
+  padding: 2px var(--token-space-2, 8px);
+  border-radius: var(--token-radius-pill, 999px);
+  background-color: var(--token-color-success-surface, #dcfce7);
+  color: var(--token-color-success-text, #166534);
+  font-size: var(--token-fs-12, 0.75rem);
+  font-weight: 500;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--token-color-success, #16a34a);
+  animation: pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+.label {
+  line-height: 1;
+}

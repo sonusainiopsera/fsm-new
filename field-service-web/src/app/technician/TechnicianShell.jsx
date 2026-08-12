@@ -30,6 +30,8 @@ import {
   LogWorkScreen,
   TECHNICIAN_NAV,
 } from './routes.js'
+import { PositionSharingProvider, usePositionSharing } from './PositionSharingContext.jsx'
+import { SharingIndicator } from './components/SharingIndicator.jsx'
 import styles from './TechnicianShell.module.css'
 
 // ── Suspense skeleton ────────────────────────────────────────────────────────
@@ -83,9 +85,10 @@ function NavItem({ to, label, icon }) {
 
 // ── Main shell ────────────────────────────────────────────────────────────────
 
-export default function TechnicianShell() {
+function TechnicianShellInner() {
   const { isConnected, isDegraded, lastConnectedAt, retryNow } = useConnectivity()
   const { preference, setPreference } = useAppearance()
+  const { isSharing } = usePositionSharing()
   const [swUpdateReady, setSwUpdateReady] = useState(false)
   const [waitingWorker, setWaitingWorker] = useState(null)
 
@@ -128,6 +131,7 @@ export default function TechnicianShell() {
       <header className={styles.appBar}>
         <span className={styles.appBarTitle}>Field Service</span>
         <div className={styles.appBarActions}>
+          <SharingIndicator isSharing={isSharing} />
           <button
             type="button"
             className={styles.appearanceToggle}
@@ -192,5 +196,13 @@ export default function TechnicianShell() {
         ))}
       </nav>
     </div>
+  )
+}
+
+export default function TechnicianShell() {
+  return (
+    <PositionSharingProvider>
+      <TechnicianShellInner />
+    </PositionSharingProvider>
   )
 }

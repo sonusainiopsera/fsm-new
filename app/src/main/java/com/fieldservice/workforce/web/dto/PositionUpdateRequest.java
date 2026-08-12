@@ -3,11 +3,13 @@ package com.fieldservice.workforce.web.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.time.Instant;
 
-/** Request body for POST /api/v1/technicians/{id}/position. */
+/** Request body for POST /api/v1/technicians/me/position. */
 @JsonIgnoreProperties(ignoreUnknown = false)
 public record PositionUpdateRequest(
 
@@ -20,5 +22,9 @@ public record PositionUpdateRequest(
         Double longitude,
 
         @NotNull
-        Instant capturedAt
+        Instant capturedAt,
+
+        /** GPS accuracy in metres; optional but strongly recommended. */
+        @Positive @Max(50_000)
+        Integer accuracyMetres
 ) {}

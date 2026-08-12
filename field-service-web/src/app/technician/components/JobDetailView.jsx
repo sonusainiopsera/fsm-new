@@ -14,13 +14,15 @@
  *   3. 409 → refetch the work order (conflict-refresh), show non-destructive notice
  *   4. 422 → show guard message verbatim at the action bar (state unchanged)
  */
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { get, post } from '../../../api/http.js'
 import { DeadlineCountdown } from '../../../shared/components/DeadlineCountdown.jsx'
 import { TransitionActionBar } from './TransitionActionBar.jsx'
 import { HoldReasonSheet } from './HoldReasonSheet.jsx'
 import { EmptyState, LoadingState, ErrorState } from '../../../components/index.js'
+import { usePositionReporting } from '../hooks/usePositionReporting.js'
+import { usePositionSharing } from '../PositionSharingContext.jsx'
 import styles from './JobDetailView.module.css'
 
 // ── Query keys ────────────────────────────────────────────────────────────────
@@ -191,6 +193,14 @@ export function JobDetailView({ workOrderId }) {
     staleTime: 30_000,
     retry: false,
   })
+
+  const { isReporting } = usePositionReporting(job?.state)
+  const { setIsSharing } = usePositionSharing()
+
+  useEffect(() => {
+    setIsSharing(isReporting)
+    return () => setIsSharing(false)
+  }, [isReporting, setIsSharing])
 
   const handleTransitionSuccess = useCallback((result) => {
     queryClient.invalidateQueries({ queryKey: detailQueryKey(workOrderId) })

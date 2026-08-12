@@ -59,14 +59,22 @@ class TechnicianPositionEntity extends BaseEntity implements SubjectKeyContextPr
     @Column(name = "captured_at", nullable = false)
     private Instant capturedAt;
 
+    @Column(name = "accuracy_metres")
+    private Integer accuracyMetres;
+
+    @Column(name = "retain_until")
+    private java.time.LocalDate retainUntil;
+
     protected TechnicianPositionEntity() {}
 
     TechnicianPositionEntity(UUID technicianId, String latitude, String longitude,
-                              Instant capturedAt) {
-        this.technicianId = technicianId;
-        this.latitude     = latitude;
-        this.longitude    = longitude;
-        this.capturedAt   = capturedAt;
+                              Instant capturedAt, Integer accuracyMetres, java.time.LocalDate retainUntil) {
+        this.technicianId   = technicianId;
+        this.latitude       = latitude;
+        this.longitude      = longitude;
+        this.capturedAt     = capturedAt;
+        this.accuracyMetres = accuracyMetres;
+        this.retainUntil    = retainUntil;
     }
 
     @Override
@@ -81,13 +89,17 @@ class TechnicianPositionEntity extends BaseEntity implements SubjectKeyContextPr
         this.longitudeIdx = BlindIndex.compute(longitude);
     }
 
-    UUID getTechnicianId()       { return technicianId; }
-    String getLatitude()         { return latitude; }
-    void setLatitude(String lat) { this.latitude = lat; }
-    String getLongitude()        { return longitude; }
-    void setLongitude(String lon){ this.longitude = lon; }
-    String getLatitudeIdx()      { return latitudeIdx; }
-    String getLongitudeIdx()     { return longitudeIdx; }
-    Instant getCapturedAt()      { return capturedAt; }
-    void setCapturedAt(Instant t){ this.capturedAt = t; }
+    UUID getTechnicianId()                           { return technicianId; }
+    String getLatitude()                             { return latitude; }
+    void setLatitude(String lat)                     { this.latitude = lat; }
+    String getLongitude()                            { return longitude; }
+    void setLongitude(String lon)                    { this.longitude = lon; }
+    String getLatitudeIdx()                          { return latitudeIdx; }
+    String getLongitudeIdx()                         { return longitudeIdx; }
+    Instant getCapturedAt()                          { return capturedAt; }
+    void setCapturedAt(Instant t)                    { this.capturedAt = t; }
+    Integer getAccuracyMetres()                      { return accuracyMetres; }
+    void setAccuracyMetres(Integer a)                { this.accuracyMetres = a; }
+    java.time.LocalDate getRetainUntil()             { return retainUntil; }
+    void setRetainUntil(java.time.LocalDate d)       { this.retainUntil = d; }
 }

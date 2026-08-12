@@ -428,3 +428,54 @@ export function photoListHandler(photos) {
     })
   }
 }
+
+// ── Position reporting handlers (WO-159) ─────────────────────────────────────
+
+const POSITION_PATH = '/api/v1/technicians/me/position'
+
+/**
+ * Handler for POST /api/v1/technicians/me/position — 202 Accepted.
+ */
+export function positionReportSuccessHandler() {
+  return function mockFetch(url, options = {}) {
+    if (!url.includes(POSITION_PATH) || options.method !== 'POST') return fetch(url, options)
+    return Promise.resolve({
+      ok: true,
+      status: 202,
+      headers: { get: () => null, forEach: () => {} },
+      json: () => Promise.resolve(null),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      clone() { return this },
+    })
+  }
+}
+
+/**
+ * Handler for POST /api/v1/technicians/me/position — 401 (unauthenticated).
+ */
+export function positionReportUnauthorizedHandler() {
+  return function mockFetch(url, options = {}) {
+    if (!url.includes(POSITION_PATH) || options.method !== 'POST') return fetch(url, options)
+    return errorResponse(401, {
+      code: 'UNAUTHENTICATED',
+      message: 'Authentication required.',
+      fieldErrors: [],
+      traceId: 'trace-401-pos',
+    })
+  }
+}
+
+/**
+ * Handler for POST /api/v1/technicians/me/position — 503 (degraded).
+ */
+export function positionReportDegradedHandler() {
+  return function mockFetch(url, options = {}) {
+    if (!url.includes(POSITION_PATH) || options.method !== 'POST') return fetch(url, options)
+    return errorResponse(503, {
+      code: 'PROVIDER_DEGRADED',
+      message: 'Service temporarily unavailable.',
+      fieldErrors: [],
+      traceId: 'trace-503-pos',
+    })
+  }
+}
