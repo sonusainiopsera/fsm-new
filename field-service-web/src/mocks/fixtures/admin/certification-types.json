@@ -1,0 +1,48 @@
+{
+  "data": [
+    {
+      "id": "00000000-0000-7039-8000-000000000001",
+      "code": "GAS_SAFE",
+      "displayName": "Gas Safe Registration",
+      "regulated": true,
+      "defaultValidityMonths": 12,
+      "active": true
+    },
+    {
+      "id": "00000000-0000-7039-8000-000000000002",
+      "code": "REFRIGERANT_F_GAS",
+      "displayName": "F-Gas Refrigerant Handling",
+      "regulated": true,
+      "defaultValidityMonths": 24,
+      "active": true
+    },
+    {
+      "id": "00000000-0000-7039-8000-000000000004",
+      "code": "FIRST_AID_BASIC",
+      "displayName": "Basic First Aid",
+      "regulated": false,
+      "defaultValidityMonths": 36,
+      "active": true
+    },
+    {
+      "id": "00000000-0000-7039-8000-000000000005",
+      "code": "WORKING_AT_HEIGHT",
+      "displayName": "Working at Height",
+      "regulated": false,
+      "defaultValidityMonths": 24,
+      "active": true
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 25,
+    "totalElements": 4,
+    "totalPages": 1,
+    "estimated": false
+  },
+  "_links": {
+    "self": "/api/v1/certification-types?page=0&size=25",
+    "next": null,
+    "prev": null
+  }
+}

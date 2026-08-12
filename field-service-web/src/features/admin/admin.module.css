@@ -1,0 +1,146 @@
+/* Shared admin screen layout tokens */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--elevation-hairline);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
+  min-height: 44px;
+}
+
+.searchInput:focus {
+  outline: 2px solid var(--color-accent-default);
+  outline-offset: 2px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.paginationBtn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-2);
+  border: var(--elevation-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: var(--color-surface-overlay);
+}
+
+.paginationBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.paginationBtn:focus-visible {
+  outline: 2px solid var(--color-accent-default);
+  outline-offset: 2px;
+}
+
+.errorSummary {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-status-error-subtle);
+  color: var(--color-status-error-default);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-status-error-default);
+}
+
+.errorSummaryTitle {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-1);
+}
+
+.errorTraceId {
+  font-size: var(--font-size-xs);
+  opacity: 0.7;
+  margin-top: var(--space-1);
+  font-family: var(--font-family-mono, monospace);
+}
+
+.formGrid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.formActions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+.regulatedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.certChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* current — green */
+.certChipCurrent {
+  background: var(--color-status-success-subtle);
+  color: var(--color-status-success-default);
+}
+
+/* expiring soon — warning */
+.certChipExpiringSoon {
+  background: var(--color-status-warning-subtle);
+  color: var(--color-status-warning-default);
+}
+
+/* expired — error */
+.certChipExpired {
+  background: var(--color-status-error-subtle);
+  color: var(--color-status-error-default);
+}

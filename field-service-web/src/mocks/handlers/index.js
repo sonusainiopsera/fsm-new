@@ -239,6 +239,112 @@ const DEFAULT_ROUTES = {
     status: 200,
     body: { userId: 'user-001', storedPreference: 'SYSTEM', effectivePreference: 'LIGHT' },
   },
+
+  // Admin — Customers
+  'GET:/api/v1/customers': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'cust-001', name: 'Acme Corp', contactEmail: 'ops@acmecorp.example', contactPhone: '+44 20 1234 5678', address: '1 Acme Way', active: true, createdAt: '2026-01-10T09:00:00Z' },
+        { id: 'cust-002', name: 'Beta Industries', contactEmail: 'facilities@beta.example', contactPhone: null, address: '22 Beta St', active: true, createdAt: '2026-02-15T11:30:00Z' },
+      ],
+      page: { number: 0, size: 20, totalElements: 2, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/customers?page=0&size=20', next: null, prev: null },
+    },
+  },
+  'POST:/api/v1/customers': {
+    status: 201,
+    body: { id: 'cust-new', name: 'New Customer', contactEmail: null, contactPhone: null, address: null, active: true, createdAt: '2026-08-12T10:00:00Z' },
+  },
+  'PUT:/api/v1/customers/cust-001': {
+    status: 200,
+    body: { id: 'cust-001', name: 'Acme Corp Updated', contactEmail: 'ops@acmecorp.example', contactPhone: '+44 20 1234 5678', address: '1 Acme Way', active: true, createdAt: '2026-01-10T09:00:00Z' },
+  },
+  'DELETE:/api/v1/customers/cust-001': { status: 200, body: { id: 'cust-001', active: false } },
+
+  // Admin — Sites
+  'GET:/api/v1/sites': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'site-001', customerId: 'cust-001', customerName: 'Acme Corp', name: 'London HQ', address: '1 Acme Way', active: true, createdAt: '2026-01-10T09:00:00Z' },
+      ],
+      page: { number: 0, size: 20, totalElements: 1, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/sites?page=0&size=20', next: null, prev: null },
+    },
+  },
+  'POST:/api/v1/sites': {
+    status: 201,
+    body: { id: 'site-new', customerId: 'cust-001', customerName: 'Acme Corp', name: 'New Site', address: null, active: true, createdAt: '2026-08-12T10:00:00Z' },
+  },
+
+  // Admin — Assets
+  'GET:/api/v1/assets': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'asset-001', siteId: 'site-001', siteName: 'London HQ', assetType: 'HVAC_UNIT', serialNumber: 'HV-0001', model: 'Carrier 30XW', active: true, createdAt: '2026-01-10T09:00:00Z' },
+      ],
+      page: { number: 0, size: 20, totalElements: 1, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/assets?page=0&size=20', next: null, prev: null },
+    },
+  },
+  'POST:/api/v1/assets': {
+    status: 201,
+    body: { id: 'asset-new', siteId: 'site-001', siteName: 'London HQ', assetType: 'BOILER', serialNumber: null, model: null, active: true, createdAt: '2026-08-12T10:00:00Z' },
+  },
+
+  // Admin — Technicians
+  'GET:/api/v1/technicians': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'tech-001', userId: 'user-002', displayName: 'John Smith', email: 'j.smith@example.com', active: true, createdAt: '2026-01-10T09:00:00Z' },
+        { id: 'tech-002', userId: 'user-003', displayName: 'Jane Doe',   email: 'j.doe@example.com',   active: true, createdAt: '2026-02-01T09:00:00Z' },
+      ],
+      page: { number: 0, size: 20, totalElements: 2, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/technicians?page=0&size=20', next: null, prev: null },
+    },
+  },
+
+  // Admin — Certification types
+  'GET:/api/v1/certification-types': {
+    status: 200,
+    body: {
+      data: [
+        { id: '00000000-0000-7039-8000-000000000001', code: 'GAS_SAFE',          displayName: 'Gas Safe Registration',    regulated: true,  defaultValidityMonths: 12, active: true },
+        { id: '00000000-0000-7039-8000-000000000002', code: 'REFRIGERANT_F_GAS', displayName: 'F-Gas Refrigerant Handling', regulated: true,  defaultValidityMonths: 24, active: true },
+        { id: '00000000-0000-7039-8000-000000000004', code: 'FIRST_AID_BASIC',   displayName: 'Basic First Aid',          regulated: false, defaultValidityMonths: 36, active: true },
+      ],
+      page: { number: 0, size: 25, totalElements: 3, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/certification-types?page=0&size=25', next: null, prev: null },
+    },
+  },
+  'POST:/api/v1/certification-types': {
+    status: 201,
+    body: { id: 'ct-new', code: 'NEW_TYPE', displayName: 'New Type', regulated: false, defaultValidityMonths: null, active: true },
+  },
+
+  // Admin — Technician certifications
+  'GET:/api/v1/technicians/tech-001/certifications': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'tc-001', typeCode: 'GAS_SAFE', typeDisplayName: 'Gas Safe Registration', regulated: true,  certificateReference: 'GS-2024-00123', issuedOn: '2025-01-15', expiresOn: '2027-12-31', current: true,  daysUntilExpiry: 506 },
+        { id: 'tc-002', typeCode: 'FIRST_AID_BASIC', typeDisplayName: 'Basic First Aid', regulated: false, certificateReference: null,            issuedOn: '2023-06-01', expiresOn: '2026-09-01', current: true,  daysUntilExpiry: 20  },
+        { id: 'tc-003', typeCode: 'WORKING_AT_HEIGHT', typeDisplayName: 'Working at Height', regulated: false, certificateReference: 'WAH-2023-00055', issuedOn: '2023-07-01', expiresOn: '2025-07-01', current: false, daysUntilExpiry: null },
+      ],
+      page: { number: 0, size: 20, totalElements: 3, totalPages: 1, estimated: false },
+      _links: { self: '/api/v1/technicians/tech-001/certifications?page=0&size=20', next: null, prev: null },
+    },
+  },
+  'PUT:/api/v1/technicians/tech-001/certifications': {
+    status: 200,
+    body: [
+      { typeCode: 'GAS_SAFE',        outcome: 'COMMITTED', error: null },
+      { typeCode: 'FIRST_AID_BASIC', outcome: 'COMMITTED', error: null },
+    ],
+  },
 };
 
 // ---- Status fixture helpers --------------------------------------------

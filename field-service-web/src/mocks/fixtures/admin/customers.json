@@ -1,0 +1,43 @@
+{
+  "data": [
+    {
+      "id": "cust-001",
+      "name": "Acme Corp",
+      "contactEmail": "ops@acmecorp.example",
+      "contactPhone": "+44 20 1234 5678",
+      "address": "1 Acme Way, London, EC1A 1BB",
+      "active": true,
+      "createdAt": "2026-01-10T09:00:00Z"
+    },
+    {
+      "id": "cust-002",
+      "name": "Beta Industries",
+      "contactEmail": "facilities@beta.example",
+      "contactPhone": "+44 161 234 5678",
+      "address": "22 Beta Street, Manchester, M1 2AB",
+      "active": true,
+      "createdAt": "2026-02-15T11:30:00Z"
+    },
+    {
+      "id": "cust-003",
+      "name": "Gamma Solutions",
+      "contactEmail": null,
+      "contactPhone": null,
+      "address": null,
+      "active": false,
+      "createdAt": "2025-11-01T08:00:00Z"
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 20,
+    "totalElements": 3,
+    "totalPages": 1,
+    "estimated": false
+  },
+  "_links": {
+    "self": "/api/v1/customers?page=0&size=20",
+    "next": null,
+    "prev": null
+  }
+}

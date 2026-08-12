@@ -392,3 +392,10 @@
 - **Files:** 22 (+1724/-3)
 - **Duration:** 945ss
 - **Approach:** Implemented certification registry with strict query-time currency evaluation. Created CertificationTypeEntity (package-private @Audited @Entity) and CertificationTypeRepository in workforce.internal. Added CertificationCurrencyPort and CertificationGuardPort public seams in workforce.api. CertificationCurrencyService implements both ports; currency is always computed as (expires_on IS NULL OR expires_on >= :atDate) at query time — no stored boolean anywhere. Regulated certification violations throw CertificationNotCurrentException (422); non-regulated emit advisory warnings. Bulk eligibility uses native SQL with HAVING COUNT(DISTINCT ct.code) = :requiredCount for a single DB round-trip. Fail-closed: any evaluation exception returns false and logs a security event. V39 Flyway migration is expand-only (keeps old columns) for backward compatibility with existing CertificationCurrencyGuard. CertificationNotCurrentException lives in platform.api.exception so GlobalExceptionHandler can handle it without circular module dependencies.
+
+## WO-121: User Story: WO-121 - Admin web screens for reference data and certifications
+- **Status:** completed
+- **Commit:** `6bfe559`
+- **Files:** 34 (+3453/-1)
+- **Duration:** 993ss
+- **Approach:** Built the admin surface bottom-up: shared plumbing first (usePagedQuery URL-sync hook, mapFieldErrors utility), then the API client modules (referenceData.js, workforce.js), then one vertical slice for Customers to validate the pattern, then replicated it for Sites, Assets, Technicians, CertificationTypes, and TechnicianCertifications. Layered the CsvImportWizard on top using the workforce batch endpoints. CertificationChip renders API-derived current/daysUntilExpiry with no client-side date math. MSW handlers and JSON fixtures cover all documented error statuses. Tests cover the shared utilities, CSV parsing, the status chip, and the Customers screen end-to-end.

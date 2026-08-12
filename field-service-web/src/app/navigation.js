@@ -39,6 +39,13 @@ export const ROLES = /** @type {const} */ ({
  */
 export const NAV_ITEMS = /** @type {NavItem[]} */ ([
   {
+    path: '/admin',
+    label: 'Administration',
+    icon: 'settings',
+    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER],
+    surface: 'admin',
+  },
+  {
     path: '/dispatch',
     label: 'Dispatch Board',
     icon: 'grid',

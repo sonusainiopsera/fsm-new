@@ -33,7 +33,8 @@ export default defineConfig({
           if (id.includes('/surfaces/field/')) return 'chunk-field';
           if (id.includes('/surfaces/operations/')) return 'chunk-operations';
           if (id.includes('/surfaces/portal/')) return 'chunk-portal';
-          if (id.includes('/surfaces/auth/')) return 'chunk-auth';
+          if (id.includes('/surfaces/auth/'))  return 'chunk-auth';
+          if (id.includes('/surfaces/admin/') || id.includes('/features/admin/')) return 'chunk-admin';
 
           // React Router shared across all surfaces
           if (id.includes('react-router')) return 'chunk-router';

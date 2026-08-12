@@ -1,0 +1,49 @@
+{
+  "data": [
+    {
+      "id": "tc-001",
+      "typeCode": "GAS_SAFE",
+      "typeDisplayName": "Gas Safe Registration",
+      "regulated": true,
+      "certificateReference": "GS-2024-00123",
+      "issuedOn": "2025-01-15",
+      "expiresOn": "2027-12-31",
+      "current": true,
+      "daysUntilExpiry": 506
+    },
+    {
+      "id": "tc-002",
+      "typeCode": "FIRST_AID_BASIC",
+      "typeDisplayName": "Basic First Aid",
+      "regulated": false,
+      "certificateReference": null,
+      "issuedOn": "2023-06-01",
+      "expiresOn": "2026-09-01",
+      "current": true,
+      "daysUntilExpiry": 20
+    },
+    {
+      "id": "tc-003",
+      "typeCode": "WORKING_AT_HEIGHT",
+      "typeDisplayName": "Working at Height",
+      "regulated": false,
+      "certificateReference": "WAH-2023-00055",
+      "issuedOn": "2023-07-01",
+      "expiresOn": "2025-07-01",
+      "current": false,
+      "daysUntilExpiry": null
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 20,
+    "totalElements": 3,
+    "totalPages": 1,
+    "estimated": false
+  },
+  "_links": {
+    "self": "/api/v1/technicians/tech-001/certifications?page=0&size=20",
+    "next": null,
+    "prev": null
+  }
+}

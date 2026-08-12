@@ -1,0 +1,10 @@
+{
+  "status": 400,
+  "code": "VALIDATION_FAILED",
+  "message": "The request contained invalid data.",
+  "fieldErrors": [
+    { "field": "name", "message": "must not be blank" },
+    { "field": "contactEmail", "message": "must be a valid email address" }
+  ],
+  "traceId": "test-trace-400"
+}

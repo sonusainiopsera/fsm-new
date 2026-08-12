@@ -1,0 +1,4 @@
+technicianId,typeCode,certificateReference,issuedOn,expiresOn,issuingBody
+tech-001,GAS_SAFE,GS-2024-99999,2024-01-15,2025-01-14,Gas Safe Register
+tech-001,FIRST_AID_BASIC,,2024-06-01,2027-06-01,St John Ambulance
+tech-002,WORKING_AT_HEIGHT,WAH-2024-00100,2024-03-01,,PASMA
