@@ -68,7 +68,7 @@ VALUES (
     'subject_erasure',
     7, 'YEARS',
     'erased_at',
-    'ANONYMISE',
+    'CRYPTO_ERASE',
     FALSE, TRUE, TRUE,
     'Erasure tombstone retained 7 years as DPO evidence per GDPR Art. 5(2) accountability.'
 ) ON CONFLICT DO NOTHING;
