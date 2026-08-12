@@ -686,3 +686,10 @@
 - **Files:** 26 (+2470/-19)
 - **Duration:** 1090ss
 - **Approach:** Implemented photo-based AI analysis as a two-phase flow: (1) photo is stored via existing presigned PUT with content-type/size validation at presign and server-side magic-byte check after upload, (2) a separate POST /analysis endpoint fetches the object via storage key (SSRF-safe), validates magic bytes again, PII-redacts any accompanying text via SimpleTextPiiFilter, calls AiGatewayPort.caption(), logs the interaction, and returns an attributed advisory draft. The technician submits their description via POST /description which computes Jaccard similarity against the suggestion and persists the override classification. The feature sits behind ai.photo-analysis.enabled (default false). PhotoRetentionPurgeJob extends the retention infrastructure to delete storage objects before removing metadata rows.
+
+## WO-138: User Story: WO-138 - Assignment endpoint with hard guards and override audit
+- **Status:** completed
+- **Commit:** `9650e7e`
+- **Files:** 12 (+1167/-0)
+- **Duration:** 918ss
+- **Approach:** N/A
