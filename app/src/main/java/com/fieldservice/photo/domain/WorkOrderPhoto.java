@@ -48,6 +48,15 @@ public class WorkOrderPhoto extends BaseEntity {
     @Column(name = "retain_until")
     private LocalDate retainUntil;
 
+    @Column(name = "content_type", length = 20)
+    private String contentType;
+
+    @Column(name = "size_bytes")
+    private Long sizeBytes;
+
+    @Column(name = "analysis_interaction_id")
+    private UUID analysisInteractionId;
+
     @Column(name = "created_by", nullable = false, updatable = false)
     private UUID createdBy;
 
@@ -70,6 +79,15 @@ public class WorkOrderPhoto extends BaseEntity {
 
     public LocalDate getRetainUntil() { return retainUntil; }
     public void setRetainUntil(LocalDate v) { this.retainUntil = v; }
+
+    public String getContentType() { return contentType; }
+    public void setContentType(String v) { this.contentType = v; }
+
+    public Long getSizeBytes() { return sizeBytes; }
+    public void setSizeBytes(Long v) { this.sizeBytes = v; }
+
+    public UUID getAnalysisInteractionId() { return analysisInteractionId; }
+    public void setAnalysisInteractionId(UUID v) { this.analysisInteractionId = v; }
 
     public UUID getCreatedBy() { return createdBy; }
     public void setCreatedBy(UUID v) { this.createdBy = v; }
