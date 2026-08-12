@@ -1,0 +1,68 @@
+.reference {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-accent-base);
+}
+
+.customerSite {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 14rem;
+}
+
+.customerName {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.siteName {
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.techName {
+  font-size: var(--fs-sm);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 10rem;
+  display: inline-block;
+}
+
+.unassigned {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.deadline {
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.noDeadline {
+  color: var(--color-text-disabled);
+}
+
+.atRisk {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-warning-text);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.noRisk {
+  color: var(--color-text-disabled);
+}

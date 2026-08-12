@@ -1,0 +1,124 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  align-items: flex-start;
+}
+
+.fieldset {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: var(--space-2) var(--space-3);
+  min-inline-size: 0;
+}
+
+.legend {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  padding: 0 var(--space-1);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.filterChip {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--duration-micro) var(--easing-standard),
+              color var(--duration-micro) var(--easing-standard);
+}
+
+.filterChip:hover {
+  background: var(--color-surface-overlay);
+  color: var(--color-text-primary);
+}
+
+.filterChipActive {
+  background: var(--color-accent-subtle);
+  color: var(--color-accent-base);
+  border-color: var(--color-accent-base);
+  font-weight: var(--fw-semibold);
+}
+
+.filterChipActive:hover {
+  background: var(--color-accent-muted);
+}
+
+.textFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+}
+
+.input {
+  font-size: var(--fs-sm);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  min-width: 12rem;
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: 1px;
+}
+
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding-top: var(--space-2);
+}
+
+.toggleCheckbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-accent-base);
+}
+
+.clearBtn {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-control);
+  text-decoration: underline;
+  align-self: center;
+}
+
+.clearBtn:hover {
+  color: var(--color-text-primary);
+}
+
+.clearBtn:focus-visible {
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: 2px;
+}
