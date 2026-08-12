@@ -23,7 +23,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -54,7 +53,7 @@ public class OutboxDrainService {
             """;
 
     private final JdbcTemplate jdbcTemplate;
-    private final Map<String, EventHandler> handlersByType;
+    private final Map<String, List<EventHandler>> handlersByType;
     private final OutboxPollerProperties properties;
     private final MeterRegistry meterRegistry;
     private final TransactionTemplate requiresNew;
@@ -67,7 +66,7 @@ public class OutboxDrainService {
                               PlatformTransactionManager txManager) {
         this.jdbcTemplate = jdbcTemplate;
         this.handlersByType = handlers.stream()
-                .collect(Collectors.toMap(EventHandler::getSupportedEventType, Function.identity()));
+                .collect(Collectors.groupingBy(EventHandler::getSupportedEventType));
         this.properties = properties;
         this.meterRegistry = meterRegistry;
         this.requiresNew = new TransactionTemplate(txManager);
@@ -165,18 +164,14 @@ public class OutboxDrainService {
     }
 
     private void dispatchWithTimeout(EventHandlerContext ctx) throws Exception {
-        EventHandler handler = handlersByType.get(ctx.eventType());
-        if (handler == null) {
+        List<EventHandler> handlers = handlersByType.get(ctx.eventType());
+        if (handlers == null || handlers.isEmpty()) {
             log.warn("eventId={} eventType={} traceId={} — no registered handler; marking published",
                     ctx.eventId(), ctx.eventType(), ctx.traceId());
             meterRegistry.counter("outbox.unhandled.event.type",
                     "event_type", ctx.eventType()).increment();
             return;
         }
-
-        log.debug("eventId={} eventType={} attempt={} consumer={} traceId={} — dispatching",
-                ctx.eventId(), ctx.eventType(), ctx.attemptNumber(),
-                handler.getClass().getSimpleName(), ctx.traceId());
 
         Thread currentThread = Thread.currentThread();
         ScheduledFuture<?> interruptFuture = timeoutScheduler.schedule(
@@ -186,7 +181,12 @@ public class OutboxDrainService {
         Timer.Sample sample = Timer.start(meterRegistry);
         String result = "failure";
         try {
-            handler.handle(ctx);
+            for (EventHandler handler : handlers) {
+                log.debug("eventId={} eventType={} attempt={} consumer={} traceId={} — dispatching",
+                        ctx.eventId(), ctx.eventType(), ctx.attemptNumber(),
+                        handler.getClass().getSimpleName(), ctx.traceId());
+                handler.handle(ctx);
+            }
             result = "success";
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

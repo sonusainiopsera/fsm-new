@@ -742,3 +742,10 @@
 - **Files:** 10 (+1868/-4)
 - **Duration:** 744ss
 - **Approach:** Built the manager operations dashboard as a lazily-loaded React route under /operations. All 11 KPI metrics are fetched in a single batched conditional GET via the existing useConditionalQuery hook (30 s ETag polling). DashboardPage drives a responsive CSS-grid of per-widget state machines (loading/empty/degraded/error), where each widget operates independently — a failing widget never blanks siblings. PROVISIONAL and BASELINE_PENDING are rendered as explicit labelled badges directly from the server-reported value, not inferred. WindowSelector and SegmentFilter each sync their selection to URL search params via useSearchParams. SVG-based MetricChart replaces Recharts (which is not in package.json) with an accessible series table linked via aria-describedby. MSW handler factory covers all six response scenarios including ETag-conditional 304.
+
+## WO-196: User Story: WO-196 - Event-driven notification fan-out with versioned templates
+- **Status:** completed
+- **Commit:** `30ce78c`
+- **Files:** 25 (+2222/-10)
+- **Duration:** 977ss
+- **Approach:** N/A
