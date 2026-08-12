@@ -25,7 +25,8 @@
     "test:performance": "playwright test --project=performance",
     "audit:design-system": "node scripts/audit-design-system.mjs",
     "check:bundle-size": "node scripts/check-bundle-size.mjs",
-    "test:technician": "playwright test --project=technician"
+    "test:technician": "playwright test --project=technician",
+    "test:e2e:technician": "playwright test --project=technician-mobile"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.56.2",

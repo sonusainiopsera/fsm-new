@@ -40,5 +40,21 @@ export default defineConfig({
         viewport: { width: 360, height: 800 },
       },
     },
+    // WO-160: Full regression suite — mobile viewport with trace + video on failure
+    {
+      name: 'technician-mobile',
+      testMatch: 'e2e/technician/**/*.spec.js',
+      retries: 1,
+      use: {
+        ...devices['Pixel 5'],
+        viewport: { width: 360, height: 800 },
+        deviceScaleFactor: 2,
+        isMobile: true,
+        hasTouch: true,
+        video: 'on',
+        trace: 'on-first-retry',
+        screenshot: 'only-on-failure',
+      },
+    },
   ],
 });
