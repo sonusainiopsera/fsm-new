@@ -75,6 +75,11 @@ class AnalyticsConfiguration {
     }
 
     @Bean
+    EventHandler slaPolicyChangedAnalyticsHandler(KpiOutboxConsumer consumer) {
+        return KpiOutboxConsumer.handlerFor("SLA_POLICY_CHANGED", consumer);
+    }
+
+    @Bean
     EventHandler csatResponseRecordedAnalyticsHandler(KpiOutboxConsumer consumer) {
         return KpiOutboxConsumer.handlerFor("CSAT_RESPONSE_RECORDED", consumer);
     }

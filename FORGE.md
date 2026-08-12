@@ -644,3 +644,10 @@
 - **Files:** 23 (+1165/-91)
 - **Duration:** 857ss
 - **Approach:** N/A
+
+## WO-162: User Story: WO-162 - SLA compliance and resolution time KPI projections
+- **Status:** completed
+- **Commit:** `6925220`
+- **Files:** 15 (+1196/-18)
+- **Duration:** 1105ss
+- **Approach:** Added a new analytics.internal.sla package containing: SlaAggregationRepository (replica-routed JDBC; uses positional params, percentile_cont(0.5) for median); SlaComplianceCalculator (KpiAggregator for sla.compliance.rate; compliance = closed at or before resolution_deadline / total closed; weighted ALL rollup; BASELINE_PENDING until baseline_metric row exists; prior-period delta stored as DELTA: prefixed segment keys); SlaBreachCountCalculator (sla.breach.count; per-priority per-reason breach counts); ResolutionTimeCalculator (abstract base) with SlaResolutionMeanCalculator (sla.resolution.mean) and SlaResolutionMedianCalculator (sla.resolution.median); BaselineMetricEntity + BaselineMetricRepository for the new baseline_metric table; Flyway V57 creating baseline_metric; MetricEventMapper updated with all four SLA metric keys on WORK_ORDER_TRANSITION, SLA_BREACH, and new SLA_POLICY_CHANGED events; AnalyticsConfiguration registers the SLA_POLICY_CHANGED EventHandler.
