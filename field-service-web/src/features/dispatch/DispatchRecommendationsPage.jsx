@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
@@ -6,6 +6,7 @@ import { StateSurface } from '../../components/StateSurface/StateSurface.jsx';
 import { apiFetch } from '../../api/http.js';
 import { useRecommendations } from './api/useRecommendations.js';
 import { RecommendationCard } from './components/RecommendationCard.jsx';
+import { AssignmentDialog } from './components/AssignmentDialog.jsx';
 import styles from './DispatchRecommendationsPage.module.css';
 
 /**
@@ -29,6 +30,19 @@ export default function DispatchRecommendationsPage() {
     loadMore,
     refresh,
   } = useRecommendations(workOrderId);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogCandidate, setDialogCandidate] = useState(/** @type {unknown} */ (null));
+
+  const handleAssign = useCallback((candidate) => {
+    setDialogCandidate(candidate);
+    setDialogOpen(true);
+  }, []);
+
+  const handleDialogClose = useCallback(() => {
+    setDialogOpen(false);
+    setDialogCandidate(null);
+  }, []);
 
   // ── Error states ────────────────────────────────────────────────────────────
 
@@ -125,9 +139,24 @@ export default function DispatchRecommendationsPage() {
 
       <ul className={styles.list} aria-label="Ranked technician candidates">
         {candidates.map(candidate => (
-          <RecommendationCard key={candidate.technicianId} candidate={candidate} />
+          <RecommendationCard
+            key={candidate.technicianId}
+            candidate={candidate}
+            onAssign={handleAssign}
+          />
         ))}
       </ul>
+
+      <AssignmentDialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        workOrderId={workOrderId}
+        mode="assign"
+        candidate={dialogCandidate}
+        snapshotId={meta?.snapshotId ?? null}
+        partsWarnings={meta?.partsWarnings ?? []}
+        onRefreshRecommendations={refresh}
+      />
 
       {hasNext && (
         <div className={styles.loadMoreRow}>

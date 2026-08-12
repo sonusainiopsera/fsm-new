@@ -728,3 +728,10 @@
 - **Files:** 19 (+1481/-2)
 - **Duration:** 1049ss
 - **Approach:** Implemented reassignment as a supersede-based append-only operation with full certification and appointment guards. The V62 Flyway migration adds end_at/superseded_by/reassignment_reason columns to assignment (renaming the active-assignment partial index to use end_at IS NULL) and adds appointment_window_start/end/appointment_confirmed to work_order. ReassignmentService executes in one @Transactional method: state eligibility check (ASSIGNED/EN_ROUTE/ON_HOLD/IN_PROGRESS), same-technician no-op (400), required reason validation, hard certification guard (reused AssignmentGuard), appointment guard (AppointmentGuard refuses future confirmed windows without acknowledgement), superseding the active assignment, saving the new assignment, updating work_order.assigned_technician_id without changing state, flushing for optimistic lock, and publishing two outbox events. ReassignmentController at POST /api/v1/work-orders/{id}/reassignment delegates to ReassignmentService with @PreAuthorize for DISPATCHER/ADMIN. Micrometer counters tagged by reason and appointment_ack.
+
+## WO-141: User Story: WO-141 - Assign and override dialog with reason capture
+- **Status:** completed
+- **Commit:** `4c4959c`
+- **Files:** 17 (+1629/-4)
+- **Duration:** 970ss
+- **Approach:** Built AssignmentDialog from the shared Modal, Button, and FormField primitives with a step-based state machine (form → cert_refused | conflict | retry_after | error). The mutation hook useAssignTechnician maintains a stable Idempotency-Key ref per submission sequence and reuses it across network retries. Override requirement is derived client-side from rank (>3 or absent). The appointment breach acknowledgement step is revealed only after the server returns 422 CONFIRMED_APPOINTMENT_BREACH — never auto-filled. Reassignment mode adds the controlled ReassignmentReasonSelect. RecommendationCard gained an onAssign callback prop and Assign button; DispatchRecommendationsPage wires the dialog state.

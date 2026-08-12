@@ -715,6 +715,87 @@ const DEFAULT_ROUTES = {
     headers: { 'ETag': '"recs-etag-v1"' },
   },
 
+  // ── Assignment and reassignment ─────────────────────────────────────────────
+
+  'POST:/api/v1/work-orders/wo-assign-001/assignment': {
+    status: 200,
+    body: {
+      data: {
+        assignmentId: '00000000-0000-7141-0000-000000000001',
+        workOrderId: 'wo-assign-001',
+        technicianId: 'tech-rec-001',
+        state: 'ASSIGNED',
+        assignedAt: '2026-08-12T10:30:00Z',
+        recommendationRank: 1,
+        recommendationScore: 0.95,
+        overrideRecorded: false,
+        partsWarning: null,
+      },
+      meta: { traceId: 'trace-assign-001' },
+    },
+  },
+
+  'POST:/api/v1/work-orders/wo-assign-001/reassignment': {
+    status: 200,
+    body: {
+      data: {
+        assignmentId: '00000000-0000-7141-0000-000000000002',
+        supersededAssignmentId: '00000000-0000-7141-0000-000000000000',
+        workOrderId: 'wo-assign-001',
+        technicianId: 'tech-rec-001',
+        state: 'ASSIGNED',
+        reassignmentReason: 'SLA_RISK',
+        appointmentImpactRecorded: false,
+        assignedAt: '2026-08-12T10:30:00Z',
+      },
+      meta: { traceId: 'trace-reassign-001' },
+    },
+  },
+
+  'GET:/api/v1/work-orders/wo-assign-001': {
+    status: 200,
+    body: {
+      id: 'wo-assign-001',
+      reference: 'WO-ASSIGN-001',
+      state: 'NEW',
+      priority: 'HIGH',
+      customerName: 'Acme Corp',
+      siteName: 'London HQ',
+      legalNextEvents: ['ASSIGN', 'CANCEL'],
+      version: 1,
+      createdAt: '2026-08-12T08:00:00Z',
+    },
+  },
+
+  'GET:/api/v1/work-orders/wo-assign-001/recommendations': {
+    status: 200,
+    body: {
+      data: [
+        {
+          technicianId: 'tech-rec-001',
+          technicianName: 'Technician 1',
+          rank: 1,
+          score: 0.95,
+          travelEstimateDegraded: false,
+          factors: [],
+        },
+      ],
+      page: { size: 1, hasNext: false },
+      links: { next: null },
+      meta: {
+        snapshotId: '00000000-0000-7141-8000-000000000001',
+        generatedAt: '2026-08-12T10:00:00Z',
+        weightSetVersion: '2.1',
+        travelEstimateDegraded: false,
+        partsDataDegraded: false,
+        candidatePoolSize: 5,
+        truncated: false,
+        exclusionSummary: [],
+        partsWarnings: [],
+      },
+    },
+  },
+
   // ── Photo analysis ──────────────────────────────────────────────────────────
 
   'POST:/api/v1/work-orders/wo-001/photos/photo-001/analysis': {

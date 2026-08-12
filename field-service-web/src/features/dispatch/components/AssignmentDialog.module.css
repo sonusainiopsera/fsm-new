@@ -1,0 +1,105 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Technician summary */
+.technicianSummary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-3);
+  background-color: var(--color-surface-raised, #f9fafb);
+  border-radius: var(--radius-md, 4px);
+  margin: 0;
+}
+
+.summaryRow {
+  display: contents;
+}
+
+.summaryLabel {
+  font-size: var(--text-sm);
+  color: var(--color-text-subtle, #6b7280);
+  font-weight: var(--font-medium);
+}
+
+.summaryValue {
+  font-size: var(--text-sm);
+  color: var(--color-text, #111);
+  margin: 0;
+}
+
+/* Terminal cert refusal */
+.terminalRefusal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.terminalIcon {
+  font-size: var(--text-2xl);
+  color: var(--color-danger, #dc2626);
+  margin: 0;
+}
+
+.terminalTitle {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text, #111);
+  margin: 0;
+}
+
+.terminalDetail {
+  font-size: var(--text-sm);
+  color: var(--color-danger, #dc2626);
+  margin: 0;
+}
+
+.terminalNote {
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle, #6b7280);
+  margin: 0;
+}
+
+/* Conflict panel */
+.conflictPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background-color: var(--color-warning-surface, #fff8e7);
+  border: 1px solid var(--color-warning-border, #f0b429);
+  border-radius: var(--radius-md, 4px);
+}
+
+.conflictTitle {
+  font-weight: var(--font-semibold);
+  margin: 0;
+}
+
+.conflictDetail {
+  font-size: var(--text-sm);
+  color: var(--color-text-subtle, #6b7280);
+  margin: 0;
+}
+
+/* Retry-after panel */
+.retryPanel {
+  padding: var(--space-3);
+  background-color: var(--color-surface-raised, #f9fafb);
+  border-radius: var(--radius-md, 4px);
+}
+
+/* Error panel */
+.errorPanel {
+  padding: var(--space-3);
+  background-color: var(--color-danger-surface, #fef2f2);
+  border: 1px solid var(--color-danger-border, #fca5a5);
+  border-radius: var(--radius-md, 4px);
+  color: var(--color-danger-text, #7f1d1d);
+}

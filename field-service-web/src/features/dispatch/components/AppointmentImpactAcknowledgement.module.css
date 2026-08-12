@@ -1,0 +1,52 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background-color: var(--color-warning-surface, #fff8e7);
+  border: 1px solid var(--color-warning-border, #f0b429);
+  border-radius: var(--radius-md, 4px);
+  color: var(--color-warning-text, #7d5100);
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--color-warning-icon, #f0b429);
+}
+
+.message {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 5rem;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius-md, 4px);
+  background-color: var(--color-surface, #fff);
+  color: var(--color-text, #111);
+}
+
+.textarea:focus {
+  outline: 2px solid var(--color-focus-ring, #2563eb);
+  outline-offset: 2px;
+}
+
+.charCount {
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle, #6b7280);
+  text-align: right;
+  margin: 0;
+}

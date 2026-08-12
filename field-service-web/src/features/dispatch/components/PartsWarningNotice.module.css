@@ -1,0 +1,20 @@
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background-color: var(--color-warning-surface, #fff8e7);
+  border: 1px solid var(--color-warning-border, #f0b429);
+  border-radius: var(--radius-md, 4px);
+  color: var(--color-warning-text, #7d5100);
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--color-warning-icon, #f0b429);
+}
+
+.text {
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}

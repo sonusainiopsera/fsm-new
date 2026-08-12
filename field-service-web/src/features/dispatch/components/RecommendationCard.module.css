@@ -80,3 +80,30 @@
 .breakdown[hidden] {
   display: none;
 }
+
+.assignBtn {
+  flex-shrink: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-btn-primary-text, #fff);
+  background: var(--color-accent-base);
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-control);
+  transition: background var(--duration-micro, 120ms);
+}
+
+.assignBtn:hover {
+  background: var(--color-accent-emphasis, #1d4ed8);
+}
+
+.assignBtn:focus-visible {
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: 2px;
+}
+
+.assignBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

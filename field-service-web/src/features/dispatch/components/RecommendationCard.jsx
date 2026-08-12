@@ -3,7 +3,8 @@ import { FactorBreakdownPanel } from './FactorBreakdownPanel.jsx';
 import styles from './RecommendationCard.module.css';
 
 /**
- * Displays a single ranked candidate row with an expandable factor breakdown.
+ * Displays a single ranked candidate row with an expandable factor breakdown
+ * and an Assign button that triggers the assignment dialog.
  *
  * @param {{
  *   candidate: {
@@ -15,9 +16,10 @@ import styles from './RecommendationCard.module.css';
  *     factors: unknown[],
  *   },
  *   defaultExpanded?: boolean,
+ *   onAssign?: (candidate: unknown) => void,
  * }} props
  */
-export function RecommendationCard({ candidate, defaultExpanded = false }) {
+export function RecommendationCard({ candidate, defaultExpanded = false, onAssign }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const { technicianId, technicianName, rank, score, travelEstimateDegraded, factors } = candidate;
@@ -58,6 +60,16 @@ export function RecommendationCard({ candidate, defaultExpanded = false }) {
             onClick={() => setExpanded(e => !e)}
           >
             {expanded ? 'Hide factors' : 'Show factors'}
+          </button>
+        )}
+
+        {onAssign && (
+          <button
+            className={styles.assignBtn}
+            onClick={() => onAssign(candidate)}
+            aria-label={`Assign ${technicianName}`}
+          >
+            Assign
           </button>
         )}
       </div>
