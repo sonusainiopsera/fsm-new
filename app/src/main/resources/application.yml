@@ -91,6 +91,10 @@ ai:
   copilot:
     enabled: false
     daily-cap-per-user: 50
+    grounding:
+      max-prior-work-orders: 5
+      max-description-chars: 2000
+      max-fault-notes-chars: 500
   provider:
     base-url: ${AI_PROVIDER_BASE_URL:https://api.example.ai}
     api-key: ${AI_PROVIDER_API_KEY:}

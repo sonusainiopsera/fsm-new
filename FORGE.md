@@ -448,3 +448,10 @@
 - **Files:** 26 (+1358/-1)
 - **Duration:** 1354ss
 - **Approach:** Implemented CSAT survey issuance and response capture as an outbox-driven system. CsatIssuanceConsumer subscribes to WORK_ORDER_STATE_CHANGED events, filters for toState=CLOSED, and idempotently inserts a CsatSurvey row (guarded by existsBySourceEventId + existsByWorkOrderId + DB unique constraints). CsatSurveyDeliveryService wraps the optional NotificationPort with an IN_APP fallback when the port is unavailable. CsatSurveyService exposes paginated survey listing and response submission (with duplicate/expiry validation). PortalSurveyController wires the portal endpoints. CSAT_RESPONSE_RECORDED events drive analytics. EncryptedStringConverter protects the comment field at rest.
+
+## WO-177: User Story: WO-177 - Grounding context retrieval and PII redaction for AI prompts
+- **Status:** completed
+- **Commit:** `7ea4c95`
+- **Files:** 22 (+1459/-0)
+- **Duration:** 1864ss
+- **Approach:** Built two independently testable units: (1) WorkOrderEnrichmentPort/Adapter in the workorder.enrichment package — a public interface that assembles asset identity, fault details, customer/site PII context, and prior service history using ScopedQueryExecutor so access control is applied as a query predicate; (2) the com.fieldservice.copilot package with PiiRedactor (NFKD-normalised literal substitution + pattern sweeps), GroundingSufficiencyEvaluator (3-rule ordered list), GroundingContextRetriever, and PromptAssembler. Redaction is enforced structurally: GroundingContext is package-private so no external code can bypass it to reach AiCompletionRequest. PromptAssembler is the sole permitted constructor of copilot AI requests and carries @PreAuthorize.
