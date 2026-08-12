@@ -2,7 +2,9 @@ package com.fieldservice.portal.web;
 
 import com.fieldservice.platform.api.ApiErrorResponse;
 import com.fieldservice.platform.api.ErrorCode;
+import com.fieldservice.platform.api.FieldError;
 import com.fieldservice.portal.access.ScopeUnavailableException;
+import com.fieldservice.portal.history.InvalidDateRangeException;
 import com.fieldservice.portal.service.PortalInvitationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
 
 import java.util.UUID;
 
@@ -40,6 +44,24 @@ public class PortalExceptionAdvice {
 
     private static final Logger log = LoggerFactory.getLogger(PortalExceptionAdvice.class);
     private static final String X_TRACE_ID = "X-Trace-Id";
+
+    /**
+     * Invalid date range: inverted or wider than the maximum permitted span.
+     * Returns 400 with a field-level error naming the offending parameter.
+     */
+    @ExceptionHandler(InvalidDateRangeException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidDateRange(InvalidDateRangeException ex) {
+        String traceId = resolveTraceId();
+        log.warn("portal_invalid_date_range field={} trace_id={}", ex.getField(), traceId);
+        ApiErrorResponse body = ApiErrorResponse.withFieldErrors(
+                ErrorCode.VALIDATION_FAILED,
+                "Invalid date range.",
+                List.of(new FieldError(ex.getField(), ex.getMessage())),
+                traceId);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .header(X_TRACE_ID, traceId)
+                .body(body);
+    }
 
     /**
      * Row-scope miss: no active portal linkage for the authenticated user.
