@@ -1,0 +1,33 @@
+{
+  "id": "wo-tech-002",
+  "reference": "REF-T002",
+  "state": "EN_ROUTE",
+  "priority": "CRITICAL",
+  "faultDescription": "Electrical panel trip — breaker B12 tripping under load. Customer reports smell of burning plastic.",
+  "siteName": "Eastside Office Complex",
+  "siteAddress": "42 East Avenue, Floor G",
+  "sitePostcode": "W1A 0AX",
+  "siteAccessNotes": "Car park barrier code: 4821. Use goods lift to floor G. Key box on wall — code 1234.",
+  "contactName": "Sam Rivera",
+  "contactPhoneMasked": "07*** *** 891",
+  "assetId": "asset-002",
+  "assetTag": "PANEL-G-01",
+  "assetDescription": "Schneider Electric 3-phase distribution panel",
+  "assetModel": "PrismaPlus G",
+  "assetManufacturer": "Schneider Electric",
+  "requiredCertifications": ["ELEC_HV", "ELEC_LV"],
+  "expectedParts": [
+    { "partId": "part-003", "partNumber": "SE-MCB-20A", "partName": "20A MCB Type B", "requiredQuantity": 2 }
+  ],
+  "responseDeadline": "2026-08-12T09:00:00Z",
+  "resolutionDeadline": "2026-08-12T14:00:00Z",
+  "atRiskAt": "2026-08-12T12:00:00Z",
+  "slaAtRisk": true,
+  "allowedTransitions": ["START"],
+  "holdReasons": [
+    { "code": "AWAITING_PARTS", "label": "Awaiting parts", "sortOrder": 1, "pausesSLAClock": true },
+    { "code": "CUSTOMER_UNAVAILABLE", "label": "Customer unavailable", "sortOrder": 2, "pausesSLAClock": false },
+    { "code": "SAFETY_CONCERN", "label": "Safety concern", "sortOrder": 4, "pausesSLAClock": true }
+  ],
+  "version": 3
+}

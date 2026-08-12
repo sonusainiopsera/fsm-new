@@ -1,0 +1,34 @@
+{
+  "id": "wo-tech-004",
+  "reference": "REF-T004",
+  "state": "ON_HOLD",
+  "priority": "LOW",
+  "faultDescription": "Broken door closer on fire exit — door not returning to closed position under spring tension.",
+  "siteName": "Southbank Community Centre",
+  "siteAddress": "3 River Walk, Ground Floor",
+  "sitePostcode": "SE1 7PB",
+  "siteAccessNotes": "Reception hours 09:00-17:00. After-hours contact: facilities manager on mobile.",
+  "contactName": "Alex Patel",
+  "contactPhoneMasked": "07*** *** 102",
+  "assetId": "asset-004",
+  "assetTag": "DOOR-EXIT-02",
+  "assetDescription": "Briton 2003 Series door closer — fire exit south",
+  "assetModel": "2003V",
+  "assetManufacturer": "Briton",
+  "requiredCertifications": [],
+  "expectedParts": [
+    { "partId": "part-005", "partNumber": "BRIT-2003V-ARM", "partName": "Door closer arm assembly", "requiredQuantity": 1 }
+  ],
+  "responseDeadline": "2026-08-13T10:00:00Z",
+  "resolutionDeadline": "2026-08-14T18:00:00Z",
+  "atRiskAt": null,
+  "slaAtRisk": false,
+  "allowedTransitions": ["RESUME"],
+  "holdReasons": [
+    { "code": "AWAITING_PARTS", "label": "Awaiting parts", "sortOrder": 1, "pausesSLAClock": true },
+    { "code": "CUSTOMER_UNAVAILABLE", "label": "Customer unavailable", "sortOrder": 2, "pausesSLAClock": false },
+    { "code": "ACCESS_DENIED", "label": "Access denied", "sortOrder": 3, "pausesSLAClock": false },
+    { "code": "SAFETY_CONCERN", "label": "Safety concern", "sortOrder": 4, "pausesSLAClock": true }
+  ],
+  "version": 7
+}

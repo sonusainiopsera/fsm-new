@@ -1,0 +1,35 @@
+{
+  "id": "wo-tech-001",
+  "reference": "REF-T001",
+  "state": "ASSIGNED",
+  "priority": "HIGH",
+  "faultDescription": "HVAC unit not maintaining setpoint — intermittent fault code E07 on control board.",
+  "siteName": "Northside Commercial Park",
+  "siteAddress": "12 Industrial Way, Unit 3",
+  "sitePostcode": "EC1A 1BB",
+  "siteAccessNotes": "Reception on ground floor. Sign in at front desk. Access card required for plant room — collect from security.",
+  "contactName": "Jordan Lee",
+  "contactPhoneMasked": "07*** *** 234",
+  "assetId": "asset-001",
+  "assetTag": "HVAC-A3-01",
+  "assetDescription": "Daikin VRV IV S-Series",
+  "assetModel": "RXYQ8T",
+  "assetManufacturer": "Daikin",
+  "requiredCertifications": ["REFRIGERANT_HANDLING", "ELEC_LV"],
+  "expectedParts": [
+    { "partId": "part-001", "partNumber": "DK-FAN-12A", "partName": "Condenser fan motor", "requiredQuantity": 1 },
+    { "partId": "part-002", "partNumber": "DK-CTRL-E07", "partName": "Control board E07 replacement", "requiredQuantity": 1 }
+  ],
+  "responseDeadline": "2026-08-12T10:00:00Z",
+  "resolutionDeadline": "2026-08-12T18:00:00Z",
+  "atRiskAt": "2026-08-12T16:00:00Z",
+  "slaAtRisk": false,
+  "allowedTransitions": ["DEPART", "START"],
+  "holdReasons": [
+    { "code": "AWAITING_PARTS", "label": "Awaiting parts", "sortOrder": 1, "pausesSLAClock": true },
+    { "code": "CUSTOMER_UNAVAILABLE", "label": "Customer unavailable", "sortOrder": 2, "pausesSLAClock": false },
+    { "code": "ACCESS_DENIED", "label": "Access denied", "sortOrder": 3, "pausesSLAClock": false },
+    { "code": "SAFETY_CONCERN", "label": "Safety concern", "sortOrder": 4, "pausesSLAClock": true }
+  ],
+  "version": 2
+}

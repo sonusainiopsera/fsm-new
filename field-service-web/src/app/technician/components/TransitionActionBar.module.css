@@ -1,0 +1,89 @@
+.bar {
+  padding: var(--token-space-4);
+  background: var(--token-surface-1, #f8f9fa);
+  border-top: 1px solid var(--token-border-subtle);
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-2);
+}
+
+/* Minimum 44 px touch target (AC-9) */
+.primaryButton,
+.secondaryButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--token-space-2);
+  min-height: 44px;
+  padding: var(--token-space-3) var(--token-space-4);
+  border-radius: var(--token-radius-button, 8px);
+  font-size: var(--token-fs-base);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.primaryButton {
+  background: var(--token-action-primary, #2563eb);
+  color: var(--token-on-action-primary, #ffffff);
+}
+
+.primaryButton:not(:disabled):hover {
+  background: var(--token-action-primary-hover, #1d4ed8);
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--token-text-primary);
+  border: 1.5px solid var(--token-border-default);
+}
+
+.secondaryButton:not(:disabled):hover {
+  background: var(--token-neutral-50, #f1f5f9);
+}
+
+.icon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.noActions {
+  display: block;
+  text-align: center;
+  padding: var(--token-space-3);
+  color: var(--token-text-secondary);
+  font-size: var(--token-fs-13);
+}
+
+.errorMessage {
+  margin: 0 0 var(--token-space-3);
+  padding: var(--token-space-3);
+  background: var(--token-danger-surface, #fef2f2);
+  color: var(--token-danger-text, #991b1b);
+  border-radius: var(--token-radius-button, 8px);
+  font-size: var(--token-fs-13);
+}

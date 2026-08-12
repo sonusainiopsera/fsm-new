@@ -616,3 +616,10 @@
 - **Files:** 27 (+1109/-49)
 - **Duration:** 1024ss
 - **Approach:** N/A
+
+## WO-156: User Story: WO-156 - Job detail screen with single-tap lifecycle transitions
+- **Status:** completed
+- **Commit:** `b7f963c`
+- **Files:** 20 (+1919/-4)
+- **Duration:** 890ss
+- **Approach:** N/A

@@ -1,0 +1,42 @@
+[
+  {
+    "workOrderId": "wo-hist-001",
+    "reference": "REF-H001",
+    "resolvedAt": "2026-07-28T15:42:00Z",
+    "faultSummary": "Condenser fan motor failure — unit not cooling. E07 fault code on control board.",
+    "resolutionSummary": "Replaced condenser fan motor (DK-FAN-12A) and control board. Unit tested at setpoint for 30 minutes.",
+    "partsUsed": ["DK-FAN-12A", "DK-CTRL-E07"]
+  },
+  {
+    "workOrderId": "wo-hist-002",
+    "reference": "REF-H002",
+    "resolvedAt": "2026-06-10T11:15:00Z",
+    "faultSummary": "Refrigerant leak detected — low charge causing poor cooling performance.",
+    "resolutionSummary": "Located leak at flare joint on indoor unit liquid line. Recovered, repaired, recharged to 2.3 kg R410A.",
+    "partsUsed": []
+  },
+  {
+    "workOrderId": "wo-hist-003",
+    "reference": "REF-H003",
+    "resolvedAt": "2026-04-03T09:55:00Z",
+    "faultSummary": "Annual preventive maintenance — filter clean, coil wash, controls check.",
+    "resolutionSummary": "Completed PPM schedule. Filters cleaned, indoor/outdoor coils washed. All controls functional. Minor refrigerant top-up 0.1 kg.",
+    "partsUsed": []
+  },
+  {
+    "workOrderId": "wo-hist-004",
+    "reference": "REF-H004",
+    "resolvedAt": "2025-11-19T14:30:00Z",
+    "faultSummary": "Noisy operation — rattling from outdoor unit at startup.",
+    "resolutionSummary": "Tightened loose compressor mounting bolts. Replaced worn anti-vibration grommets. Noise eliminated on test.",
+    "partsUsed": ["AV-GROMMET-KIT"]
+  },
+  {
+    "workOrderId": "wo-hist-005",
+    "reference": "REF-H005",
+    "resolvedAt": "2025-08-07T16:00:00Z",
+    "faultSummary": "Drainage blockage — water leaking from indoor unit onto ceiling tiles.",
+    "resolutionSummary": "Cleared condensate drain blockage (algae build-up). Fitted condensate treatment tablet. Drain pan cleaned.",
+    "partsUsed": []
+  }
+]

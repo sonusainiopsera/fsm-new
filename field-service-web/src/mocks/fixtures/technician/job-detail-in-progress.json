@@ -1,0 +1,34 @@
+{
+  "id": "wo-tech-003",
+  "reference": "REF-T003",
+  "state": "IN_PROGRESS",
+  "priority": "MEDIUM",
+  "faultDescription": "Plumbing leak in ceiling void — water ingress affecting data cabling. Source traced to faulty compression fitting.",
+  "siteName": "Westfield Plaza",
+  "siteAddress": "88 West Mall, Level 2",
+  "sitePostcode": "SW1A 2AA",
+  "siteAccessNotes": "Void access via ceiling hatch in server room. Requires isolation of cold water supply at main stopcock.",
+  "contactName": "Casey Morgan",
+  "contactPhoneMasked": "07*** *** 556",
+  "assetId": "asset-003",
+  "assetTag": "PLUMB-L2-07",
+  "assetDescription": "Cold water distribution pipework Level 2",
+  "assetModel": null,
+  "assetManufacturer": null,
+  "requiredCertifications": ["PLUMBING"],
+  "expectedParts": [
+    { "partId": "part-004", "partNumber": "FIT-COMP-0.5IN", "partName": "Compression fitting 1/2\"", "requiredQuantity": 3 }
+  ],
+  "responseDeadline": "2026-08-12T11:30:00Z",
+  "resolutionDeadline": "2026-08-12T20:00:00Z",
+  "atRiskAt": null,
+  "slaAtRisk": false,
+  "allowedTransitions": ["COMPLETE", "HOLD"],
+  "holdReasons": [
+    { "code": "AWAITING_PARTS", "label": "Awaiting parts", "sortOrder": 1, "pausesSLAClock": true },
+    { "code": "CUSTOMER_UNAVAILABLE", "label": "Customer unavailable", "sortOrder": 2, "pausesSLAClock": false },
+    { "code": "ACCESS_DENIED", "label": "Access denied", "sortOrder": 3, "pausesSLAClock": false },
+    { "code": "SAFETY_CONCERN", "label": "Safety concern", "sortOrder": 4, "pausesSLAClock": true }
+  ],
+  "version": 5
+}
