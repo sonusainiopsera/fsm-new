@@ -546,3 +546,10 @@
 - **Files:** 28 (+1421/-14)
 - **Duration:** 888ss
 - **Approach:** N/A
+
+## WO-134: User Story: WO-134 - Weighted multi-factor technician scoring engine
+- **Status:** completed
+- **Commit:** `2395870`
+- **Files:** 21 (+1453/-0)
+- **Duration:** 1132ss
+- **Approach:** Implemented a framework-free, deterministic scoring engine in dispatch.scoring. V52 migration creates dispatch_scoring_weight and dispatch_scoring_config tables with Envers AUD tables, seeded with four factor weights and exponent=2.0. ScoringFactor interface takes ScoringContext and ScoringWeights, returning FactorBreakdown with raw, normalised (0-1), weight, weighted contribution, explanation, and degraded flag. ScoringEngine is a plain Java class wired via ScoringConfiguration @Configuration. WorkloadFairnessFactor reads the exponent from ScoringWeights per-request so tuning changes take effect within the 30s cache TTL. ScoringWeightsLoader uses ReentrantLock for thread-safe cache with invalidation.
