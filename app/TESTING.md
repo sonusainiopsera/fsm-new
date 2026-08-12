@@ -571,3 +571,94 @@ still rejected at the authorisation layer:
 # RBAC YAML matrix (service-layer bypass proof)
 ./mvnw test -pl app -Dtest=RbacMatrixTest
 ```
+
+---
+
+## PII masking policy (WO-192)
+
+### Tiers and treatment
+
+| Tier | Treatment | Example fields |
+|---|---|---|
+| `RESTRICTED` | Fully redacted → `[REDACTED]` | passwordHash, apiKey, jwtSigningKey |
+| `CONFIDENTIAL` | Partially masked per strategy | email, phone, fullName, latitude |
+| `INTERNAL` | Pass-through | workOrderNumber, equipmentId |
+| `PUBLIC` | Pass-through | productName, catalogueCode |
+
+Unclassified fields default to `RESTRICTED` (most restrictive) — zero false-negatives.
+
+### Masking strategies (CONFIDENTIAL per type)
+
+| Type | Strategy | Example output |
+|---|---|---|
+| EMAIL | Keep first char + domain | `j***@example.com` |
+| PHONE | Keep last 2 digits, mask rest | `+44 *** *** **89` |
+| NAME | Initials only | `J. S.` |
+| ADDRESS | Region component only | `[ADDR]...London` |
+| COORDINATE | 1 decimal place (~11 km) | `51.5~` |
+| TOKEN / HASH | Full redaction | `[REDACTED]` |
+
+### Adding a new masking strategy
+
+1. Implement `MaskingStrategy` (functional interface, must be idempotent + null-safe).
+2. Add a static constant to `MaskingStrategies` with a Javadoc explaining the format.
+3. Wire it in `MaskingStrategies.forTier()` if it should be the default for a tier.
+4. Add unit tests in `MaskingStrategiesTest` covering null, empty, single-char, malformed.
+5. Add a Semgrep allow-list comment if the new strategy introduces a test fixture.
+
+### Fixture scanner
+
+Run:
+```
+./mvnw test -pl app -Dtest=FixturePiiScannerTest
+```
+
+The scanner checks every file under `src/test/resources/fixtures/` for email, phone,
+UK postcode and coordinate patterns. Files containing real-looking PII patterns MUST be
+in `fixtures/pii-allow-list.txt` with a justification comment.
+
+To add an approved file:
+1. Verify it contains only synthetic/fictional values.
+2. Add a justification comment + the relative path to `pii-allow-list.txt`.
+3. Get sign-off from the privacy team before merging.
+
+### Non-production anonymisation
+
+Activate the `anonymise` profile to pseudonymise a non-production database:
+```
+APP_ANONYMISE_SEED=<non-prod-only-secret> \
+  java -jar app.jar --spring.profiles.active=anonymise
+```
+
+The generator:
+- Refuses to run if the `prod` profile is active.
+- Reads the classification registry to find all CONFIDENTIAL and RESTRICTED entities.
+- Replaces CONFIDENTIAL field values with deterministic HMAC-SHA256-derived pseudonyms
+  (format-preserving where possible: email → `anon-<hex>@example-anon.invalid`).
+- Replaces RESTRICTED column values with `[ANONYMISED-RESTRICTED]`.
+- Is idempotent: already-pseudonymised values are not double-processed.
+- Uses HmacSHA256 only — MD5, SHA-1 and DES are never used.
+
+### Semgrep PII rules
+
+Run locally:
+```
+semgrep --config .semgrep/pii-masking-rules.yml app/src/ platform/src/ privacy/src/
+```
+
+Rules:
+- `logger-logs-classified-field`: direct logger call with a classified field.
+- `deprecated-hash-algorithm`: MD5, SHA-1, DES usage.
+- `objectmapper-serialises-classified-entity`: bare `new ObjectMapper()` serialising an entity.
+
+### Interpreting a fixture-scanner failure
+
+```
+Fixture scanner found PII patterns in non-allow-listed files:
+[fixtures/seed-example.sql] found patterns: [EMAIL pattern → [user@real-domain.com]]
+```
+
+**Remediation:**
+1. Replace the real-looking value with a synthetic one (e.g. `test@example.invalid`).
+2. OR add the file to `fixtures/pii-allow-list.txt` if it already contains only fiction.
+3. Never use real personal data in test fixtures — even if "anonymised" by hand.

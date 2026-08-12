@@ -1,0 +1,20 @@
+# PII allow-list for fixture scanner
+#
+# Each line is a file path (relative to src/test/resources/) that is
+# approved to contain synthetic personal-data-shaped values.
+# Entries require a justification comment on the line above.
+#
+# Format:
+#   # Justification: <reason> (approved by: <name>, <date>)
+#   fixtures/<filename>
+#
+# IMPORTANT: real personal data must NEVER appear in any committed file.
+# All entries here must contain only synthetic/fictional values.
+
+# Justification: deliberately unsafe fixture — proves CI scanner detects PII patterns (approved by: privacy-team, 2026-08-12)
+fixtures/unsafe-pii.sql
+
+# Justification: synthetic seed data containing obviously-fake contact details for integration tests (approved by: privacy-team, 2026-08-12)
+fixtures/seed-core.sql
+fixtures/identity-seed.sql
+fixtures/refresh-token-fixtures.sql

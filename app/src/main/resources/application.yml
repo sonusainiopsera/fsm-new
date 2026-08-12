@@ -155,6 +155,15 @@ app:
       zone: UTC
       token-secret: ${DSAR_TOKEN_SECRET:change-me-in-production}
 
+  privacy:
+    masking:
+      enabled: true
+      # Unclassified fields default to RESTRICTED (most restrictive) if provider returns empty
+      unclassified-default: RESTRICTED
+    anonymise:
+      # Non-production-only secret for deterministic HMAC pseudonymisation
+      seed: ${APP_ANONYMISE_SEED:change-me-non-production-seed-only}
+
 server:
   port: ${PORT:8080}
   error:

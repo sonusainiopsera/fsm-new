@@ -1,6 +1,7 @@
 package com.fieldservice.aigateway.internal;
 
 import com.fieldservice.aigateway.api.AiGatewayPort;
+import com.fieldservice.platform.privacy.FreeTextScrubber;
 import io.github.resilience4j.bulkhead.Bulkhead;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.retry.Retry;
@@ -107,7 +108,9 @@ public class AiGatewayAutoConfiguration {
     AiGatewayPort aiGatewayPort(
             HttpAiProviderAdapter httpAiProviderAdapter,
             UsageCapService usageCapService,
-            AiGatewayProperties props) {
-        return new FeatureFlagGuardedGateway(httpAiProviderAdapter, usageCapService, props);
+            AiGatewayProperties props,
+            FreeTextScrubber freeTextScrubber) {
+        AiGatewayPort base = new FeatureFlagGuardedGateway(httpAiProviderAdapter, usageCapService, props);
+        return new RedactingAiGatewayAdapter(base, freeTextScrubber);
     }
 }

@@ -1,0 +1,145 @@
+# Semgrep PII masking enforcement rules — WO-192
+#
+# Rule set: prevent unmasked personal data reaching logs or event payloads.
+#
+# Rules:
+#   1. logger-logs-classified-field          — direct logger call with a @DataClassification-annotated field
+#   2. deprecated-hash-algorithm             — MD5, SHA-1 or DES usage
+#   3. classified-entity-in-logger-arg       — passing an entity object directly to a logger
+#
+# Run locally:
+#   semgrep --config .semgrep/pii-masking-rules.yml app/src/ platform/src/ privacy/src/
+
+rules:
+
+  # -----------------------------------------------------------------------
+  # Rule 1: Logging a @DataClassification-annotated field directly.
+  #
+  # Pattern: logger.*(info|warn|error|debug|trace) with a field access that
+  # is annotated @DataClassification. Developers must call PiiMasker.mask()
+  # or use a masked DTO before logging.
+  # -----------------------------------------------------------------------
+  - id: logger-logs-classified-field
+    message: >
+      Logger call in '$CLASS' passes a field annotated @DataClassification directly.
+      Wrap the value with PiiMasker.mask() or use a DTO that omits the field before logging.
+      Restricted values must NEVER appear in any log at any level.
+      See docs/privacy/masking-policy.md for the masking guide.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-532: Insertion of Sensitive Information into Log File"
+      compliance: "GDPR Art.5(1)(f), SOC2 CC6.7"
+      references:
+        - docs/privacy/masking-policy.md
+    paths:
+      include:
+        - "*/src/main/java/**"
+    patterns:
+      - pattern: |
+          $LOG.$LEVEL(..., $OBJ.$FIELD, ...)
+      - metavariable-regex:
+          metavariable: "$LEVEL"
+          regex: "^(info|warn|error|debug|trace|atLevel)$"
+      - pattern-not-inside: |
+          class $C {
+            ...
+            @DataClassification(...)
+            $TYPE $FIELD;
+            ...
+          }
+
+  # -----------------------------------------------------------------------
+  # Rule 2: Deprecated/prohibited hash algorithms.
+  #
+  # MD5, SHA-1 and DES are forbidden for cryptographic use in this codebase
+  # (see architecture security constraints). Only SHA-256, SHA-3 and HMAC-SHA256+
+  # are approved for hashing; BCrypt/Argon2 for password derivation.
+  # -----------------------------------------------------------------------
+  - id: deprecated-hash-algorithm
+    message: >
+      Prohibited hash/cipher algorithm '$ALGO' detected.
+      MD5, SHA-1 and DES are not approved for use in this codebase.
+      Use HmacSHA256 (for pseudonymisation), SHA-256/SHA-3 (for checksums)
+      or BCrypt/Argon2 (for passwords).
+      See docs/security/cryptography-standards.md.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-327: Use of a Broken or Risky Cryptographic Algorithm"
+      compliance: "SOC2 CC6.7, GDPR Recital 83"
+    paths:
+      include:
+        - "*/src/main/java/**"
+        - "*/src/test/java/**"
+    patterns:
+      - pattern: |
+          MessageDigest.getInstance("$ALGO")
+      - metavariable-regex:
+          metavariable: "$ALGO"
+          regex: "(?i)^(MD5|SHA-?1|SHA1|DES|DESede|3DES|RC4|RC2|Blowfish)$"
+
+  - id: deprecated-hash-algorithm-mac
+    message: >
+      Prohibited MAC algorithm '$ALGO' detected.
+      HmacMD5 and HmacSHA1 are not approved. Use HmacSHA256 or stronger.
+    languages: [java]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-327: Use of a Broken or Risky Cryptographic Algorithm"
+    paths:
+      include:
+        - "*/src/main/java/**"
+    patterns:
+      - pattern: |
+          Mac.getInstance("$ALGO")
+      - metavariable-regex:
+          metavariable: "$ALGO"
+          regex: "(?i)^(HmacMD5|HmacSHA1)$"
+
+  - id: deprecated-cipher-algorithm
+    message: >
+      Prohibited cipher algorithm string '$ALGO' — DES and RC4 are forbidden.
+      Use AES-256-GCM (via javax.crypto.Cipher with "AES/GCM/NoPadding").
+    languages: [java]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-327: Use of a Broken or Risky Cryptographic Algorithm"
+    paths:
+      include:
+        - "*/src/main/java/**"
+    patterns:
+      - pattern: |
+          Cipher.getInstance("$ALGO")
+      - metavariable-regex:
+          metavariable: "$ALGO"
+          regex: "(?i)^(DES|DESede|3DES|RC4|RC2|Blowfish|AES/ECB)"
+
+  # -----------------------------------------------------------------------
+  # Rule 3: ObjectMapper/logger receiving an entity object directly.
+  #
+  # Entities annotated @DataClassification (or containing annotated fields)
+  # must not be passed to ObjectMapper.writeValueAsString() or a logger
+  # without going through the masking module.  Use a DTO or masked view.
+  # -----------------------------------------------------------------------
+  - id: objectmapper-serialises-classified-entity
+    message: >
+      ObjectMapper is serialising an object that may be a classified entity.
+      Ensure the PiiMaskingJacksonModule is registered on this ObjectMapper,
+      or convert to a DTO before serialisation.
+      See docs/privacy/masking-policy.md §Jackson-Integration.
+    languages: [java]
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-359: Exposure of Private Personal Information to an Unauthorized Actor"
+    paths:
+      include:
+        - "*/src/main/java/**"
+    patterns:
+      - pattern: |
+          new ObjectMapper().writeValueAsString(...)

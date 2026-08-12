@@ -121,4 +121,43 @@ class LayeredArchitectureTest {
                 .isInstanceOf(AssertionError.class)
                 .hasMessageContaining("ViolatingControllerFixture");
     }
+
+    // ==========================================================================
+    // WO-192 PII masking architecture rules
+    // ==========================================================================
+
+    /**
+     * The platform.privacy package must NOT import from the privacy module.
+     * This enforces the no-circular-dependency constraint: platform ← privacy,
+     * never platform → privacy.
+     */
+    @Test
+    @DisplayName("platform.privacy package must not import from the privacy module")
+    void platform_privacy_must_not_depend_on_privacy_module() {
+        ArchRule rule = noClasses()
+                .that().resideInAPackage("com.fieldservice.platform.privacy..")
+                .should().accessClassesThat()
+                .resideInAPackage("com.fieldservice.privacy..")
+                .because("platform cannot depend on the privacy module — this would create a "
+                        + "circular dependency. Use the FieldTierProvider bridge interface instead.");
+
+        rule.check(PROD_CLASSES);
+    }
+
+    /**
+     * Classes annotated {@code @DataClassification} (JPA entities) must not reside
+     * in {@code *.web} packages.  Controllers must use DTOs — classified entities
+     * must never be serialised as HTTP response bodies.
+     */
+    @Test
+    @DisplayName("@DataClassification entities must not reside in web packages")
+    void classified_entities_must_not_reside_in_web_packages() {
+        ArchRule rule = noClasses()
+                .that().areAnnotatedWith(com.fieldservice.privacy.api.DataClassification.class)
+                .should().resideInAPackage("..web..")
+                .because("Classified entities must not live in web packages — use DTOs. "
+                        + "See docs/privacy/masking-policy.md §DTO-Contract.");
+
+        rule.check(PROD_CLASSES);
+    }
 }

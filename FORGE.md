@@ -364,3 +364,10 @@
 - **Files:** 45 (+2409/-3)
 - **Duration:** 637ss
 - **Approach:** N/A
+
+## WO-192: User Story: WO-192 - PII log masking and non-production data anonymisation
+- **Status:** completed
+- **Commit:** `241eff0`
+- **Files:** 21 (+1688/-2)
+- **Duration:** 1153ss
+- **Approach:** Classification-driven masking layer built in three tiers: (1) Platform-layer primitives — MaskingTier, MaskingStrategy, MaskingStrategies (7 type-specific strategies), FieldTierProvider bridge interface, PiiMasker Spring component, FreeTextScrubber regex scrubber, PiiMaskingJacksonModule with BeanSerializerModifier. (2) Privacy-layer bridge — AnnotationFieldTierProvider implements FieldTierProvider via @DataClassification reflection with ConcurrentHashMap cache; solves the platform↔privacy circular-dependency constraint. (3) App-layer wiring — PiiMaskingLogbackConverter (%maskedMsg) registered in new logback-spring.xml; RedactingAiGatewayAdapter decorator wrapping AiGatewayPort with fail-closed contract; AnonymisationGenerator @Profile(anonymise) ApplicationRunner using HmacSHA256 pseudonymisation. Build enforcement via new .semgrep/pii-masking-rules.yml (deprecated algorithms, bare ObjectMapper, classified-field logging) and two new ArchUnit rules in LayeredArchitectureTest.

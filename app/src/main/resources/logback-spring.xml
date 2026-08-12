@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logback configuration for field-service-api.
+
+  PII masking:
+    %maskedMsg — applies PiiMaskingLogbackConverter to the formatted message before output.
+    All appenders use %maskedMsg; the raw %msg conversion word is never used in patterns.
+
+  Profiles:
+    default / prod — INFO level, console JSON-ish structured output
+    test           — WARN level to suppress noise in unit tests (Spring boot overrides via
+                     logging.level.* in application-test.yml)
+-->
+<configuration>
+
+    <!-- Register the PII masking converter as the %maskedMsg conversion word -->
+    <conversionRule conversionWord="maskedMsg"
+                    converterClass="com.fieldservice.app.privacy.PiiMaskingLogbackConverter"/>
+
+    <!-- ================================================================
+         Appenders
+         ================================================================ -->
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %5level [%15.15thread] %-40.40logger{39} : %maskedMsg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ================================================================
+         Spring Boot profile-specific overrides
+         ================================================================ -->
+
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="!prod">
+        <!-- Non-prod: DEBUG for our code, WARN for noisy frameworks -->
+        <logger name="com.fieldservice" level="DEBUG"/>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.hibernate" level="WARN"/>
+        <logger name="com.zaxxer.hikari" level="WARN"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>
