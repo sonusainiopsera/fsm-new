@@ -574,6 +574,58 @@ still rejected at the authorisation layer:
 
 ---
 
+## KPI Baseline Instrumentation Validation (WO-207)
+
+### Metric formulas and denominator exclusions
+
+| Metric | Key | Formula | Zero denominator |
+|--------|-----|---------|-----------------|
+| SLA compliance | `sla.compliance.rate` | `compliant_closed / total_closed` per priority; ALL = sum-of-priority-numerators / sum-of-denominators | `null` |
+| Resolution mean | `sla.resolution.mean` | `AVG(EXTRACT(EPOCH FROM (closed_at - created_at)) / 60)` per priority | `null` |
+| Resolution median | `sla.resolution.median` | `PERCENTILE_CONT(0.5)` over same distribution; NOT approximated from mean | `null` |
+| Utilization | `workforce.utilization.rate` | `fieldMinutes / shiftMinutes` per technician per ISO week; team = sum-of-numerators | `null` (missing shift); `0.0000` (valid shift, zero labour) |
+| First-time fix | `quality.first_time_fix.matured` | `is_first_time_fix_true / classifiable_matured` | `null` |
+| Self-service adoption | *(pending)* | `portal_requests / total_requests` | `null` |
+| Satisfaction CSAT/NPS | *(pending)* | CSAT: average score; NPS: (promoters − detractors) / total × 100 | `null` |
+
+**Compliance boundary**: `closed_at <= resolution_deadline` is COMPLIANT (inclusive).
+
+**FTF 30-day repeat rule**: links with same `(asset_id, fault_key)` within strictly < 30 days. At exactly 30 days → NOT linked.
+
+**Cohort maturity**: `matured_at = closed_at + 30 days`. PROVISIONAL rows are excluded from `quality.first_time_fix.matured`.
+
+### Golden dataset
+
+Hand-derived expected values are committed at `src/test/resources/golden/kpi-expected-values.json`.
+UUID namespace: `gg000000-0000-7207-XXXX-XXXXXXXXXXXX`.
+
+P30D golden dataset (8 work orders):
+
+| Priority | Compliant | Total | Rate | Mean (min) | Median (min) |
+|----------|-----------|-------|------|-----------|-------------|
+| HIGH | 3 | 4 | 0.7500 | 97.75 | 105.0 |
+| MEDIUM | 2 | 3 | 0.6667 | 190.0 | 200.0 |
+| LOW | 1 | 1 | 1.0000 | 400.0 | 400.0 |
+| ALL | 6 | 8 | 0.7500 | 170.125 | 120.5 |
+
+### Running the validation tests
+
+```bash
+# All KPI validation integration tests (requires Docker)
+./mvnw test -pl app -Dtest='ComplianceMetricValidationTest,ResolutionTimeValidationTest,UtilizationValidationTest,FirstTimeFixValidationTest' -Dgroups=integration
+
+# Unit-only formula tests (no Spring, no DB)
+./mvnw test -pl app -Dtest='ComplianceMetricValidationTest#formula*,UtilizationValidationTest#formula*'
+```
+
+### Target configurability
+
+Improvement targets are driven by the `baseline_metric` table. Without a row, `maturity = BASELINE_PENDING`.
+After inserting `(metric_key, segment_key, baseline_value)`, maturity transitions to an attainment label (`ON_TRACK`, etc.).
+See `ComplianceMetricValidationTest#targetConfig_*` for the executable assertion.
+
+---
+
 ## PII masking policy (WO-192)
 
 ### Tiers and treatment
