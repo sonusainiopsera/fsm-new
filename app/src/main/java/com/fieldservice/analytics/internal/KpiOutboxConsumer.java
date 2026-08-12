@@ -1,6 +1,8 @@
 package com.fieldservice.analytics.internal;
 
 import com.fieldservice.outbox.payload.PartsConsumedPayload;
+import com.fieldservice.outbox.payload.SlaBreachedPayload;
+import com.fieldservice.outbox.payload.SlaPolicyChangedPayload;
 import com.fieldservice.outbox.payload.WorkOrderCreatedPayload;
 import com.fieldservice.outbox.payload.WorkOrderStateChangedPayload;
 import com.fieldservice.platform.outbox.EventHandler;
@@ -50,9 +52,24 @@ class KpiOutboxConsumer {
                     KpiAggregationQueries.METRIC_WO_SLA_COMPLIANCE_7D,
                     BacklogMetricKeys.BACKLOG_OPEN_COUNT,
                     BacklogMetricKeys.BACKLOG_ON_HOLD_COUNT,
-                    BacklogMetricKeys.WORKLOAD_BALANCE_CV),
+                    BacklogMetricKeys.WORKLOAD_BALANCE_CV,
+                    // WO-162: SLA metrics — a state change to COMPLETED/CLOSED affects compliance
+                    SlaMetricKeys.COMPLIANCE_RATE,
+                    SlaMetricKeys.RESOLUTION_MEAN,
+                    SlaMetricKeys.RESOLUTION_MEDIAN,
+                    SlaMetricKeys.BREACH_COUNT),
             PartsConsumedPayload.EVENT_TYPE, List.of(
-                    KpiAggregationQueries.METRIC_WO_COMPLETION_RATE_7D)
+                    KpiAggregationQueries.METRIC_WO_COMPLETION_RATE_7D),
+            // WO-162: SLA breach detection affects breach count and compliance
+            SlaBreachedPayload.EVENT_TYPE, List.of(
+                    SlaMetricKeys.COMPLIANCE_RATE,
+                    SlaMetricKeys.BREACH_COUNT),
+            // WO-162: SLA policy change can alter which work orders are compliant
+            SlaPolicyChangedPayload.EVENT_TYPE, List.of(
+                    SlaMetricKeys.COMPLIANCE_RATE,
+                    SlaMetricKeys.RESOLUTION_MEAN,
+                    SlaMetricKeys.RESOLUTION_MEDIAN,
+                    SlaMetricKeys.BREACH_COUNT)
     );
 
     private final MetricDebounceRegistry debounceRegistry;

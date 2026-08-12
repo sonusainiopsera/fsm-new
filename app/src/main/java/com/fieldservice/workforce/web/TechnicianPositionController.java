@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -62,13 +62,13 @@ public class TechnicianPositionController {
             return switch (ex.getReason()) {
                 case STALE_TIMESTAMP -> ResponseEntity
                         .badRequest()
-                        .body(ErrorEnvelope.of("STALE_TIMESTAMP", ex.getMessage(), List.of(),
-                                traceId(httpRequest)));
+                        .body(new ErrorEnvelope("STALE_TIMESTAMP", ex.getMessage(),
+                                traceId(httpRequest), Instant.now()));
 
                 case NO_ACTIVE_JOB -> ResponseEntity
                         .unprocessableEntity()
-                        .body(ErrorEnvelope.of("NO_ACTIVE_JOB", ex.getMessage(), List.of(),
-                                traceId(httpRequest)));
+                        .body(new ErrorEnvelope("NO_ACTIVE_JOB", ex.getMessage(),
+                                traceId(httpRequest), Instant.now()));
 
                 case RATE_LIMITED -> {
                     HttpHeaders headers = new HttpHeaders();
@@ -76,8 +76,8 @@ public class TechnicianPositionController {
                     yield ResponseEntity
                             .status(HttpStatus.TOO_MANY_REQUESTS)
                             .headers(headers)
-                            .body(ErrorEnvelope.of("RATE_LIMITED", ex.getMessage(), List.of(),
-                                    traceId(httpRequest)));
+                            .body(new ErrorEnvelope("RATE_LIMITED", ex.getMessage(),
+                                    traceId(httpRequest), Instant.now()));
                 }
             };
         }

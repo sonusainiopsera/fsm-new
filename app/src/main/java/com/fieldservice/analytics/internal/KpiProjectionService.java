@@ -50,6 +50,7 @@ class KpiProjectionService implements KpiProjectionQuery {
     private final DegradationPolicy degradationPolicy;
     private final AnalyticsMetrics metrics;
     private final Clock clock;
+    private final SlaKpiRefreshHandler slaKpiRefreshHandler;
 
     @Nullable
     private final AnalyticsRedisCache redisCache;
@@ -64,6 +65,7 @@ class KpiProjectionService implements KpiProjectionQuery {
             DegradationPolicy degradationPolicy,
             AnalyticsMetrics metrics,
             Clock clock,
+            SlaKpiRefreshHandler slaKpiRefreshHandler,
             @Nullable @org.springframework.beans.factory.annotation.Autowired(required = false)
             AnalyticsRedisCache redisCache) {
         this.repository = repository;
@@ -75,6 +77,7 @@ class KpiProjectionService implements KpiProjectionQuery {
         this.degradationPolicy = degradationPolicy;
         this.metrics = metrics;
         this.clock = clock;
+        this.slaKpiRefreshHandler = slaKpiRefreshHandler;
         this.redisCache = redisCache;
     }
 
@@ -144,6 +147,12 @@ class KpiProjectionService implements KpiProjectionQuery {
      */
     @Transactional
     void recomputeAndPersist(String metricKey) {
+        // SLA metrics produce multiple (segment, window) rows — delegated to the SLA handler
+        if (SlaMetricKeys.ALL_METRIC_KEYS.contains(metricKey)) {
+            slaKpiRefreshHandler.recomputeAll(metricKey, clock.instant());
+            return;
+        }
+
         Instant now = clock.instant();
         log.info("analytics.recompute.start: metricKey={}", metricKey);
 

@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.sql.DataSource;
 
@@ -88,5 +89,15 @@ class AnalyticsDataSourceConfig {
     @Bean("replicaJdbcTemplate")
     JdbcTemplate replicaJdbcTemplate(@org.springframework.beans.factory.annotation.Qualifier("replicaDataSource") DataSource replicaDataSource) {
         return new JdbcTemplate(replicaDataSource);
+    }
+
+    /**
+     * NamedParameterJdbcTemplate wired to the replica datasource.
+     * Used by SlaAggregationRepository for named-parameter compliance queries.
+     */
+    @Bean("replicaNamedParameterJdbcTemplate")
+    NamedParameterJdbcTemplate replicaNamedParameterJdbcTemplate(
+            @org.springframework.beans.factory.annotation.Qualifier("replicaDataSource") DataSource replicaDataSource) {
+        return new NamedParameterJdbcTemplate(replicaDataSource);
     }
 }

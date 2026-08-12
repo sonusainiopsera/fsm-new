@@ -1,6 +1,8 @@
 package com.fieldservice.analytics.internal;
 
 import com.fieldservice.outbox.payload.PartsConsumedPayload;
+import com.fieldservice.outbox.payload.SlaBreachedPayload;
+import com.fieldservice.outbox.payload.SlaPolicyChangedPayload;
 import com.fieldservice.outbox.payload.WorkOrderCreatedPayload;
 import com.fieldservice.outbox.payload.WorkOrderStateChangedPayload;
 import com.fieldservice.platform.outbox.EventHandler;
@@ -58,6 +60,36 @@ class KpiEventHandlers {
 
     // CsatKpiConsumer (analytics.internal) is registered directly as an EventHandler bean
     // for CsatResponseRecorded — no adapter needed here.
+
+    // WO-162: SLA breach events mark SLA compliance and breach-count metrics dirty.
+    @Component
+    static class SlaBreachedHandler implements EventHandler {
+        private final KpiOutboxConsumer consumer;
+        SlaBreachedHandler(KpiOutboxConsumer consumer) { this.consumer = consumer; }
+
+        @Override
+        public String getSupportedEventType() { return SlaBreachedPayload.EVENT_TYPE; }
+
+        @Override
+        public void handle(EventHandlerContext ctx) {
+            consumer.consume(ctx);
+        }
+    }
+
+    // WO-162: SLA policy changes can alter which work orders are compliant.
+    @Component
+    static class SlaPolicyChangedHandler implements EventHandler {
+        private final KpiOutboxConsumer consumer;
+        SlaPolicyChangedHandler(KpiOutboxConsumer consumer) { this.consumer = consumer; }
+
+        @Override
+        public String getSupportedEventType() { return SlaPolicyChangedPayload.EVENT_TYPE; }
+
+        @Override
+        public void handle(EventHandlerContext ctx) {
+            consumer.consume(ctx);
+        }
+    }
 
     @Component
     static class PartsConsumedHandler implements EventHandler {

@@ -104,6 +104,7 @@ class KpiProjectionEntity {
     void setNumerator(@Nullable BigDecimal numerator) { this.numerator = numerator; }
     void setDenominator(@Nullable BigDecimal denominator) { this.denominator = denominator; }
     void setSampleCount(int sampleCount) { this.sampleCount = sampleCount; }
+    void setMaturity(String maturity) { this.maturity = maturity; }
     void setDataAsOf(Instant dataAsOf) { this.dataAsOf = dataAsOf; this.updatedAt = dataAsOf; }
     void bumpProjectionVersion() { this.projectionVersion++; }
     void setDegraded(boolean degraded) { this.degraded = degraded; }

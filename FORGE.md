@@ -644,3 +644,10 @@
 - **Files:** 15 (+780/-20)
 - **Duration:** 872ss
 - **Approach:** N/A
+
+## WO-162: User Story: WO-162 - SLA compliance and resolution time KPI projections
+- **Status:** completed
+- **Commit:** `f70f28d`
+- **Files:** 15 (+1467/-9)
+- **Duration:** 1122ss
+- **Approach:** Implemented SLA compliance and resolution time KPI projections by building a clean layered architecture on top of the WO-161 analytics substrate. A replica-routed SlaAggregationRepository queries closed work orders grouped by priority using named parameters and PostgreSQL percentile_cont(0.5) for median. Two pure calculators (SlaComplianceCalculator, ResolutionTimeCalculator) derive rates, weighted rollups, and deltas with no Spring dependencies. SlaKpiRefreshHandler orchestrates multi-window (7/30/90d), multi-segment upserts, delta rows (stored with _DELTA window key suffix), baseline maturity via BaselineMetricStore, and trend points. SLA metric keys are wired into the WO-161 debounce registry with KpiOutboxConsumer mapping, and KpiProjectionService delegates early when any SLA key is drained. SlaBreachedHandler and SlaPolicyChangedHandler adapters route new outbox event types. KpiProjectionEntity gained setMaturity() and TechnicianPositionController was fixed to use the correct ErrorEnvelope constructor (no static factory method exists).
