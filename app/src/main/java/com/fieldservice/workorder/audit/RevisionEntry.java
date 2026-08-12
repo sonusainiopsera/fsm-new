@@ -1,51 +1,28 @@
 package com.fieldservice.workorder.audit;
 
-import com.fieldservice.platform.audit.AppRevision;
-import com.fieldservice.workorder.domain.WorkOrder;
-import org.hibernate.envers.RevisionType;
-
 import java.time.Instant;
-import java.util.UUID;
+import java.util.List;
 
 /**
- * DTO representing a single revision snapshot of a {@link WorkOrder}.
+ * A single revision entry in the work order history.
  *
- * <p>Contains revision metadata (who, when, why) plus a shallow snapshot of the
- * entity state at that revision. Password-classified fields are never included.
+ * <p>Contains revision metadata (number, timestamp, actor display name, revision type) plus an
+ * allow-listed set of field-level diffs computed from consecutive Envers snapshots.
+ *
+ * <p>Actor is presented as {@code actorDisplayName} only — internal user identifiers are
+ * never surfaced in the API response.
+ *
+ * <p>Masking is applied before this record is populated:
+ * <ul>
+ *   <li>Restricted-class fields are never included in {@code changes}.</li>
+ *   <li>Confidential fields (technician identity, customer contact) are omitted for
+ *       CUSTOMER-role callers by the assembler before this record is constructed.</li>
+ * </ul>
  */
 public record RevisionEntry(
-        int        revisionId,
-        Instant    revisionTimestamp,
-        String     revisionType,
-        String     actorUserId,
-        String     actorRole,
-        String     traceId,
-        String     clientIp,
-        UUID       workOrderId,
-        String     reference,
-        String     state,
-        String     priority,
-        UUID       siteId,
-        UUID       assignedTechnicianId,
-        String     description
-) {
-
-    static RevisionEntry from(WorkOrder wo, AppRevision rev, RevisionType type) {
-        return new RevisionEntry(
-                rev.getId(),
-                rev.getRevisionInstant(),
-                type.name(),
-                rev.getActorUserId(),
-                rev.getActorRole(),
-                rev.getTraceId(),
-                rev.getClientIp(),
-                wo.getId(),
-                wo.getReference(),
-                wo.getState() != null ? wo.getState().name() : null,
-                wo.getPriority(),
-                wo.getSite() != null ? wo.getSite().getId() : null,
-                wo.getAssignedTechnicianId(),
-                wo.getDescription()
-        );
-    }
-}
+        int            revision,
+        Instant        revisionAt,
+        String         actorDisplayName,
+        String         revisionType,
+        List<FieldChangeDto> changes
+) {}

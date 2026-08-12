@@ -399,3 +399,10 @@
 - **Files:** 34 (+3453/-1)
 - **Duration:** 993ss
 - **Approach:** Built the admin surface bottom-up: shared plumbing first (usePagedQuery URL-sync hook, mapFieldErrors utility), then the API client modules (referenceData.js, workforce.js), then one vertical slice for Customers to validate the pattern, then replicated it for Sites, Assets, Technicians, CertificationTypes, and TechnicianCertifications. Layered the CsvImportWizard on top using the workforce batch endpoints. CertificationChip renders API-derived current/daysUntilExpiry with no client-side date math. MSW handlers and JSON fixtures cover all documented error statuses. Tests cover the shared utilities, CSV parsing, the status chip, and the Customers screen end-to-end.
+
+## WO-129: User Story: WO-129 - Work order timeline and immutable revision history API
+- **Status:** completed
+- **Commit:** `0273c58`
+- **Files:** 10 (+1113/-94)
+- **Duration:** 886ss
+- **Approach:** Enhanced the WO-003 basic Envers revision endpoint into a full history surface. RevisionEntry DTO updated to field-level diffs (before/after per allow-listed field) with actorDisplayName resolved from AppUser without exposing internal IDs. WorkOrderRevisionService extended with getTimeline() that loads all revisions in ascending order, derives state-machine events (CREATED/ASSIGNED/REASSIGNED/DEPARTED/STARTED/HELD/RESUMED/COMPLETED/CLOSED/CANCELLED), attaches hold reason codes, then paginates the derived list newest-first. Controller uses standard PagedResponse<T> envelope ($.data, $.page) and enforces max page size 50. AccessScope pre-check via ScopedQueryExecutor gates every query — non-existent and out-of-scope both return ScopedAccessDeniedException → 403. CUSTOMER callers get 'Service Team' as actorDisplayName and have assignedTechnicianId excluded from diffs.
