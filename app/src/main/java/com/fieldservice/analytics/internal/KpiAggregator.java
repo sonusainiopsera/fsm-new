@@ -40,6 +40,17 @@ public interface KpiAggregator {
             BigDecimal value,
             Integer    sampleCount,
             String     maturity,
-            Instant    dataAsOf
-    ) {}
+            Instant    dataAsOf,
+            boolean    partialBucket,
+            boolean    incompleteData
+    ) {
+        /** Backward-compatible constructor for aggregators that do not use workforce flags. */
+        KpiAggregatorResult(String segmentKey, String windowKey,
+                             BigDecimal numerator, BigDecimal denominator,
+                             BigDecimal value, Integer sampleCount,
+                             String maturity, Instant dataAsOf) {
+            this(segmentKey, windowKey, numerator, denominator, value,
+                 sampleCount, maturity, dataAsOf, false, false);
+        }
+    }
 }

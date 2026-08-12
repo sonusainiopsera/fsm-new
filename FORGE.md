@@ -672,3 +672,10 @@
 - **Files:** 15 (+1218/-3)
 - **Duration:** 783ss
 - **Approach:** N/A
+
+## WO-163: User Story: WO-163 - Technician utilization and jobs-per-day KPI projections
+- **Status:** completed
+- **Commit:** `02525a4`
+- **Files:** 15 (+1672/-19)
+- **Duration:** 663ss
+- **Approach:** Created workforce KPI package under analytics/internal/workforce with three core classes: WorkforceAggregationRepository (replica-routed JDBC queries for labour minutes, shift minutes, and closure counts), ActiveTechnicianDayResolver (single source of truth for the active-technician-day definition: rostered shift OR logged field time), UtilizationCalculator and ThroughputCalculator (both implement KpiAggregator). Extended KpiAggregatorResult with backward-compatible partialBucket and incompleteData fields, and updated the upsert query and V59 migration to persist them. Wired new metric keys into MetricEventMapper and added ROSTER_CHANGED / TECHNICIAN_STATUS_CHANGED handlers to AnalyticsConfiguration.

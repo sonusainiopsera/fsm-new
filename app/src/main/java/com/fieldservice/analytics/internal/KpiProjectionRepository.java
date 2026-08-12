@@ -35,11 +35,13 @@ interface KpiProjectionRepository extends JpaRepository<KpiProjectionEntity, UUI
             INSERT INTO kpi_projection
                 (id, metric_key, segment_key, window_key,
                  numerator, denominator, value, sample_count,
-                 maturity, data_as_of, projection_version, degraded)
+                 maturity, data_as_of, projection_version, degraded,
+                 partial_bucket, incomplete_data)
             VALUES
                 (:id, :metricKey, :segmentKey, :windowKey,
                  :numerator, :denominator, :value, :sampleCount,
-                 :maturity, :dataAsOf, 1, :degraded)
+                 :maturity, :dataAsOf, 1, :degraded,
+                 :partialBucket, :incompleteData)
             ON CONFLICT (metric_key, segment_key, window_key) DO UPDATE
                SET numerator          = EXCLUDED.numerator,
                    denominator        = EXCLUDED.denominator,
@@ -48,20 +50,24 @@ interface KpiProjectionRepository extends JpaRepository<KpiProjectionEntity, UUI
                    maturity           = EXCLUDED.maturity,
                    data_as_of         = EXCLUDED.data_as_of,
                    projection_version = kpi_projection.projection_version + 1,
-                   degraded           = EXCLUDED.degraded
+                   degraded           = EXCLUDED.degraded,
+                   partial_bucket     = EXCLUDED.partial_bucket,
+                   incomplete_data    = EXCLUDED.incomplete_data
              WHERE kpi_projection.data_as_of <= EXCLUDED.data_as_of
             """, nativeQuery = true)
-    void upsert(@Param("id")          UUID       id,
-                @Param("metricKey")   String     metricKey,
-                @Param("segmentKey")  String     segmentKey,
-                @Param("windowKey")   String     windowKey,
-                @Param("numerator")   BigDecimal numerator,
-                @Param("denominator") BigDecimal denominator,
-                @Param("value")       BigDecimal value,
-                @Param("sampleCount") Integer    sampleCount,
-                @Param("maturity")    String     maturity,
-                @Param("dataAsOf")    Instant    dataAsOf,
-                @Param("degraded")    boolean    degraded);
+    void upsert(@Param("id")             UUID       id,
+                @Param("metricKey")      String     metricKey,
+                @Param("segmentKey")     String     segmentKey,
+                @Param("windowKey")      String     windowKey,
+                @Param("numerator")      BigDecimal numerator,
+                @Param("denominator")    BigDecimal denominator,
+                @Param("value")          BigDecimal value,
+                @Param("sampleCount")    Integer    sampleCount,
+                @Param("maturity")       String     maturity,
+                @Param("dataAsOf")       Instant    dataAsOf,
+                @Param("degraded")       boolean    degraded,
+                @Param("partialBucket")  boolean    partialBucket,
+                @Param("incompleteData") boolean    incompleteData);
 
     /**
      * Staleness gauge support: returns data_as_of for all current projections

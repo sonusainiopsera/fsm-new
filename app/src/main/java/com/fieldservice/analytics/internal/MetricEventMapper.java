@@ -27,7 +27,8 @@ final class MetricEventMapper {
                                                       "backlog.open.count",  "backlog.on_hold.count",
                                                       "workforce.workload_balance.cv",
                                                       "sla.compliance.rate", "sla.breach.count",
-                                                      "sla.resolution.mean", "sla.resolution.median")),
+                                                      "sla.resolution.mean", "sla.resolution.median",
+                                                      "workforce.jobs_per_day")),
             Map.entry("ASSIGNMENT_CREATED",    Set.of("wo.backlog_count",    "technician.utilization",
                                                       "backlog.open.count",  "workforce.workload_balance.cv")),
             Map.entry("SLA_BREACH",            Set.of("wo.sla_compliance",
@@ -35,7 +36,14 @@ final class MetricEventMapper {
             Map.entry("SLA_AT_RISK",           Set.of("wo.sla_compliance")),
             Map.entry("SLA_POLICY_CHANGED",    Set.of("sla.compliance.rate", "sla.breach.count",
                                                       "sla.resolution.mean", "sla.resolution.median")),
-            Map.entry("LABOUR_ENTRY_ADDED",    Set.of("technician.utilization", "workforce.workload_balance.cv"))
+            Map.entry("LABOUR_ENTRY_ADDED",    Set.of("technician.utilization",
+                                                      "workforce.workload_balance.cv",
+                                                      "workforce.utilization.rate",
+                                                      "workforce.jobs_per_day")),
+            Map.entry("ROSTER_CHANGED",        Set.of("workforce.utilization.rate",
+                                                      "workforce.jobs_per_day")),
+            Map.entry("TECHNICIAN_STATUS_CHANGED", Set.of("workforce.utilization.rate",
+                                                           "workforce.jobs_per_day"))
     );
 
     private MetricEventMapper() {}

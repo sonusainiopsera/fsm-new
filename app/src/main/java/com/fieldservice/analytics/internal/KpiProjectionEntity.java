@@ -57,6 +57,12 @@ class KpiProjectionEntity {
     @Column(name = "degraded", nullable = false)
     private boolean degraded = false;
 
+    @Column(name = "partial_bucket", nullable = false)
+    private boolean partialBucket = false;
+
+    @Column(name = "incomplete_data", nullable = false)
+    private boolean incompleteData = false;
+
     protected KpiProjectionEntity() {}
 
     KpiProjectionEntity(UUID id, String metricKey, String segmentKey, String windowKey,
@@ -87,6 +93,8 @@ class KpiProjectionEntity {
     Instant    getDataAsOf()         { return dataAsOf; }
     long       getProjectionVersion(){ return projectionVersion; }
     boolean    isDegraded()          { return degraded; }
+    boolean    isPartialBucket()    { return partialBucket; }
+    boolean    isIncompleteData()   { return incompleteData; }
 
     void setNumerator(BigDecimal n)        { this.numerator      = n; }
     void setDenominator(BigDecimal d)      { this.denominator    = d; }
@@ -95,6 +103,8 @@ class KpiProjectionEntity {
     void setMaturity(String m)             { this.maturity       = m; }
     void setDataAsOf(Instant t)            { this.dataAsOf       = t; }
     void setDegraded(boolean d)            { this.degraded       = d; }
+    void setPartialBucket(boolean p)       { this.partialBucket  = p; }
+    void setIncompleteData(boolean i)      { this.incompleteData = i; }
     void incrementVersion()                { this.projectionVersion++; }
 
     KpiProjection toDto(long stalenessSeconds) {

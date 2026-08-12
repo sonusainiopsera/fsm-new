@@ -92,7 +92,9 @@ class KpiProjectionRefreshService {
                 r.sampleCount(),
                 r.maturity(),
                 r.dataAsOf(),
-                false
+                false,
+                r.partialBucket(),
+                r.incompleteData()
         );
 
         Optional<KpiProjectionEntity> saved = projectionRepository.findByMetricKeyAndSegmentKeyAndWindowKey(

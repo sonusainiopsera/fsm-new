@@ -84,6 +84,16 @@ class AnalyticsConfiguration {
         return KpiOutboxConsumer.handlerFor("CSAT_RESPONSE_RECORDED", consumer);
     }
 
+    @Bean
+    EventHandler rosterChangedAnalyticsHandler(KpiOutboxConsumer consumer) {
+        return KpiOutboxConsumer.handlerFor("ROSTER_CHANGED", consumer);
+    }
+
+    @Bean
+    EventHandler technicianStatusChangedAnalyticsHandler(KpiOutboxConsumer consumer) {
+        return KpiOutboxConsumer.handlerFor("TECHNICIAN_STATUS_CHANGED", consumer);
+    }
+
     // ---------------------------------------------------------------
     // Replica DataSource (optional — falls back to primary)
     // ---------------------------------------------------------------
