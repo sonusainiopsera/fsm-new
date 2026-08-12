@@ -1,0 +1,6 @@
+{
+  "code": "RATE_LIMITED",
+  "message": "Too many requests. Please try again shortly.",
+  "traceId": "trace-create-429",
+  "retryAfterSecs": 30
+}

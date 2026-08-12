@@ -1,0 +1,10 @@
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Request validation failed",
+  "traceId": "trace-create-400",
+  "fieldErrors": [
+    { "field": "title", "message": "Title must not be blank" },
+    { "field": "faultDescription", "message": "Fault description must not be blank" },
+    { "field": "priority", "message": "Priority is required" }
+  ]
+}

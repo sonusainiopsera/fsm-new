@@ -1,0 +1,5 @@
+{
+  "code": "SLA_POLICY_MISSING",
+  "message": "No SLA policy is configured for priority CRITICAL",
+  "traceId": "trace-create-422"
+}

@@ -10,7 +10,7 @@
  *       client-side lifecycle rule duplication.
  * AC-10: Loading, empty, error, and permission-denied each have a designed treatment.
  */
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   PageHeader,
@@ -18,12 +18,14 @@ import {
   EmptyState,
   ErrorState,
   PermissionDeniedState,
+  Button,
 } from '../../components/index.js'
 import { parsePagedEnvelope } from '../../api/pagination.js'
 import { FilterBar } from './components/FilterBar.jsx'
 import { WorkOrderTable } from './components/WorkOrderTable.jsx'
 import { WorkOrderDetailDrawer } from './components/DetailDrawer.jsx'
 import { useWorkOrderSearch } from './api/useWorkOrderSearch.js'
+import { CreateWorkOrderModal } from './components/CreateWorkOrderModal.jsx'
 
 /** URL param names — single source of truth to avoid typos. */
 const PARAM = {
@@ -89,6 +91,7 @@ function filtersToParams(filters, existing) {
 export default function WorkOrderBoardPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { page, sort, drawerId, filters } = parseUrlState(searchParams)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
 
   const { data, isLoading, isFetching, isError, error } = useWorkOrderSearch({
     page,
@@ -171,6 +174,13 @@ export default function WorkOrderBoardPage() {
             Refreshing…
           </span>
         )}
+        <Button
+          id="create-work-order-btn"
+          variant="primary"
+          onClick={() => setCreateModalOpen(true)}
+        >
+          + Create Work Order
+        </Button>
       </PageHeader>
 
       <FilterBar filters={filters} onChange={handleFiltersChange} />
@@ -268,6 +278,12 @@ export default function WorkOrderBoardPage() {
         workOrder={drawerRow}
         open={!!drawerId}
         onClose={handleDrawerClose}
+      />
+
+      {/* Create Work Order Modal — AC-1 */}
+      <CreateWorkOrderModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
       />
     </div>
   )

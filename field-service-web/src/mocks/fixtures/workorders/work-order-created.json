@@ -1,0 +1,19 @@
+{
+  "id": "wo-new-0001-0000-000000000099",
+  "reference": "REF-NEW001",
+  "title": "Boiler Fault — Acme London HQ",
+  "state": "NEW",
+  "priority": "HIGH",
+  "customerId": "cust-0001-0000-0000-000000000001",
+  "customerName": "Acme Corp",
+  "siteId": "site-0001-0000-0000-000000000001",
+  "siteName": "London HQ",
+  "assetId": "asset-001-0000-0000-000000000001",
+  "assetTag": "AT-001",
+  "faultDescription": "Boiler not igniting. Gas pressure normal.",
+  "responseDueAt": "2026-08-12T12:00:00Z",
+  "resolutionDueAt": "2026-08-12T20:00:00Z",
+  "atRisk": false,
+  "legalNextEvents": ["ASSIGN", "CANCEL"],
+  "version": 1
+}

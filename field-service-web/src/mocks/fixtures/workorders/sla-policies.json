@@ -1,0 +1,26 @@
+{
+  "CRITICAL": {
+    "priority": "CRITICAL",
+    "responseMins": 60,
+    "resolutionMins": 240,
+    "atRiskFraction": 0.8
+  },
+  "HIGH": {
+    "priority": "HIGH",
+    "responseMins": 120,
+    "resolutionMins": 480,
+    "atRiskFraction": 0.8
+  },
+  "MEDIUM": {
+    "priority": "MEDIUM",
+    "responseMins": 240,
+    "resolutionMins": 1440,
+    "atRiskFraction": 0.8
+  },
+  "LOW": {
+    "priority": "LOW",
+    "responseMins": 480,
+    "resolutionMins": 2880,
+    "atRiskFraction": 0.8
+  }
+}

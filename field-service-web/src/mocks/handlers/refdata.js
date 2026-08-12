@@ -90,8 +90,15 @@ export function refdataHandlers({ errorCode, technicianId } = {}) {
       return jsonOk({ id: url.split('/').pop(), ...body, active: true })
     }
 
-    // Sites
-    if (url.includes(`${BASE}/sites`) && method === 'GET') return jsonOk(sitesFixture)
+    // Sites — support optional ?customerId= filter for dependent selects
+    if (url.includes(`${BASE}/sites`) && method === 'GET') {
+      const parsedUrl = new URL(url, 'http://localhost')
+      const customerIdFilter = parsedUrl.searchParams.get('customerId')
+      const sites = customerIdFilter
+        ? { ...sitesFixture, data: sitesFixture.data.filter(s => s.customerId === customerIdFilter) }
+        : sitesFixture
+      return jsonOk(sites)
+    }
     if (url.includes(`${BASE}/sites`) && method === 'POST') {
       const body = opts.body ? JSON.parse(opts.body) : {}
       return jsonOk({ id: 'site-new-0000-0000-000000000099', ...body, active: true }, 201)
@@ -101,8 +108,15 @@ export function refdataHandlers({ errorCode, technicianId } = {}) {
       return jsonOk({ id: url.split('/').pop(), ...body, active: true })
     }
 
-    // Assets
-    if (url.includes(`${BASE}/assets`) && method === 'GET') return jsonOk(assetsFixture)
+    // Assets — support optional ?siteId= filter for dependent selects
+    if (url.includes(`${BASE}/assets`) && method === 'GET') {
+      const parsedUrl = new URL(url, 'http://localhost')
+      const siteIdFilter = parsedUrl.searchParams.get('siteId')
+      const assets = siteIdFilter
+        ? { ...assetsFixture, data: assetsFixture.data.filter(a => a.siteId === siteIdFilter) }
+        : assetsFixture
+      return jsonOk(assets)
+    }
     if (url.includes(`${BASE}/assets`) && method === 'POST') {
       const body = opts.body ? JSON.parse(opts.body) : {}
       return jsonOk({ id: 'asset-new-000-0000-000000000099', ...body, active: true }, 201)
