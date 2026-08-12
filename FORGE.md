@@ -511,3 +511,10 @@
 - **Files:** 8 (+1062/-0)
 - **Duration:** 991ss
 - **Approach:** Implemented a technician-scoped day-list endpoint using JdbcTemplate for a multi-table JOIN (work_order + site + asset). Row-scope is applied as a SQL WHERE predicate (assigned_technician_id = ?) — never a post-filter. The day-window query includes jobs scheduled within [dayStart, dayEnd) plus carry-over open states (ASSIGNED, EN_ROUTE, IN_PROGRESS, ON_HOLD) with earlier/null scheduled windows. Strong ETag is SHA-256(technicianId:date:count:maxVersion). ContactMasker strips to digits, exposing only the last 4. A Flyway migration adds scheduled_window_start/end to work_order and work_order_aud, contact_phone to site, and a covering index on (assigned_technician_id, scheduled_window_start) INCLUDE (state).
+
+## WO-174: User Story: WO-174 - Portal request submission and live status tracking screens
+- **Status:** completed
+- **Commit:** `1d60958`
+- **Files:** 13 (+1693/-8)
+- **Duration:** 766ss
+- **Approach:** Implemented two customer portal screens: NewServiceRequestPage (guided submission form) and ServiceRequestStatusPage (live polling status view), connected via React Router sub-routing in the existing LazyPortal surface. The form uses useMutation with a stable per-instance Idempotency-Key (crypto.randomUUID in a useRef), scoped site/asset selects, live character counter, and inline server field error mapping. The status page uses usePortalQuery (60s conditional-GET polling) with FreshnessBanner for degraded/not-connected states and StatusTimeline rendering only API-provided plain-language labels. New shared components FreshnessBanner and StatusTimeline were added with aria-live regions and WCAG 2.1 AA touch targets. Portal API client wrappers, MSW mock handler entries, and RTL test suites (happy path, validation, server errors, 304 no-flash, forbidden-string assertions) were all committed.

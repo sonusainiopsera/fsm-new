@@ -1,0 +1,59 @@
+/* FreshnessBanner — token-only styles */
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.fresh {
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+}
+
+.degraded {
+  background-color: var(--color-warning-surface);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-border);
+}
+
+.notConnected {
+  background-color: var(--color-danger-surface);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+}
+
+.icon {
+  flex-shrink: 0;
+  font-size: var(--text-base);
+}
+
+.message {
+  flex: 1;
+}
+
+.retryButton {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--text-sm);
+  color: var(--color-danger-text);
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.retryButton:hover {
+  background-color: var(--color-danger-surface-hover, var(--color-danger-surface));
+}
+
+.retryButton:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-accent-500));
+  outline-offset: 2px;
+}

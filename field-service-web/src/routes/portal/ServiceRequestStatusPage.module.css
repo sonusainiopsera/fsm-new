@@ -1,0 +1,97 @@
+/* ServiceRequestStatusPage — token-only styles */
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--spacing-6) var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.banner {
+  /* FreshnessBanner gets full width */
+}
+
+.summaryCard {
+  padding: var(--spacing-4);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.summaryLabel {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.summaryValue {
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+}
+
+.timeline {
+  /* StatusTimeline fills container */
+}
+
+.noteCard {
+  padding: var(--spacing-4);
+}
+
+.noteHeading {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.noteBody {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--leading-relaxed);
+}
+
+.footer {
+  padding-top: var(--spacing-2);
+  border-top: 1px solid var(--color-neutral-200);
+}
+
+[data-appearance='dark'] .footer {
+  border-color: var(--color-neutral-700);
+}
+
+.link {
+  font-size: var(--text-sm);
+  color: var(--color-accent-600);
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.link:hover {
+  text-decoration: underline;
+  color: var(--color-accent-700);
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-accent-500));
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

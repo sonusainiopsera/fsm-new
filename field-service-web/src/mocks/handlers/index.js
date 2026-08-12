@@ -493,6 +493,65 @@ const DEFAULT_ROUTES = {
       outcome: 'COMPLETED', refusalReason: null,
     },
   },
+
+  // ── Portal: customer self-service ────────────────────────────────────────
+
+  // Customer's sites list
+  'GET:/api/v1/portal/sites': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'site-p01', name: 'Northgate Office', address: '12 Northgate Rd, London, EC1A 1BB' },
+        { id: 'site-p02', name: 'Southside Warehouse', address: '88 Industrial Way, Manchester, M1 5AB' },
+      ],
+    },
+    headers: { 'ETag': '"portal-sites-etag-v1"' },
+  },
+
+  // Site assets
+  'GET:/api/v1/portal/sites/site-p01/assets': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'asset-pa01', assetTag: 'HVAC-101', model: 'Daikin VRV', assetType: 'HVAC Unit' },
+        { id: 'asset-pa02', assetTag: 'LIFT-02', model: 'Otis 3000', assetType: 'Lift' },
+      ],
+    },
+  },
+  'GET:/api/v1/portal/sites/site-p02/assets': {
+    status: 200,
+    body: { data: [] },
+  },
+
+  // Submit new service request — 201 Created
+  'POST:/api/v1/portal/service-requests': {
+    status: 201,
+    body: {
+      workOrderId: 'wo-portal-001',
+      reference: 'WO-P001',
+      respondByAt: '2026-08-13T12:00:00Z',
+      resolveByAt: '2026-08-14T17:00:00Z',
+    },
+  },
+
+  // Service request status — default happy path
+  'GET:/api/v1/portal/service-requests/wo-portal-001/status': {
+    status: 200,
+    body: {
+      reference: 'WO-P001',
+      currentStatusLabel: 'Request received — under review',
+      siteName: 'Northgate Office',
+      respondByAt: '2026-08-13T12:00:00Z',
+      resolveByAt: '2026-08-14T17:00:00Z',
+      milestones: [
+        { at: '2026-08-12T09:00:00Z', label: 'Request submitted' },
+        { at: '2026-08-12T09:05:00Z', label: 'Request received — under review' },
+      ],
+      customerNote: 'A technician will contact you to arrange access.',
+      observedAt: '2026-08-12T09:10:00Z',
+    },
+    headers: { 'ETag': '"portal-status-v1"' },
+  },
 };
 
 // ---- Status fixture helpers --------------------------------------------

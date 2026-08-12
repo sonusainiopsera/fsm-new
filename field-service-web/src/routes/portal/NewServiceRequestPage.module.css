@@ -1,0 +1,112 @@
+/* NewServiceRequestPage — token-only styles */
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--spacing-6) var(--spacing-4);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+.sectionHeading {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.select {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-input-bg);
+  color: var(--color-text-primary);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  appearance: auto;
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-accent-500));
+  outline-offset: 2px;
+  border-color: var(--color-accent-500);
+}
+
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.textarea {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-input-bg);
+  color: var(--color-text-primary);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.textarea:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-accent-500));
+  outline-offset: 2px;
+  border-color: var(--color-accent-500);
+}
+
+.charCount {
+  margin: calc(var(--spacing-1) * -1) 0 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  text-align: right;
+}
+
+.charCountWarn {
+  color: var(--color-warning-text);
+  font-weight: var(--font-semibold);
+}
+
+.radioGroup {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.radio {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--color-accent-500);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--spacing-2);
+}
+
+.errorAlert {
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-danger-surface);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-md);
+  color: var(--color-danger-text);
+  font-size: var(--text-base);
+}
