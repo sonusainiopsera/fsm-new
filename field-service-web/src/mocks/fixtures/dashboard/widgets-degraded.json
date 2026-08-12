@@ -1,0 +1,45 @@
+{
+  "data": [
+    {
+      "metricKey": "SLA_COMPLIANCE_RATE",
+      "segment": "ALL",
+      "window": "THIRTY_DAYS",
+      "value": 0.9100,
+      "unit": "%",
+      "numerator": 182,
+      "denominator": 200,
+      "sampleCount": 200,
+      "trend": [
+        { "ts": 1752192000, "value": 0.88 },
+        { "ts": 1752278400, "value": 0.90 },
+        { "ts": 1752364800, "value": 0.91 }
+      ],
+      "deltaVsPriorPeriod": null,
+      "targetAttainment": 0.91,
+      "maturity": "MATURED",
+      "dataAsOf": "2026-08-12T07:45:00Z",
+      "stalenessSeconds": 4515,
+      "degraded": true,
+      "degradedReason": "READ_MODEL_STALE"
+    },
+    {
+      "metricKey": "FTF_RATE",
+      "segment": "ALL",
+      "window": "THIRTY_DAYS",
+      "value": null,
+      "unit": "%",
+      "numerator": null,
+      "denominator": null,
+      "sampleCount": 0,
+      "trend": [],
+      "deltaVsPriorPeriod": null,
+      "targetAttainment": null,
+      "maturity": "PROVISIONAL",
+      "dataAsOf": "2026-08-12T07:45:00Z",
+      "stalenessSeconds": 4515,
+      "degraded": true,
+      "degradedReason": "INSUFFICIENT_SAMPLE_COUNT"
+    }
+  ],
+  "page": { "number": 0, "size": 2, "totalElements": 2, "totalPages": 1 }
+}

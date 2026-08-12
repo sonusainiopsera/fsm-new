@@ -735,3 +735,10 @@
 - **Files:** 7 (+2044/-1)
 - **Duration:** 449ss
 - **Approach:** Implemented the assign/reassign confirmation dialog. useAssignTechnician.js provides two TanStack useMutation hooks (useAssignTechnician and useReassignTechnician) posting to the respective endpoints with a per-dialog-session stable Idempotency-Key. isOverrideRequired() derives whether an override is needed purely from the server-supplied rank (rank absent OR > 3 → required). AssignmentDialog is a state machine (idle → submitting → cert_refused / appt_breach / conflict / retry_after / field_errors / error) that renders TechnicianSummaryPanel, conditionally renders OverrideReasonField, ReassignmentReasonSelect (reassign mode only), and AppointmentImpactAcknowledgement (only after 422 APPOINTMENT_BREACH_UNACKNOWLEDGED). The shared Modal primitive provides focus trap, Escape-to-close, and focus restoration. On success, invalidates workOrder and recommendations queries and emits a toast. The MSW dispatch handler was extended with createAssignmentFetch() covering all success/error scenarios for dialog flow tests.
+
+## WO-167: User Story: WO-167 - Operations dashboard KPI widget grid in React
+- **Status:** completed
+- **Commit:** `5685551`
+- **Files:** 10 (+1868/-4)
+- **Duration:** 744ss
+- **Approach:** Built the manager operations dashboard as a lazily-loaded React route under /operations. All 11 KPI metrics are fetched in a single batched conditional GET via the existing useConditionalQuery hook (30 s ETag polling). DashboardPage drives a responsive CSS-grid of per-widget state machines (loading/empty/degraded/error), where each widget operates independently — a failing widget never blanks siblings. PROVISIONAL and BASELINE_PENDING are rendered as explicit labelled badges directly from the server-reported value, not inferred. WindowSelector and SegmentFilter each sync their selection to URL search params via useSearchParams. SVG-based MetricChart replaces Recharts (which is not in package.json) with an accessible series table linked via aria-describedby. MSW handler factory covers all six response scenarios including ETag-conditional 304.
