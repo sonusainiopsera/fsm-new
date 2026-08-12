@@ -7,6 +7,7 @@ import com.fieldservice.identity.domain.AppUserRepository;
 import com.fieldservice.notification.api.DeliveryOutcome;
 import com.fieldservice.notification.api.NotificationChannel;
 import com.fieldservice.notification.api.NotificationPort;
+import com.fieldservice.notification.api.NotificationPreferenceService;
 import com.fieldservice.notification.api.NotificationRequest;
 import com.fieldservice.notification.api.TemplateRenderer;
 import com.fieldservice.notification.internal.DeadLetterService;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -52,16 +54,17 @@ class WorkOrderAssignmentConsumer {
     static final String TEMPLATE_REVOKED   = "reassignment_notification";
     static final String CATEGORY           = "WORK_ORDER_ASSIGNMENT";
 
-    private final NotificationPort         notificationPort;
-    private final TemplateRenderer         templateRenderer;
-    private final TechnicianRepository     technicianRepository;
-    private final AppUserRepository        appUserRepository;
-    private final ConsumerIdempotencyGuard idempotencyGuard;
-    private final DeadLetterService        deadLetterService;
-    private final ObjectMapper             objectMapper;
-    private final Counter                  assignedCounter;
-    private final Counter                  revokedCounter;
-    private final Timer                    handoffTimer;
+    private final NotificationPort              notificationPort;
+    private final TemplateRenderer              templateRenderer;
+    private final TechnicianRepository          technicianRepository;
+    private final AppUserRepository             appUserRepository;
+    private final ConsumerIdempotencyGuard      idempotencyGuard;
+    private final DeadLetterService             deadLetterService;
+    private final ObjectMapper                  objectMapper;
+    private final NotificationPreferenceService preferenceService;
+    private final Counter                       assignedCounter;
+    private final Counter                       revokedCounter;
+    private final Timer                         handoffTimer;
 
     WorkOrderAssignmentConsumer(NotificationPort notificationPort,
                                  TemplateRenderer templateRenderer,
@@ -70,6 +73,7 @@ class WorkOrderAssignmentConsumer {
                                  ConsumerIdempotencyGuard idempotencyGuard,
                                  DeadLetterService deadLetterService,
                                  ObjectMapper objectMapper,
+                                 NotificationPreferenceService preferenceService,
                                  MeterRegistry meterRegistry) {
         this.notificationPort    = notificationPort;
         this.templateRenderer    = templateRenderer;
@@ -78,6 +82,7 @@ class WorkOrderAssignmentConsumer {
         this.idempotencyGuard    = idempotencyGuard;
         this.deadLetterService   = deadLetterService;
         this.objectMapper        = objectMapper;
+        this.preferenceService   = preferenceService;
         this.assignedCounter     = Counter.builder("notification_trigger_total")
                 .tag("trigger", "assignment_notification").register(meterRegistry);
         this.revokedCounter      = Counter.builder("notification_trigger_total")
@@ -126,26 +131,36 @@ class WorkOrderAssignmentConsumer {
         String contact = appUserRepository.findById(recipientUserId)
                 .map(AppUser::getEmail).orElse("");
 
-        TemplateRenderer.RenderedTemplate rendered;
+        // Resolve effective channels — default-on if preference resolution fails
+        Set<NotificationChannel> channels;
         try {
-            rendered = templateRenderer.render(templateKey, NotificationChannel.IN_APP, "en",
-                    Map.of("workOrderRef", workOrderIdStr));
+            channels = preferenceService.resolveEffective(recipientUserId, CATEGORY);
         } catch (Exception ex) {
-            if (!DeadLetterService.isDeterministic(ex)) { throw ex; }
-            deadLetterService.quarantine(event.eventId(), consumer,
-                    "Template render failed: " + ex.getMessage(), "key=" + templateKey, 1);
-            return;
+            log.warn("assignment_preference_resolution_fallback event_id={} reason={}",
+                    event.eventId(), ex.getMessage());
+            channels = NotificationPreferenceService.ALL_CHANNELS;
         }
 
-        try {
-            DeliveryOutcome outcome = notificationPort.send(new NotificationRequest(
-                    event.eventId(), NotificationChannel.IN_APP, recipientUserId, contact,
-                    rendered.subject(), rendered.body(), CATEGORY, "MEDIUM"));
-            if (isRevocation) revokedCounter.increment(); else assignedCounter.increment();
-            log.debug("assignment_notification_sent event_id={} outcome={}", event.eventId(), outcome);
-        } catch (DataIntegrityViolationException ex) {
-            log.debug("assignment_idempotent_dup event_id={} recipient={}", event.eventId(), recipientUserId);
+        for (NotificationChannel ch : channels) {
+            TemplateRenderer.RenderedTemplate chRendered;
+            try {
+                chRendered = templateRenderer.render(templateKey, ch, "en",
+                        Map.of("workOrderRef", workOrderIdStr));
+            } catch (Exception ex) {
+                // Template may not exist for this channel — skip, don't quarantine
+                log.debug("assignment_template_missing channel={} key={}", ch, templateKey);
+                continue;
+            }
+            try {
+                notificationPort.send(new NotificationRequest(
+                        event.eventId(), ch, recipientUserId, contact,
+                        chRendered.subject(), chRendered.body(), CATEGORY, "MEDIUM"));
+            } catch (DataIntegrityViolationException ex) {
+                log.debug("assignment_idempotent_dup event_id={} recipient={} ch={}", event.eventId(), recipientUserId, ch);
+            }
         }
+        if (isRevocation) revokedCounter.increment(); else assignedCounter.increment();
+        log.debug("assignment_notification_dispatched event_id={} channels={}", event.eventId(), channels);
 
         handoffTimer.record(java.time.Duration.between(arrival, Instant.now()));
     }

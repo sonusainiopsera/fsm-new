@@ -234,10 +234,41 @@ const DEFAULT_ROUTES = {
     body: { returnId: 'ret-001', applied: true },
   },
 
-  // User preferences
+  // User preferences (appearance)
   'GET:/api/v1/users/me/preferences': {
     status: 200,
     body: { userId: 'user-001', storedPreference: 'SYSTEM', effectivePreference: 'LIGHT' },
+  },
+
+  // Notification preferences — GET (default-on: no explicit rows)
+  'GET:/api/v1/users/user-001/notification-preferences': {
+    status: 200,
+    body: {
+      data: [],
+      page: { number: 0, size: 0, totalElements: 0, totalPages: 1 },
+      links: { next: null, prev: null },
+    },
+  },
+
+  // Notification preferences — PUT (upsert returns full list)
+  'PUT:/api/v1/users/user-001/notification-preferences': {
+    status: 200,
+    body: {
+      data: [
+        { category: 'WORK_ORDER_ASSIGNMENT', channel: 'EMAIL',  enabled: false, source: 'EXPLICIT' },
+        { category: 'WORK_ORDER_ASSIGNMENT', channel: 'SMS',    enabled: true,  source: 'EXPLICIT' },
+        { category: 'WORK_ORDER_ASSIGNMENT', channel: 'PUSH',   enabled: true,  source: 'EXPLICIT' },
+        { category: 'WORK_ORDER_ASSIGNMENT', channel: 'IN_APP', enabled: true,  source: 'EXPLICIT' },
+      ],
+      page: { number: 0, size: 4, totalElements: 4, totalPages: 1 },
+      links: { next: null, prev: null },
+    },
+  },
+
+  // Notification preferences — cross-user 403
+  'GET:/api/v1/users/user-other/notification-preferences': {
+    status: 403,
+    body: { code: 'FORBIDDEN', message: 'Forbidden.', fieldErrors: [], traceId: 'test-trace-403' },
   },
 
   // Admin — Customers

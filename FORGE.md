@@ -756,3 +756,10 @@
 - **Files:** 16 (+1352/-2)
 - **Duration:** 824ss
 - **Approach:** N/A
+
+## WO-197: User Story: WO-197 - Per-user notification channel preferences API and settings screen
+- **Status:** completed
+- **Commit:** `75b8944`
+- **Files:** 16 (+1457/-26)
+- **Duration:** 899ss
+- **Approach:** Implemented backend-first: Flyway V64 migration creates notification_preference and notification_preference_aud tables with enum CHECK constraints. NotificationPreferenceService public API (notification/api package) exposes resolveEffective() with default-on semantics and listPreferences/upsertPreferences. Package-private entity with @Audited and repository in notification/internal/preference, with ServiceImpl handling HashMap-keyed upsert atomically. NotificationPreferenceController at /api/v1/users/{userId}/notification-preferences enforces self-or-ADMIN via SpEL @PreAuthorize, validates category against NotificationCategory enum allow-list, wraps responses in PagedResponse. WorkOrderAssignmentConsumer updated to resolve preferences per-channel with try/catch fallback to ALL_CHANNELS. Frontend: TanStack Query hook with optimistic update and rollback, NotificationPreferencesPage with role='switch' ARIA toggles, 5 named states, 100% design token CSS. Settings surface at /settings/notifications reads userId from AuthContext.token.sub.
