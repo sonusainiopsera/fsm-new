@@ -661,6 +661,31 @@ const DEFAULT_ROUTES = {
     },
   },
 
+  // ── Photo analysis ──────────────────────────────────────────────────────────
+
+  'POST:/api/v1/work-orders/wo-001/photos/photo-001/analysis': {
+    status: 200,
+    body: {
+      interactionId:        'ia-00000001-0000-7181-0000-000000000001',
+      suggestedDescription: 'Relay on main circuit board showing signs of heat damage.',
+      advisory:             true,
+      source:               'AI',
+      provider:             'gpt-4-vision-preview',
+      basis:                ['PHOTO_CONTENT'],
+      degraded:             false,
+      degradedCode:         null,
+    },
+  },
+
+  'POST:/api/v1/work-orders/wo-001/photos/photo-001/description': {
+    status: 200,
+    body: {
+      description:            'Relay on main circuit board showing signs of heat damage.',
+      overrideClassification: 'ACCEPTED_UNCHANGED',
+      similarityScore:        1.0,
+    },
+  },
+
   // Service request status — default happy path
   'GET:/api/v1/portal/service-requests/wo-portal-001/status': {
     status: 200,

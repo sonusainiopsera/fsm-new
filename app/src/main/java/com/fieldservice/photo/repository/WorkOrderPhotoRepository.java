@@ -18,6 +18,8 @@ public interface WorkOrderPhotoRepository extends JpaRepository<WorkOrderPhoto, 
 
     Optional<WorkOrderPhoto> findByStorageKey(String storageKey);
 
+    Optional<WorkOrderPhoto> findByIdAndWorkOrderId(UUID id, UUID workOrderId);
+
     long countByWorkOrderId(UUID workOrderId);
 
     // ---- Retention queries --------------------------------------------------

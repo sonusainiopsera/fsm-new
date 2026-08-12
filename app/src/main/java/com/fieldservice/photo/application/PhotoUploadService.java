@@ -172,7 +172,8 @@ public class PhotoUploadService {
         WorkOrderPhoto photo;
         try {
             photo = new WorkOrderPhoto(workOrderId, storageKey, category,
-                    capturedAt, caption, retainUntil, registeredBy);
+                    capturedAt, caption, retainUntil, registeredBy,
+                    meta.contentType(), meta.contentLength());
             photoRepository.save(photo);
         } catch (DataIntegrityViolationException ex) {
             // Race: another thread registered the same key concurrently. Return existing.

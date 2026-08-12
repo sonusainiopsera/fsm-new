@@ -679,3 +679,10 @@
 - **Files:** 15 (+1672/-19)
 - **Duration:** 663ss
 - **Approach:** Created workforce KPI package under analytics/internal/workforce with three core classes: WorkforceAggregationRepository (replica-routed JDBC queries for labour minutes, shift minutes, and closure counts), ActiveTechnicianDayResolver (single source of truth for the active-technician-day definition: rostered shift OR logged field time), UtilizationCalculator and ThroughputCalculator (both implement KpiAggregator). Extended KpiAggregatorResult with backward-compatible partialBucket and incompleteData fields, and updated the upsert query and V59 migration to persist them. Wired new metric keys into MetricEventMapper and added ROSTER_CHANGED / TECHNICIAN_STATUS_CHANGED handlers to AnalyticsConfiguration.
+
+## WO-181: User Story: WO-181 - Photo-based issue analysis with editable AI draft description
+- **Status:** completed
+- **Commit:** `dfd3fc8`
+- **Files:** 26 (+2470/-19)
+- **Duration:** 1090ss
+- **Approach:** Implemented photo-based AI analysis as a two-phase flow: (1) photo is stored via existing presigned PUT with content-type/size validation at presign and server-side magic-byte check after upload, (2) a separate POST /analysis endpoint fetches the object via storage key (SSRF-safe), validates magic bytes again, PII-redacts any accompanying text via SimpleTextPiiFilter, calls AiGatewayPort.caption(), logs the interaction, and returns an attributed advisory draft. The technician submits their description via POST /description which computes Jaccard similarity against the suggestion and persists the override classification. The feature sits behind ai.photo-analysis.enabled (default false). PhotoRetentionPurgeJob extends the retention infrastructure to delete storage objects before removing metadata rows.

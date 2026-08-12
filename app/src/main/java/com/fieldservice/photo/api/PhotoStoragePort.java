@@ -46,6 +46,27 @@ public interface PhotoStoragePort {
      */
     Optional<ObjectMetadata> headObject(String storageKey);
 
+    /**
+     * Reads the first {@code maxBytes} bytes of the stored object.
+     * Used for server-side magic-byte validation without loading the full image into memory.
+     *
+     * @param storageKey the object key
+     * @param maxBytes   upper bound on bytes returned; actual length may be less if the
+     *                   object is smaller
+     * @return the leading bytes; never null, may be empty if the object is zero-length
+     * @throws PhotoStorageUnavailableException if the provider is unreachable
+     */
+    byte[] getFirstBytes(String storageKey, int maxBytes);
+
+    /**
+     * Permanently deletes the stored object. Called by the retention purge job before
+     * removing the metadata row. Idempotent: no-ops if the object does not exist.
+     *
+     * @param storageKey the object key
+     * @throws PhotoStorageUnavailableException if the delete attempt fails
+     */
+    void deleteObject(String storageKey);
+
     /** Result of a presign-PUT operation. */
     record PresignedPutResult(String uploadUrl, Instant expiresAt) {}
 
