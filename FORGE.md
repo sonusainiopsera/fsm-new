@@ -735,3 +735,10 @@
 - **Files:** 17 (+1629/-4)
 - **Duration:** 970ss
 - **Approach:** Built AssignmentDialog from the shared Modal, Button, and FormField primitives with a step-based state machine (form → cert_refused | conflict | retry_after | error). The mutation hook useAssignTechnician maintains a stable Idempotency-Key ref per submission sequence and reuses it across network retries. Override requirement is derived client-side from rank (>3 or absent). The appointment breach acknowledgement step is revealed only after the server returns 422 CONFIRMED_APPOINTMENT_BREACH — never auto-filled. Reassignment mode adds the controlled ReassignmentReasonSelect. RecommendationCard gained an onAssign callback prop and Assign button; DispatchRecommendationsPage wires the dialog state.
+
+## WO-167: User Story: WO-167 - Operations dashboard KPI widget grid in React
+- **Status:** completed
+- **Commit:** `0d73340`
+- **Files:** 24 (+2177/-10)
+- **Duration:** 820ss
+- **Approach:** Implemented the full operations dashboard feature on top of the existing Phase 1 primitives and ETag-conditional polling infrastructure. DashboardPage uses useDashboardWidgets (TanStack Query + useDashboardQuery wrapper) for 30-second conditional-GET polling against /api/v1/operations/kpi-widgets. Window (7d/30d/90d) and segment (priority/team) state is URL-synchronized via useSearchParams with in-flight request cancellation on rapid switching. DashboardKpiCard wraps the Phase 1 KpiCard with four named states (loading skeleton, empty, degraded, error) and maturity labelling (PROVISIONAL, NOT_MEANINGFUL, BASELINE_PENDING). MetricChart is SVG-based (recharts not installed) with colour-blind-safe accent+neutral ramp and AccessibleSeriesTable linked via aria-describedby. All CSS uses design token vars only. The operations surface stub was replaced with a Routes tree rendering DashboardPage. MSW fixture module covers all 7 widget families, all 4 named states, maturity variants, and 304/503 responses.

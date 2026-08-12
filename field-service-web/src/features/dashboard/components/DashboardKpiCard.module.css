@@ -1,0 +1,175 @@
+/* Wrapper adds footer metadata row beneath the Phase 1 KpiCard */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.degradedWrapper {
+  opacity: 0.85;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-2);
+  flex-wrap: wrap;
+  min-height: 1.25rem;
+}
+
+/* Maturity badges */
+.maturityBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.maturity-provisional {
+  background-color: var(--color-warning-subtle);
+  color: var(--color-warning-text);
+}
+
+.maturity-baseline-pending {
+  background-color: var(--color-neutral-100);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.notMeaningful {
+  background-color: var(--color-neutral-100);
+  color: var(--color-text-secondary);
+}
+
+.staleBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-warning-subtle);
+  color: var(--color-warning-text);
+  white-space: nowrap;
+}
+
+/* Shared named-state card */
+.stateCard {
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 7rem;
+}
+
+.stateIcon {
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
+}
+
+.stateTitle {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.stateDesc {
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.errorCard {
+  border-color: var(--color-danger-border, var(--color-border));
+}
+
+.emptyCard {
+  justify-content: center;
+}
+
+.notMeaningfulCard {
+  gap: var(--space-2);
+}
+
+.notMeaningfulLabel {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.retryBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.retryBtn:hover {
+  border-color: var(--color-neutral-400);
+}
+
+.retryBtn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Loading skeleton */
+.skeleton {
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 7rem;
+}
+
+.skeletonLine {
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-100) 0%,
+    var(--color-neutral-200) 50%,
+    var(--color-neutral-100) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonLabel {
+  height: 0.75rem;
+  width: 40%;
+}
+
+.skeletonValue {
+  height: 1.875rem;
+  width: 60%;
+}
+
+.skeletonDelta {
+  height: 0.875rem;
+  width: 30%;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
