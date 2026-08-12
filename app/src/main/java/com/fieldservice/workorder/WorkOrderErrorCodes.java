@@ -11,5 +11,10 @@ public final class WorkOrderErrorCodes {
     public static final String ASSET_SITE_MISMATCH   = "ASSET_SITE_MISMATCH";
     public static final String PORTAL_PRIORITY_DENIED = "PORTAL_PRIORITY_DENIED";
 
+    public static final String DUPLICATE_TARGET_NOT_OPEN  = "DUPLICATE_TARGET_NOT_OPEN";
+    public static final String DUPLICATE_SELF_LINK        = "DUPLICATE_SELF_LINK";
+    public static final String DUPLICATE_ALREADY_LINKED   = "DUPLICATE_ALREADY_LINKED";
+    public static final String DUPLICATE_LINK_CYCLE       = "DUPLICATE_LINK_CYCLE";
+
     private WorkOrderErrorCodes() {}
 }

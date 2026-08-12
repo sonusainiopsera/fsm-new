@@ -214,6 +214,10 @@ audit:
     # Row ceiling below which exports are synchronous. Above this: async handle returned.
     export-row-ceiling: 1000
 
+duplicate:
+  window-hours: 72
+  min-signature-overlap: 0.3
+
 ---
 spring:
   config:

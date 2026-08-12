@@ -100,6 +100,12 @@ public class WorkOrder implements ScopedEntity {
     @Column(name = "fault_category", length = 100)
     private String faultCategory;
 
+    @Column(name = "fault_signature_tokens", nullable = false)
+    private String faultSignatureTokens = "";
+
+    @Column(name = "excluded_from_sla_compliance", nullable = false)
+    private boolean excludedFromSlaCompliance = false;
+
     /** Attribution for how the work order was created. Defaults to DISPATCHER. */
     @Column(name = "origin", nullable = false, length = 30)
     private String origin = "DISPATCHER";
@@ -146,10 +152,12 @@ public class WorkOrder implements ScopedEntity {
     public Instant         getAtRiskAt()            { return atRiskAt; }
     public boolean         isNoPartsRequired()      { return noPartsRequired; }
     public UUID            getAppliedSlaPolicyId()  { return appliedSlaPolicyId; }
-    public String          getFaultCode()            { return faultCode; }
-    public String          getFaultCategory()        { return faultCategory; }
-    public String          getOrigin()              { return origin; }
-    public Integer         getVersion()             { return version; }
+    public String          getFaultCode()                   { return faultCode; }
+    public String          getFaultCategory()               { return faultCategory; }
+    public String          getFaultSignatureTokens()        { return faultSignatureTokens; }
+    public boolean         isExcludedFromSlaCompliance()   { return excludedFromSlaCompliance; }
+    public String          getOrigin()                     { return origin; }
+    public Integer         getVersion()                    { return version; }
 
     public void markNoPartsRequired() { this.noPartsRequired = true; }
 
@@ -160,6 +168,10 @@ public class WorkOrder implements ScopedEntity {
     public void setFaultCode(String faultCode) { this.faultCode = faultCode; }
 
     public void setFaultCategory(String faultCategory) { this.faultCategory = faultCategory; }
+
+    public void setFaultSignatureTokens(String tokens) { this.faultSignatureTokens = tokens == null ? "" : tokens; }
+
+    public void markExcludedFromSlaCompliance() { this.excludedFromSlaCompliance = true; }
 
     public void setOrigin(String origin) { this.origin = origin; }
 

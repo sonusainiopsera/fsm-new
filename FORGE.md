@@ -539,3 +539,10 @@
 - **Files:** 23 (+3172/-0)
 - **Duration:** 1064ss
 - **Approach:** Created a new `audit` bounded context (api/ + internal/) implementing read-only Envers revision search via parameterized JDBC queries over REVINFO and *_AUD tables. Entity types are validated against a curated allow-list before any query is constructed (SQL injection closed). Keyset cursor on (REVTSTMP DESC, REV DESC) ensures stable pagination under concurrent appends. PiiMaskingPolicy masks all PII-classified fields from the entity allow-list plus secondary regex pattern scrubbing for email/phone/GPS/postcode. RevisionDiffCalculator computes before/after diffs for ADD/MOD/DEL revisions. Export is synchronous below the configured row ceiling (1000 rows) and asynchronously queued above it via the audit_export table. V48 migration adds search indexes on REVINFO and all major *_AUD tables plus the audit_export table. Retention is configuration-driven (730 days default, enforced >= 365). Frontend AuditSearchPage implements five named states with design-system tokens, 40px/32px density modes, sticky-header table, revision detail drawer with field diff, and export with progress handling.
+
+## WO-132: User Story: WO-132 - Duplicate work order detection and linking workflow
+- **Status:** completed
+- **Commit:** `f396f88`
+- **Files:** 20 (+1194/-25)
+- **Duration:** 979ss
+- **Approach:** N/A

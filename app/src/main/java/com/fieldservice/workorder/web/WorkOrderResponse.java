@@ -2,9 +2,11 @@ package com.fieldservice.workorder.web;
 
 import com.fieldservice.workorder.domain.WorkOrder;
 import com.fieldservice.workorder.domain.WorkOrderStatus;
+import com.fieldservice.workorder.duplicates.DuplicateCandidate;
 import com.fieldservice.workorder.holds.WorkOrderHold;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -30,9 +32,10 @@ public record WorkOrderResponse(
         Instant resolutionDueAt,
         Instant atRiskAt,
         UUID appliedSlaPolicyId,
-        Integer version) {
+        Integer version,
+        List<DuplicateCandidate> duplicateCandidates) {
 
-    /** For list responses — hold detail fields are absent. */
+    /** For list responses — hold detail and duplicate candidates are absent. */
     public static WorkOrderResponse from(WorkOrder wo) {
         return new WorkOrderResponse(
                 wo.getId(),
@@ -50,7 +53,30 @@ public record WorkOrderResponse(
                 wo.getResolutionDeadline(),
                 wo.getAtRiskAt(),
                 wo.getAppliedSlaPolicyId(),
-                wo.getVersion());
+                wo.getVersion(),
+                null);
+    }
+
+    /** For creation responses — includes advisory duplicate candidates. */
+    public static WorkOrderResponse from(WorkOrder wo, List<DuplicateCandidate> duplicateCandidates) {
+        return new WorkOrderResponse(
+                wo.getId(),
+                wo.getReference(),
+                wo.getState(),
+                wo.getPriority(),
+                wo.getOrigin(),
+                wo.getSite().getId(),
+                wo.getAssignedTechnicianId(),
+                wo.getCreatedAt(),
+                wo.getCumulativeHoldMinutes(),
+                null,
+                null,
+                wo.getResponseDeadline(),
+                wo.getResolutionDeadline(),
+                wo.getAtRiskAt(),
+                wo.getAppliedSlaPolicyId(),
+                wo.getVersion(),
+                duplicateCandidates != null && !duplicateCandidates.isEmpty() ? duplicateCandidates : null);
     }
 
     /** For the single-item detail endpoint — includes the currently-open hold if any. */
@@ -71,6 +97,7 @@ public record WorkOrderResponse(
                 wo.getResolutionDeadline(),
                 wo.getAtRiskAt(),
                 wo.getAppliedSlaPolicyId(),
-                wo.getVersion());
+                wo.getVersion(),
+                null);
     }
 }

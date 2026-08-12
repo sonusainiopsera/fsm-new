@@ -28,6 +28,7 @@ import java.util.List;
 public class DatabaseCleaner {
 
     static final List<String> MUTABLE_TABLES = List.of(
+            "work_order_duplicate_link",
             "audit_export",
             "ai_interaction_rating",
             "ai_interaction",

@@ -7,6 +7,7 @@ import com.fieldservice.platform.api.ErrorCode;
 import com.fieldservice.platform.api.FieldError;
 import com.fieldservice.platform.api.exception.BusinessGuardException;
 import com.fieldservice.workorder.application.WorkOrderReferentialException;
+import com.fieldservice.workorder.duplicates.DuplicateLinkException;
 import com.fieldservice.workorder.holds.HoldReasonValidationException;
 import com.fieldservice.workorder.lifecycle.IllegalWorkOrderTransitionException;
 import com.fieldservice.workorder.lifecycle.WorkOrderVersionConflictException;
@@ -38,6 +39,19 @@ import java.util.stream.Collectors;
 public class WorkOrderExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(WorkOrderExceptionHandler.class);
+
+    @ExceptionHandler(DuplicateLinkException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateLinkException(DuplicateLinkException ex) {
+        String traceId = resolveTraceId();
+        log.warn("duplicate_link_refused code={} trace_id={}", ex.getCode(), traceId);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .header("X-Trace-Id", traceId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiErrorResponse.withFieldErrors(ErrorCode.GUARD_REFUSED,
+                        ex.getMessage(),
+                        List.of(new FieldError("code", ex.getCode())),
+                        traceId));
+    }
 
     @ExceptionHandler(WorkOrderReferentialException.class)
     public ResponseEntity<ApiErrorResponse> handleReferentialException(WorkOrderReferentialException ex) {

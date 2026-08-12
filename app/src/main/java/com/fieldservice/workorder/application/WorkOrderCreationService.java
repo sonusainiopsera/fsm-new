@@ -20,6 +20,9 @@ import com.fieldservice.workorder.WorkOrderErrorCodes;
 import com.fieldservice.workorder.domain.WorkOrder;
 import com.fieldservice.workorder.domain.WorkOrderPriority;
 import com.fieldservice.workorder.domain.WorkOrderStatus;
+import com.fieldservice.workorder.duplicates.DuplicateCandidate;
+import com.fieldservice.workorder.duplicates.DuplicateDetectionService;
+import com.fieldservice.workorder.duplicates.FaultSignatureNormalizer;
 import com.fieldservice.workorder.repository.WorkOrderRepository;
 import com.fieldservice.workorder.web.WorkOrderCreationRequest;
 import com.fieldservice.workorder.web.WorkOrderResponse;
@@ -49,14 +52,15 @@ public class WorkOrderCreationService {
     /** CUSTOMER portal submissions may not set priority above this ceiling. */
     static final WorkOrderPriority PORTAL_PRIORITY_CEILING = WorkOrderPriority.HIGH;
 
-    private final WorkOrderRepository    workOrderRepository;
-    private final ScopedQueryExecutor    scopedQueryExecutor;
-    private final SiteRepository         siteRepository;
-    private final AssetRepository        assetRepository;
+    private final WorkOrderRepository      workOrderRepository;
+    private final ScopedQueryExecutor      scopedQueryExecutor;
+    private final SiteRepository           siteRepository;
+    private final AssetRepository          assetRepository;
     private final RequestScopedAccessScope accessScope;
-    private final SlaDeadlineCalculator  slaDeadlineCalculator;
-    private final SlaPolicyProvider      slaPolicyProvider;
-    private final DomainEventPublisher   eventPublisher;
+    private final SlaDeadlineCalculator    slaDeadlineCalculator;
+    private final SlaPolicyProvider        slaPolicyProvider;
+    private final DomainEventPublisher     eventPublisher;
+    private final DuplicateDetectionService duplicateDetectionService;
 
     public WorkOrderCreationService(WorkOrderRepository workOrderRepository,
                                     ScopedQueryExecutor scopedQueryExecutor,
@@ -65,15 +69,17 @@ public class WorkOrderCreationService {
                                     RequestScopedAccessScope accessScope,
                                     SlaDeadlineCalculator slaDeadlineCalculator,
                                     SlaPolicyProvider slaPolicyProvider,
-                                    DomainEventPublisher eventPublisher) {
-        this.workOrderRepository   = workOrderRepository;
-        this.scopedQueryExecutor   = scopedQueryExecutor;
-        this.siteRepository        = siteRepository;
-        this.assetRepository       = assetRepository;
-        this.accessScope           = accessScope;
-        this.slaDeadlineCalculator = slaDeadlineCalculator;
-        this.slaPolicyProvider     = slaPolicyProvider;
-        this.eventPublisher        = eventPublisher;
+                                    DomainEventPublisher eventPublisher,
+                                    DuplicateDetectionService duplicateDetectionService) {
+        this.workOrderRepository       = workOrderRepository;
+        this.scopedQueryExecutor       = scopedQueryExecutor;
+        this.siteRepository            = siteRepository;
+        this.assetRepository           = assetRepository;
+        this.accessScope               = accessScope;
+        this.slaDeadlineCalculator     = slaDeadlineCalculator;
+        this.slaPolicyProvider         = slaPolicyProvider;
+        this.eventPublisher            = eventPublisher;
+        this.duplicateDetectionService = duplicateDetectionService;
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'DISPATCHER', 'MANAGER', 'CUSTOMER')")
@@ -139,6 +145,7 @@ public class WorkOrderCreationService {
                 null);
 
         workOrder.setDescription(request.faultDescription());
+        workOrder.setFaultSignatureTokens(FaultSignatureNormalizer.normalize(request.faultDescription()));
         workOrder.applyDeadlines(sla.responseDueAt(), sla.resolutionDueAt(), sla.atRiskAt(),
                 policy.getId());
 
@@ -170,7 +177,11 @@ public class WorkOrderCreationService {
                 workOrder.getId(), workOrder.getReference(), workOrder.getPriority(),
                 site.getId(), request.customerId(), scope.userId());
 
-        return WorkOrderResponse.from(workOrder);
+        // Advisory duplicate detection — wrapped so failure never blocks creation
+        java.util.List<DuplicateCandidate> duplicateCandidates =
+                duplicateDetectionService.detect(workOrder, request.customerId(), scope);
+
+        return WorkOrderResponse.from(workOrder, duplicateCandidates);
     }
 
     /**
@@ -228,6 +239,7 @@ public class WorkOrderCreationService {
         WorkOrder workOrder = new WorkOrder(reference, WorkOrderStatus.NEW,
                 priority.toDbValue(), site, null);
         workOrder.setDescription(faultDescription);
+        workOrder.setFaultSignatureTokens(FaultSignatureNormalizer.normalize(faultDescription));
         workOrder.setOrigin("PORTAL");
         workOrder.applyDeadlines(sla.responseDueAt(), sla.resolutionDueAt(), sla.atRiskAt());
 
