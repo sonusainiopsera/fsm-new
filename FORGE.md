@@ -469,3 +469,10 @@
 - **Files:** 15 (+1894/-0)
 - **Duration:** 909ss
 - **Approach:** Three privacy admin screens built as named exports from their feature files. PrivacySurface is a lazy-loaded route group gated to PRIVACY_ADMIN/ADMIN; all other roles render PermissionDeniedState immediately. ClassificationRegistryPage and RetentionSchedulePage use usePagedQuery for server-side pagination and useMutation for versioned PUT with 409 conflict handling. DsarQueuePage uses server-side state filtering and countdown rendering from server-supplied remainingDays/atRisk. ErasureConfirmDialog requires typed 'CONFIRM' token, generates a stable idempotency key per dialog instance via newAttemptKey(), and shows 422 guard-refusal messages without stack detail. DsarRequestDetailPage opens export URLs fresh per click via window.open, never caching. DataTable rowActions render prop used throughout; Button uses 'destructive' variant for erasure. MSW handlers and fixture files provide comprehensive mock data for all states.
+
+## WO-120: User Story: WO-120 - Scheduled pre-expiry certification alert sweep on worker
+- **Status:** completed
+- **Commit:** `a05b569`
+- **Files:** 12 (+1301/-0)
+- **Duration:** 968ss
+- **Approach:** Implemented the certification expiry sweep as a @Profile('worker') @Scheduled component backed by JdbcSchedulingLock for exactly-once execution. Alert state is tracked in a new certification_alert_state table (V44 migration) with a unique constraint on (technician_certification_id, alert_stage, validity_key) where validity_key=expiresOn.toString() — this makes re-issued certifications automatically alert again without manual cleanup. The sweep uses keyset pagination so large cohorts do not produce single giant transactions. Each row's state write and outbox event publication are atomic via @Transactional(propagation=MANDATORY) in CertificationAlertPublisher. The notification consumer (CertificationAlertConsumer) is idempotent via ConsumerIdempotencyGuard and resolves Operations Manager users plus the affected technician as recipients; per-recipient failures are isolated and do not abort the sweep.

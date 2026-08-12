@@ -9,6 +9,14 @@ app:
       tick-ms: 60000
       batch-size: 500
       enabled: true
+  certification:
+    alert-sweep:
+      cron: "0 0 6 * * *"       # Daily at 06:00 UTC
+      warning-window-days: 30
+      urgent-window-days: 7
+      batch-size: 200
+      enabled: true
+      lock-lease-secs: 300
   privacy:
     dsar:
       export-cron: "0 */5 * * * *"

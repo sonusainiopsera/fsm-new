@@ -419,3 +419,117 @@ FROM technician t
 JOIN app_user u ON u.id = t.user_id
 WHERE u.email = 'm.seed@example.test'
 ON CONFLICT DO NOTHING;
+
+-- ---- Certification expiry sweep fixtures (WO-120) ---------------------------
+-- UUID prefix: 00000000-0000-7120-9000-XXXXXXXXXXXX (distinct from WO-119 cert rows)
+-- Scenario coverage (using WO-195 seed technicians — t.seed and m.seed have technician rows):
+--   9001: expires_on = CURRENT_DATE + 31 days  → outside warning window (no alert)
+--   9002: expires_on = CURRENT_DATE + 30 days  → WARNING cohort boundary (alert expected)
+--   9003: expires_on = CURRENT_DATE + 8 days   → WARNING cohort
+--   9004: expires_on = CURRENT_DATE + 7 days   → URGENT cohort boundary (alert expected)
+--   9005: expires_on = CURRENT_DATE + 1 day    → URGENT cohort
+--   9006: expires_on = CURRENT_DATE            → URGENT cohort (0 days remaining)
+--   9007: expires_on = CURRENT_DATE - 1 day    → EXPIRED cohort
+--   9008: re-issued certification (further expires_on) — different validity_key resets alerts
+--   9009: null expires_on (perpetual) — must never enter any cohort
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7120-9000-000000000001',
+    t.id,
+    '00000000-0000-7039-8000-000000000002',
+    'SWEEP-RFGAS-31D', '2025-01-01', CURRENT_DATE + INTERVAL '31 days', 'RefrigReg', TRUE, 0
+FROM technician t JOIN app_user u ON u.id = t.user_id WHERE u.email = 't.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7120-9000-000000000002',
+    t.id,
+    '00000000-0000-7039-8000-000000000003',
+    'SWEEP-ELEC-30D', '2025-01-01', CURRENT_DATE + INTERVAL '30 days', 'NICEIC', TRUE, 0
+FROM technician t JOIN app_user u ON u.id = t.user_id WHERE u.email = 't.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7120-9000-000000000003',
+    t.id,
+    '00000000-0000-7039-8000-000000000005',
+    'SWEEP-WAH-8D', '2025-01-01', CURRENT_DATE + INTERVAL '8 days', 'PASMA', TRUE, 0
+FROM technician t JOIN app_user u ON u.id = t.user_id WHERE u.email = 't.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7120-9000-000000000004',
+    t.id,
+    '00000000-0000-7039-8000-000000000006',
+    'SWEEP-ASB-7D', '2025-01-01', CURRENT_DATE + INTERVAL '7 days', 'UKATA', TRUE, 0
+FROM technician t JOIN app_user u ON u.id = t.user_id WHERE u.email = 't.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7120-9000-000000000005',
+    t.id,
+    '00000000-0000-7039-8000-000000000002',
+    'SWEEP-RFGAS-1D', '2025-01-01', CURRENT_DATE + INTERVAL '1 day', 'RefrigReg', TRUE, 0
+FROM technician t JOIN app_user u ON u.id = t.user_id WHERE u.email = 'm.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7120-9000-000000000006',
+    t.id,
+    '00000000-0000-7039-8000-000000000003',
+    'SWEEP-ELEC-0D', '2025-01-01', CURRENT_DATE, 'NICEIC', TRUE, 0
+FROM technician t JOIN app_user u ON u.id = t.user_id WHERE u.email = 'm.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7120-9000-000000000007',
+    t.id,
+    '00000000-0000-7039-8000-000000000005',
+    'SWEEP-WAH-EXP', '2024-01-01', CURRENT_DATE - INTERVAL '1 day', 'PASMA', TRUE, 0
+FROM technician t JOIN app_user u ON u.id = t.user_id WHERE u.email = 'm.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+-- Re-issued certification: same type as 9002 but with a later expires_on (new validity_key).
+-- An existing alert state for the old validity_key must NOT block a fresh alert on this row.
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7120-9000-000000000008',
+    t.id,
+    '00000000-0000-7039-8000-000000000006',
+    'SWEEP-ASB-REISSUED', '2026-01-01', CURRENT_DATE + INTERVAL '25 days', 'UKATA', TRUE, 0
+FROM technician t JOIN app_user u ON u.id = t.user_id WHERE u.email = 't.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+-- Perpetual certification (null expires_on) — must NEVER enter any alert cohort
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7120-9000-000000000009',
+    t.id,
+    '00000000-0000-7039-8000-000000000002',
+    'SWEEP-PERPETUAL', '2020-01-01', NULL, 'RefrigReg', TRUE, 0
+FROM technician t JOIN app_user u ON u.id = t.user_id WHERE u.email = 'd.seed@example.test'
+ON CONFLICT DO NOTHING;
