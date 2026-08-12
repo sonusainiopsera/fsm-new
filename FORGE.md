@@ -427,3 +427,10 @@
 - **Files:** 10 (+412/-0)
 - **Duration:** 846ss
 - **Approach:** N/A
+
+## WO-171: User Story: WO-171 - Customer job status tracking API with conditional polling
+- **Status:** completed
+- **Commit:** `6033bd5`
+- **Files:** 7 (+1120/-0)
+- **Duration:** 1232ss
+- **Approach:** Implemented a conditional-GET polling endpoint (GET /api/v1/portal/service-requests/{id}/status) with RFC 7232 strong ETags. CustomerStateLabels enum provides table-driven state-to-plain-language mapping covering all 8 lifecycle states and 7 hold reasons. PortalStatusView DTO is a redacted projection that structurally excludes GPS, full technician identity, internal codes, and cost data. PortalStatusService uses a two-path design: peekEtag() for fast 304 checks (lightweight entity load, no milestones/technician), and getFullStatus() returning StatusResult(etag, view) where ETag and body are computed from the same entity load to eliminate any ETag-body consistency race. Milestones are built from Envers revision history; if the Envers query fails, freshness.degraded=true is set and an empty list is served (graceful degradation). Scope isolation uses a JPA Specification combining work order id with site.customerId, making foreign work orders indistinguishable from non-existent ones (404 not 403). Micrometer timers and outcome counters are registered in the constructor.
