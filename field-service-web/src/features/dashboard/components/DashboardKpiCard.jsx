@@ -1,9 +1,23 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { KpiCard } from '../../../components/index.js';
 import { DataAgeBadge } from './DataAgeBadge.jsx';
 import styles from './DashboardKpiCard.module.css';
 
 /** @import { WidgetDto } from '../api/useDashboardWidgets.js' */
+
+/**
+ * Builds the drill-down URL for a widget.
+ *
+ * @param {{ metricKey?: string | null, window?: string | null, segment?: string | null }} opts
+ * @returns {string | null}
+ */
+function drillDownUrl({ metricKey, window: win, segment }) {
+  if (!metricKey || !win) return null;
+  const params = new URLSearchParams({ metric: metricKey, window: win });
+  if (segment && segment !== 'ALL') params.set('segment', segment);
+  return `/operations/drill-down?${params}`;
+}
 
 const MATURITY_LABELS = {
   PROVISIONAL: 'Provisional',
@@ -37,9 +51,11 @@ function KpiCardSkeleton() {
  *   isEmpty?: boolean,
  *   error?: Error | null,
  *   onRetry?: () => void,
+ *   selectedWindow?: string | null,
+ *   selectedSegment?: string | null,
  * }} props
  */
-export function DashboardKpiCard({ widget = null, isLoading = false, isEmpty = false, error = null, onRetry }) {
+export function DashboardKpiCard({ widget = null, isLoading = false, isEmpty = false, error = null, onRetry, selectedWindow = null, selectedSegment = null }) {
   // ── Loading state ─────────────────────────────────────────────────────────
   if (isLoading && !widget) {
     return <KpiCardSkeleton />;
@@ -74,7 +90,8 @@ export function DashboardKpiCard({ widget = null, isLoading = false, isEmpty = f
     );
   }
 
-  const { label, value, delta, deltaLabel, target, current, sparkline, maturity, degraded, dataAge, notMeaningfulReason } = widget;
+  const { label, value, delta, deltaLabel, target, current, sparkline, maturity, degraded, dataAge, notMeaningfulReason, metricKey } = widget;
+  const drillUrl = drillDownUrl({ metricKey, window: selectedWindow, segment: selectedSegment });
 
   // ── Not-meaningful state ──────────────────────────────────────────────────
   if (maturity === 'NOT_MEANINGFUL') {
@@ -119,6 +136,15 @@ export function DashboardKpiCard({ widget = null, isLoading = false, isEmpty = f
           </span>
         )}
         <DataAgeBadge dataAge={dataAge} degraded={degraded} />
+        {drillUrl && (
+          <Link
+            to={drillUrl}
+            className={styles.drillLink}
+            aria-label={`View work orders for ${label}`}
+          >
+            View details
+          </Link>
+        )}
       </div>
     </div>
   );

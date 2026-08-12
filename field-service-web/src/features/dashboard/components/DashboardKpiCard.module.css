@@ -173,3 +173,15 @@
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+.drillLink {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--color-link, #2563eb);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.drillLink:hover {
+  text-decoration: underline;
+}

@@ -13,6 +13,8 @@ import styles               from './DashboardPage.module.css';
 
 const VALID_WINDOWS = new Set(['7d', '30d', '90d']);
 
+const WINDOW_TO_ENUM = { '7d': 'SEVEN_DAYS', '30d': 'THIRTY_DAYS', '90d': 'NINETY_DAYS' };
+
 /**
  * Operations manager dashboard.
  *
@@ -124,6 +126,8 @@ export default function DashboardPage() {
                   isEmpty={false}
                   error={null}
                   onRetry={() => refetch()}
+                  selectedWindow={WINDOW_TO_ENUM[windowParam] ?? null}
+                  selectedSegment={priorityParam ? `PRIORITY:${priorityParam}` : null}
                 />
               ))}
         </WidgetGrid>

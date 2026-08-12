@@ -28,6 +28,8 @@ import { apiFetch } from '../../../api/http.js';
  *   dataAge: string | null,
  *   unit?: string | null,
  *   notMeaningfulReason?: string | null,
+ *   metricKey?: string | null,
+ *   window?: string | null,
  * }} WidgetDto
  *
  * @typedef {{
