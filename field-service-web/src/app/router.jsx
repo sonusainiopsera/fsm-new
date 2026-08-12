@@ -18,6 +18,7 @@ import { LoadingState } from '../components/index.js'
 // Route-level code splitting — surface chunks + sign-in + not-found
 const DispatchSurface = lazy(() => import('../surfaces/dispatch/index.jsx'))
 const FieldSurface = lazy(() => import('../surfaces/field/index.jsx'))
+const TechnicianShell = lazy(() => import('./technician/TechnicianShell.jsx'))
 const OperationsSurface = lazy(() => import('../surfaces/operations/index.jsx'))
 const PortalSurface = lazy(() => import('../surfaces/portal/index.jsx'))
 const AdminSurface = lazy(() => import('../surfaces/admin/index.jsx'))
@@ -72,6 +73,17 @@ export const router = createBrowserRouter([
         element: (
           <LazyRoute>
             <FieldSurface />
+          </LazyRoute>
+        ),
+      },
+      {
+        // Dedicated technician PWA shell — 360 px mobile-first layout with
+        // offline banner, SW caching and bottom nav. Manages its own Suspense
+        // internally so each screen loads independently.
+        path: 'technician/*',
+        element: (
+          <LazyRoute>
+            <TechnicianShell />
           </LazyRoute>
         ),
       },

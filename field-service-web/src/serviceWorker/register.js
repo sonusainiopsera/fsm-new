@@ -1,59 +1,108 @@
 /**
- * @fileoverview Service worker registration — field surface only.
+ * @fileoverview Service worker registration — technician PWA (field surface).
  *
- * Registered exclusively for the technician surface to cache the assigned-jobs
- * list for read access when offline. The SW never caches tokens or authenticated
- * mutation responses (WO-185 constraint).
+ * - Scoped to /technician so other surfaces are unaffected.
+ * - Exposes onUpdateReady callback so TechnicianShell can show the skip-waiting
+ *   prompt (AC-9: never force-reload mid-shift).
+ * - purgeCaches() clears runtime caches on logout (Edge case 5: shared device).
+ * - Skip registration in dev to avoid stale-cache confusion with hot reload.
  *
- * The SW file is served at /field-service-worker.js — in Vite production builds,
- * the source at src/serviceWorker/fieldServiceWorker.js must be copied to the
- * public directory or referenced via a Vite plugin.
+ * SECURITY: Access tokens are never cached; the SW only caches GET responses
+ * for the day-list endpoint (see fieldServiceWorker.js).
  */
 
 const SW_PATH = '/field-service-worker.js'
 
 /**
- * Registers the field service worker. Safe to call multiple times (idempotent).
- * Logs a structured warning if registration fails but never throws.
+ * @typedef {{
+ *   onUpdateReady?: (waitingWorker: ServiceWorker) => void
+ * }} RegisterOptions
  */
-export async function registerFieldServiceWorker() {
+
+/**
+ * Registers the field service worker. Idempotent — safe to call multiple times.
+ *
+ * @param {RegisterOptions} [options]
+ * @returns {Promise<ServiceWorkerRegistration | null>}
+ */
+export async function registerFieldServiceWorker(options = {}) {
   if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
-    return
+    return null
   }
 
   if (import.meta.env.DEV) {
-    // Skip SW registration in dev to avoid stale-cache confusion
-    return
+    return null
   }
 
   try {
     const registration = await navigator.serviceWorker.register(SW_PATH, {
-      scope: '/field/',
+      scope: '/technician/',
     })
 
+    // Immediately check if an update is already waiting (page refresh scenario)
+    if (registration.waiting) {
+      options.onUpdateReady?.(registration.waiting)
+    }
+
     registration.addEventListener('updatefound', () => {
-      const newSw = registration.installing
-      if (!newSw) return
-      newSw.addEventListener('statechange', () => {
-        if (newSw.state === 'installed' && navigator.serviceWorker.controller) {
-          // New SW installed — prompt user to reload for updated job list
-          if (typeof console !== 'undefined') {
-            console.info('[SW] New service worker installed. Reload to apply updates.')
-          }
+      const installing = registration.installing
+      if (!installing) return
+
+      installing.addEventListener('statechange', () => {
+        if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+          // New SW installed but waiting — prompt user instead of force-reloading
+          options.onUpdateReady?.(installing)
         }
       })
     })
+
+    // Reload the page once the new SW takes control (after skip-waiting)
+    let refreshing = false
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true
+        window.location.reload()
+      }
+    })
+
+    return registration
   } catch (err) {
     if (typeof console !== 'undefined') {
-      console.warn('[SW] Service worker registration failed:', { error: String(err) })
+      console.warn('[SW] Registration failed:', { error: String(err) })
     }
+    return null
   }
 }
 
 /**
- * Returns true if the response came from the SW cache (degraded indicator).
+ * Posts PURGE_CACHES to the active service worker.
+ * Call on logout to clear any cached job data from a shared device.
+ */
+export async function purgeCaches() {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
+  const registration = await navigator.serviceWorker.getRegistration('/technician/')
+  if (registration?.active) {
+    registration.active.postMessage({ type: 'PURGE_CACHES' })
+  }
+}
+
+/**
+ * Returns true if the response came from the SW cache (stale indicator).
+ *
  * @param {Response} response
+ * @returns {boolean}
  */
 export function isStaleServiceWorkerResponse(response) {
   return response.headers.get('x-sw-stale') === 'true'
+}
+
+/**
+ * Returns the age in milliseconds of a stale SW-served response.
+ *
+ * @param {Response} response
+ * @returns {number | null}
+ */
+export function getStaleAgeMs(response) {
+  const raw = response.headers.get('x-sw-age-ms')
+  return raw !== null ? parseInt(raw, 10) : null
 }

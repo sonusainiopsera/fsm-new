@@ -567,3 +567,10 @@
 - **Files:** 20 (+2051/-1)
 - **Duration:** 1033ss
 - **Approach:** N/A
+
+## WO-155: User Story: WO-155 - Technician PWA shell with service worker and offline banner
+- **Status:** completed
+- **Commit:** `d420f69`
+- **Files:** 24 (+1749/-94)
+- **Duration:** 622ss
+- **Approach:** Added a dedicated /technician/* route group with a TechnicianShell that provides the 360 px mobile-first PWA layout. The shell owns the NotConnectedBanner (driven by useConnectivity hook), an appearance toggle wired to the existing AppearanceProvider, bottom navigation with 44px minimum touch targets, a Suspense boundary per lazy screen, and a skip-waiting SW update prompt. The service worker was rewritten to use StaleWhileRevalidate for the day-list GET with a 12-hour shift TTL and network-only passthrough for all mutations. The useConnectivity hook combines navigator.onLine, a debounced heartbeat, and query-error classification to provide a reliable connectivity signal.

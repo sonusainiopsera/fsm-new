@@ -1,0 +1,47 @@
+{
+  "jobs": [
+    {
+      "id": "wo-tech-001",
+      "title": "HVAC Inspection — Building A",
+      "priority": "HIGH",
+      "state": "ASSIGNED",
+      "site": "Northside Commercial Park",
+      "address": "12 Industrial Way, Unit 3",
+      "scheduledAt": "2026-08-15T09:00:00Z",
+      "estimatedDurationMinutes": 90,
+      "partsNeeded": ["Filter HEPA-12", "Belt B-240"],
+      "slaStatus": "ON_TRACK",
+      "resolutionDueAt": "2026-08-15T17:00:00Z"
+    },
+    {
+      "id": "wo-tech-002",
+      "title": "Electrical Panel — Ground Floor",
+      "priority": "CRITICAL",
+      "state": "IN_PROGRESS",
+      "site": "Eastside Office Complex",
+      "address": "42 East Avenue, Floor G",
+      "scheduledAt": "2026-08-15T11:00:00Z",
+      "estimatedDurationMinutes": 120,
+      "partsNeeded": ["Breaker 20A", "Terminal Block"],
+      "slaStatus": "AT_RISK",
+      "resolutionDueAt": "2026-08-15T14:00:00Z"
+    },
+    {
+      "id": "wo-tech-003",
+      "title": "Plumbing Leak — Level 2",
+      "priority": "MEDIUM",
+      "state": "EN_ROUTE",
+      "site": "Westfield Plaza",
+      "address": "88 West Mall, Level 2",
+      "scheduledAt": "2026-08-15T13:30:00Z",
+      "estimatedDurationMinutes": 60,
+      "partsNeeded": ["Pipe Fitting 1/2 in"],
+      "slaStatus": "ON_TRACK",
+      "resolutionDueAt": "2026-08-15T20:00:00Z"
+    }
+  ],
+  "date": "2026-08-15",
+  "technicianId": "tech-uuid-001",
+  "totalAssigned": 3,
+  "generatedAt": "2026-08-15T08:00:00Z"
+}

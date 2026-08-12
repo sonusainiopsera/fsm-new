@@ -1,0 +1,76 @@
+/*
+ * NotConnectedBanner — persists at the top of the technician shell when offline.
+ * Uses design tokens exclusively (no ad-hoc values).
+ */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-2);
+  padding: var(--token-space-2) var(--token-space-4);
+  background-color: var(--token-color-feedback-warning-surface, #fef3c7);
+  border-bottom: 1px solid var(--token-color-feedback-warning-border, #d97706);
+  /* Persist above the route content */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  /* Accessible min height  */
+  min-height: 44px;
+}
+
+.icon {
+  font-size: var(--token-fs-16);
+  flex-shrink: 0;
+  color: var(--token-color-feedback-warning-text, #92400e);
+}
+
+.message {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: var(--token-fs-14);
+  font-weight: 600;
+  color: var(--token-color-feedback-warning-text, #92400e);
+  line-height: var(--token-lh-body);
+}
+
+.age {
+  font-size: var(--token-fs-12);
+  color: var(--token-color-feedback-warning-text, #92400e);
+  opacity: 0.8;
+}
+
+.expiredWarning {
+  font-size: var(--token-fs-12);
+  color: var(--token-color-feedback-error-text, #7f1d1d);
+  font-weight: 600;
+}
+
+.retry {
+  /* 44×44 minimum touch target */
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--token-space-2) var(--token-space-3);
+  border: 1px solid var(--token-color-feedback-warning-border, #d97706);
+  border-radius: var(--token-radius-control);
+  background: transparent;
+  color: var(--token-color-feedback-warning-text, #92400e);
+  font-size: var(--token-fs-14);
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.retry:hover {
+  background-color: var(--token-color-feedback-warning-border, #d97706);
+  color: var(--token-neutral-0, #ffffff);
+}
+
+.retry:focus-visible {
+  outline: 2px solid var(--token-color-focus-ring, #2563eb);
+  outline-offset: 2px;
+}

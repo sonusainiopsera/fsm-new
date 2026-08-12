@@ -1,0 +1,28 @@
+{
+  "name": "Field Service Platform",
+  "short_name": "FieldService",
+  "description": "Technician mobile workspace — assigned jobs, status updates, parts logging",
+  "start_url": "/technician",
+  "scope": "/technician",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#1e40af",
+  "background_color": "#ffffff",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
