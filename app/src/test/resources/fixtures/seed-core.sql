@@ -341,3 +341,81 @@ VALUES
     -- TECHNICIAN: read-only SLA policy visibility
     ('00000000-0000-7020-8000-000000000008', 'TECHNICIAN', 'SLA_POLICY:READ', TRUE, 'system', NOW(), 0)
 ON CONFLICT (id) DO NOTHING;
+
+-- ---- Certification type reference data (WO-119) --------------------------------
+-- UUID prefix: 00000000-0000-7039-8000-XXXXXXXXXXXX (matches V39 migration seed)
+-- These rows duplicate V39 seed for idempotency in integration tests.
+INSERT INTO certification_type (id, code, display_name, regulated, default_validity_months, active)
+VALUES
+    ('00000000-0000-7039-8000-000000000001', 'GAS_SAFE',
+     '[PLACEHOLDER] Gas Safe Register (Domestic & Commercial)', TRUE,  12, TRUE),
+    ('00000000-0000-7039-8000-000000000002', 'REFRIGERANT_F_GAS',
+     '[PLACEHOLDER] Refrigerant Handling — F-Gas Category I',  TRUE,  24, TRUE),
+    ('00000000-0000-7039-8000-000000000003', 'ELECTRICAL_17TH_ED',
+     '[PLACEHOLDER] Electrical Installation — 18th Edition',   TRUE,  36, TRUE),
+    ('00000000-0000-7039-8000-000000000004', 'FIRST_AID_BASIC',
+     '[PLACEHOLDER] First Aid at Work (Basic)',                 FALSE, 36, TRUE),
+    ('00000000-0000-7039-8000-000000000005', 'WORKING_AT_HEIGHT',
+     '[PLACEHOLDER] Working at Height Safety',                 FALSE, 24, TRUE),
+    ('00000000-0000-7039-8000-000000000006', 'ASBESTOS_AWARENESS',
+     '[PLACEHOLDER] Asbestos Awareness (Non-Licensed)',         FALSE, 12, TRUE)
+ON CONFLICT (code) DO NOTHING;
+
+-- ---- Technician certification fixtures (WO-119) --------------------------------
+-- UUID prefix: 00000000-0000-7039-9000-XXXXXXXXXXXX
+-- Scenario coverage (using WO-195 seed technicians):
+--   t.seed@example.test  → has current GAS_SAFE + FIRST_AID_BASIC expiring soon
+--   m.seed@example.test  → has expired GAS_SAFE (regulated) + expired FIRST_AID_BASIC
+--   d.seed@example.test  → no certification rows at all
+
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7039-9000-000000000001',
+    t.id,
+    '00000000-0000-7039-8000-000000000001',
+    'GS-SEED-001', '2025-01-01', '2027-12-31', 'Gas Safe Register', TRUE, 0
+FROM technician t
+JOIN app_user u ON u.id = t.user_id
+WHERE u.email = 't.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7039-9000-000000000002',
+    t.id,
+    '00000000-0000-7039-8000-000000000004',
+    'FA-SEED-001', '2026-01-01', CURRENT_DATE + INTERVAL '20 days', 'St Johns Ambulance', TRUE, 0
+FROM technician t
+JOIN app_user u ON u.id = t.user_id
+WHERE u.email = 't.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7039-9000-000000000003',
+    t.id,
+    '00000000-0000-7039-8000-000000000001',
+    'GS-SEED-002-EXP', '2023-01-01', CURRENT_DATE - INTERVAL '1 day', 'Gas Safe Register', TRUE, 0
+FROM technician t
+JOIN app_user u ON u.id = t.user_id
+WHERE u.email = 'm.seed@example.test'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO technician_certification
+    (id, technician_id, certification_type_id, certificate_reference,
+     issued_on, expires_on, issuing_body, active, version)
+SELECT
+    '00000000-0000-7039-9000-000000000004',
+    t.id,
+    '00000000-0000-7039-8000-000000000004',
+    'FA-SEED-002-EXP', '2023-01-01', CURRENT_DATE - INTERVAL '1 day', 'Red Cross', TRUE, 0
+FROM technician t
+JOIN app_user u ON u.id = t.user_id
+WHERE u.email = 'm.seed@example.test'
+ON CONFLICT DO NOTHING;

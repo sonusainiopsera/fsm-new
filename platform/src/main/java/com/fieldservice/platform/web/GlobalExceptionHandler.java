@@ -6,6 +6,7 @@ import com.fieldservice.platform.api.ErrorCode;
 import com.fieldservice.platform.api.FieldError;
 import io.micrometer.core.instrument.MeterRegistry;
 import com.fieldservice.platform.api.exception.BusinessGuardException;
+import com.fieldservice.platform.api.exception.CertificationNotCurrentException;
 import com.fieldservice.platform.api.exception.ConflictException;
 import com.fieldservice.platform.api.exception.ForbiddenException;
 import com.fieldservice.platform.api.exception.IdempotencyConflictException;
@@ -322,6 +323,22 @@ public class GlobalExceptionHandler {
         log.warn("retention_floor_violation trace_id={}", traceId);
         return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
                 ApiErrorResponse.of(ErrorCode.RETENTION_FLOOR_VIOLATION, ex.getMessage(), traceId));
+    }
+
+    // ---- 422 Certification Not Current ----------------------------------------
+
+    @ExceptionHandler(CertificationNotCurrentException.class)
+    public ResponseEntity<ApiErrorResponse> handleCertificationNotCurrent(
+            CertificationNotCurrentException ex) {
+        String traceId = resolveTraceId();
+        log.warn("certification_not_current missing={} trace_id={}", ex.getMissingTypeCodes(), traceId);
+        List<FieldError> fieldErrors = ex.getMissingTypeCodes().stream()
+                .map(code -> new FieldError("certificationTypeCode", code,
+                        "Regulated certification not current: " + code))
+                .toList();
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorResponse.withFieldErrors(ErrorCode.CERTIFICATION_NOT_CURRENT,
+                        ex.getMessage(), fieldErrors, traceId));
     }
 
     // ---- 422 Business Guard Refusal -------------------------------------------
