@@ -269,6 +269,50 @@ public class GlobalExceptionHandler {
                 ApiErrorResponse.of(ErrorCode.SLA_POLICY_UNAVAILABLE, ex.getMessage(), traceId));
     }
 
+    // ---- 409 DSAR Illegal Transition -------------------------------------------
+
+    @ExceptionHandler(com.fieldservice.privacy.api.DsarRequestService.DsarIllegalTransitionException.class)
+    public ResponseEntity<ApiErrorResponse> handleDsarIllegalTransition(
+            com.fieldservice.privacy.api.DsarRequestService.DsarIllegalTransitionException ex) {
+        String traceId = resolveTraceId();
+        log.warn("dsar_illegal_transition trace_id={}", traceId);
+        return errorResponse(HttpStatus.CONFLICT,
+                ApiErrorResponse.of(ErrorCode.DSAR_ILLEGAL_TRANSITION, ex.getMessage(), traceId));
+    }
+
+    // ---- 422 DSAR Guard Refused ------------------------------------------------
+
+    @ExceptionHandler(com.fieldservice.privacy.api.DsarRequestService.DsarGuardRefusalException.class)
+    public ResponseEntity<ApiErrorResponse> handleDsarGuardRefusal(
+            com.fieldservice.privacy.api.DsarRequestService.DsarGuardRefusalException ex) {
+        String traceId = resolveTraceId();
+        log.warn("dsar_guard_refused code={} trace_id={}", ex.getCode(), traceId);
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorResponse.of(ErrorCode.DSAR_GUARD_REFUSED, ex.getMessage(), traceId));
+    }
+
+    // ---- 422 DSAR Export Not Ready ---------------------------------------------
+
+    @ExceptionHandler(com.fieldservice.privacy.api.DsarRequestService.ExportNotReadyException.class)
+    public ResponseEntity<ApiErrorResponse> handleExportNotReady(
+            com.fieldservice.privacy.api.DsarRequestService.ExportNotReadyException ex) {
+        String traceId = resolveTraceId();
+        log.warn("dsar_export_not_ready trace_id={}", traceId);
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorResponse.of(ErrorCode.DSAR_EXPORT_NOT_READY, ex.getMessage(), traceId));
+    }
+
+    // ---- 401 DSAR Download Token Invalid ---------------------------------------
+
+    @ExceptionHandler(com.fieldservice.privacy.internal.DownloadTokenService.InvalidDownloadTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidDownloadToken(
+            com.fieldservice.privacy.internal.DownloadTokenService.InvalidDownloadTokenException ex) {
+        String traceId = resolveTraceId();
+        log.warn("dsar_download_token_invalid trace_id={}", traceId);
+        return errorResponse(HttpStatus.UNAUTHORIZED,
+                ApiErrorResponse.of(ErrorCode.DSAR_DOWNLOAD_TOKEN_INVALID, ex.getMessage(), traceId));
+    }
+
     // ---- 422 Retention Floor Violation ----------------------------------------
 
     @ExceptionHandler(com.fieldservice.privacy.api.RetentionPolicyService.AuditFloorViolationException.class)

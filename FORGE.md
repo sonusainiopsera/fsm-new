@@ -357,3 +357,10 @@
 - **Files:** 31 (+1813/-7)
 - **Duration:** 992ss
 - **Approach:** N/A
+
+## WO-190: User Story: WO-190 - Data subject access and portability export workflow
+- **Status:** completed
+- **Commit:** `84a77df`
+- **Files:** 45 (+2409/-3)
+- **Duration:** 637ss
+- **Approach:** N/A

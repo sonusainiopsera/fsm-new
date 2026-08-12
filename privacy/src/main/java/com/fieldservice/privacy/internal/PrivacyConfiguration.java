@@ -12,5 +12,5 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableCaching
 @EnableScheduling
-@EnableConfigurationProperties(RetentionProperties.class)
+@EnableConfigurationProperties({RetentionProperties.class, DsarProperties.class})
 class PrivacyConfiguration {}

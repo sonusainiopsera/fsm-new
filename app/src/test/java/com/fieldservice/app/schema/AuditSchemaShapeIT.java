@@ -37,7 +37,10 @@ class AuditSchemaShapeIT extends AbstractIntegrationTest {
             "part_aud",
             "stock_location_aud",
             "work_order_hold_aud",
-            "work_order_part_aud"
+            "work_order_part_aud",
+            "retention_policy_aud",
+            "purge_run_aud",
+            "dsar_request_aud"
     );
 
     @Autowired

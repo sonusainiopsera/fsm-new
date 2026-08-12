@@ -5,6 +5,9 @@ spring:
 
 app:
   privacy:
+    dsar:
+      export-cron: "0 */5 * * * *"
+      export-lock-lease-secs: 300
     purge:
       # Execution remains disabled until Q7 retention periods are ratified by the DPO.
       # Set to true only after DPO sign-off and operational runbook is approved.

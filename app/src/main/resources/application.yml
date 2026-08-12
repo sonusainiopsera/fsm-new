@@ -146,6 +146,14 @@ app:
       zone: UTC
     consistency-check:
       enabled: true
+    dsar:
+      request-due-days: P30D
+      at-risk-threshold-days: 7
+      download-token-validity-secs: 300
+      export-cron: "0 */5 * * * *"
+      export-lock-lease-secs: 300
+      zone: UTC
+      token-secret: ${DSAR_TOKEN_SECRET:change-me-in-production}
 
 server:
   port: ${PORT:8080}
