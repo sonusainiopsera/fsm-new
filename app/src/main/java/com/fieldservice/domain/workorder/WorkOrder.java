@@ -117,6 +117,10 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
     @Column(name = "scheduled_window_end")
     private Instant scheduledWindowEnd;
 
+    /** True when the dispatcher has confirmed the scheduled window with the customer (V67/WO-139). */
+    @Column(name = "appointment_confirmed", nullable = false)
+    private boolean appointmentConfirmed = false;
+
     @Column(name = "applied_sla_policy_id")
     private UUID appliedSlaPolicyId;
 
@@ -243,6 +247,9 @@ public class WorkOrder extends BaseEntity implements ScopedEntity {
 
     public Instant getScheduledWindowEnd() { return scheduledWindowEnd; }
     public void setScheduledWindowEnd(Instant scheduledWindowEnd) { this.scheduledWindowEnd = scheduledWindowEnd; }
+
+    public boolean isAppointmentConfirmed() { return appointmentConfirmed; }
+    public void setAppointmentConfirmed(boolean appointmentConfirmed) { this.appointmentConfirmed = appointmentConfirmed; }
 
     @Column(name = "fault_signature", columnDefinition = "text[]")
     private String[] faultSignature = new String[0];

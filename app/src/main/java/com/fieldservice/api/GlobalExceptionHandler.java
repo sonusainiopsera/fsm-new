@@ -4,6 +4,9 @@ import com.fieldservice.aigateway.api.AiCapExceededException;
 import com.fieldservice.aigateway.api.AiUnavailableException;
 import com.fieldservice.dispatch.api.AssignmentService.CertificationGuardException;
 import com.fieldservice.dispatch.api.AssignmentService.OverrideReasonRequiredException;
+import com.fieldservice.dispatch.api.ReassignmentService.AppointmentBreachException;
+import com.fieldservice.dispatch.api.ReassignmentService.ReassignmentStateException;
+import com.fieldservice.dispatch.api.ReassignmentService.SameAssigneeException;
 import com.fieldservice.photo.application.PhotoRegistrationException;
 import com.fieldservice.dispatch.api.EligibilityDataException;
 import com.fieldservice.inventory.api.InsufficientStockException;
@@ -420,6 +423,48 @@ public class GlobalExceptionHandler {
         log.info("dispatch.override_reason_required: traceId={}, path={}", traceId(), request.getRequestURI());
         List<FieldError> fieldErrors = List.of(new FieldError("overrideReason", ex.getMessage()));
         return validationResponse(fieldErrors);
+    }
+
+    // -------------------------------------------------------------------------
+    // Dispatch — Reassignment Guards
+    // -------------------------------------------------------------------------
+
+    @ExceptionHandler(ReassignmentStateException.class)
+    public ResponseEntity<ErrorEnvelope> handleReassignmentState(
+            ReassignmentStateException ex,
+            HttpServletRequest request) {
+
+        log.info("dispatch.reassignment_state_refused: currentState={}, traceId={}, path={}",
+                ex.getCurrentState(), traceId(), request.getRequestURI());
+        String tid = traceId();
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .header(TRACE_HEADER, tid)
+                .body(new ErrorEnvelope(
+                        "REASSIGNMENT_INVALID_STATE",
+                        ex.getMessage(),
+                        tid,
+                        Instant.now()));
+    }
+
+    @ExceptionHandler(SameAssigneeException.class)
+    public ResponseEntity<ErrorEnvelope> handleSameAssignee(
+            SameAssigneeException ex,
+            HttpServletRequest request) {
+
+        log.info("dispatch.reassignment_same_assignee: traceId={}, path={}", traceId(), request.getRequestURI());
+        List<FieldError> fieldErrors = List.of(new FieldError("technicianId", ex.getMessage()));
+        return validationResponse(fieldErrors);
+    }
+
+    @ExceptionHandler(AppointmentBreachException.class)
+    public ResponseEntity<ErrorEnvelope> handleAppointmentBreach(
+            AppointmentBreachException ex,
+            HttpServletRequest request) {
+
+        log.info("dispatch.appointment_breach_unacknowledged: traceId={}, path={}", traceId(), request.getRequestURI());
+        return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
+                "APPOINTMENT_BREACH_UNACKNOWLEDGED",
+                ex.getMessage());
     }
 
     // -------------------------------------------------------------------------

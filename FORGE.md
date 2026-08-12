@@ -721,3 +721,10 @@
 - **Files:** 8 (+1272/-0)
 - **Duration:** 1124ss
 - **Approach:** Created a complete KPI baseline instrumentation validation suite for six confirmed metrics. All expected values are hand-derived and committed in kpi-expected-values.json before writing any test. Tests drive computation through existing analytics public APIs (SlaComplianceCalculator, ResolutionTimeCalculator, UtilizationCalculator, CohortMaturityResolver, RepeatVisitLinker) — no formula re-implementation. Pure unit tests only (no Spring context, no DB required). Key boundary cases covered: inclusive deadline boundary, strict 30-day repeat-visit window, provisional-to-matured clock transition at exactly T+30d, DST-safe epoch-seconds arithmetic, zero-denominator not-available, FRONT_OFFICE exclusion from self-service.
+
+## WO-139: User Story: WO-139 - Reassignment flow protecting confirmed appointment commitments
+- **Status:** completed
+- **Commit:** `b85d3bf`
+- **Files:** 15 (+1637/-8)
+- **Duration:** 926ss
+- **Approach:** Implemented a supersede-model reassignment flow. V67 migration adds end_at/superseded_by/reassignment_reason columns on assignment and appointment_confirmed on work_order, replacing the is_current partial index with end_at IS NULL unique index. ReassignmentServiceImpl executes a 12-step transactional sequence: state guard → same-assignee check → certification hard guard (via existing AssignmentGuard) → appointment pinning guard (new AppointmentGuard) → snapshot override check → supersede old assignment (set end_at=now) → persist new assignment → back-link superseded_by → update work_order.assigned_technician_id → publish TechnicianUnassigned + TechnicianAssigned outbox events → Micrometer counter. AppointmentGuard fires only when appointmentConfirmed=true AND scheduledWindowStart is in the future; it throws AppointmentBreachException if no acknowledgement text is supplied. All exception types are mapped to HTTP status codes in GlobalExceptionHandler.

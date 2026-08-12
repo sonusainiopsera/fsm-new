@@ -55,11 +55,12 @@ public class AssignmentGuard {
 
     private static String mapReasonToCode(ExclusionReason reason) {
         return switch (reason) {
-            case INACTIVE_TECHNICIAN  -> "TECHNICIAN_INACTIVE";
-            case CERTIFICATION_MISSING -> "CERTIFICATION_MISSING";
-            case CERTIFICATION_EXPIRED -> "CERTIFICATION_EXPIRED";
-            case UNAVAILABLE_IN_WINDOW -> "TECHNICIAN_UNAVAILABLE";
-            case OUT_OF_REACH          -> "TECHNICIAN_OUT_OF_REACH";
+            case INACTIVE_TECHNICIAN       -> "TECHNICIAN_INACTIVE";
+            case CERTIFICATION_MISSING     -> "CERTIFICATION_MISSING";
+            case CERTIFICATION_EXPIRED     -> "CERTIFICATION_EXPIRED";
+            case UNAVAILABLE_IN_WINDOW     -> "TECHNICIAN_UNAVAILABLE";
+            case OUT_OF_REACH              -> "TECHNICIAN_OUT_OF_REACH";
+            case CONFLICTING_APPOINTMENT   -> "CONFLICTING_APPOINTMENT";
         };
     }
 
@@ -69,8 +70,9 @@ public class AssignmentGuard {
             case "CERTIFICATION_MISSING"  -> "The technician does not hold a required certification.";
             case "CERTIFICATION_EXPIRED"  -> "The technician's required certification has expired.";
             case "TECHNICIAN_UNAVAILABLE" -> "The technician is unavailable during the required service window.";
-            case "TECHNICIAN_OUT_OF_REACH"-> "The technician is outside the service area reach radius.";
-            default                       -> "The technician is not eligible for this work order.";
+            case "TECHNICIAN_OUT_OF_REACH"    -> "The technician is outside the service area reach radius.";
+            case "CONFLICTING_APPOINTMENT"    -> "The technician is already committed to an overlapping confirmed appointment.";
+            default                           -> "The technician is not eligible for this work order.";
         };
     }
 }

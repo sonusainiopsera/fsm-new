@@ -22,5 +22,8 @@ public enum ExclusionReason {
     UNAVAILABLE_IN_WINDOW,
 
     /** Technician's home-base exceeds the configured Haversine reach radius. */
-    OUT_OF_REACH
+    OUT_OF_REACH,
+
+    /** Technician is already committed to an overlapping confirmed appointment (WO-139 reassignment only). */
+    CONFLICTING_APPOINTMENT
 }

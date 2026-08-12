@@ -97,6 +97,28 @@ public class Assignment implements ScopedEntity {
     @Column(name = "snapshot_stale", nullable = false)
     private boolean snapshotStale = false;
 
+    // ── Supersede model (V67 / WO-139) ───────────────────────────────────────
+
+    /** Set when this assignment is closed by a subsequent reassignment. The active assignment has {@code endAt = null}. */
+    @Column(name = "end_at")
+    private Instant endAt;
+
+    /** ID of the assignment that replaced this one; null on the current active assignment. */
+    @Column(name = "superseded_by")
+    private UUID supersededBy;
+
+    /** Controlled reassignment reason; null on the initial assignment. */
+    @Column(name = "reassignment_reason", length = 100)
+    private String reassignmentReason;
+
+    /** Optional free-text notes supplementing the controlled reason. */
+    @Column(name = "reason_notes", columnDefinition = "TEXT")
+    private String reasonNotes;
+
+    /** Persisted acknowledgement when the reassignment breaches a confirmed appointment window. */
+    @Column(name = "appointment_impact_reason", columnDefinition = "TEXT")
+    private String appointmentImpactReason;
+
     @Version
     @Column(name = "version", nullable = false)
     private Integer version;
@@ -185,4 +207,19 @@ public class Assignment implements ScopedEntity {
 
     public boolean isSnapshotStale() { return snapshotStale; }
     public void setSnapshotStale(boolean snapshotStale) { this.snapshotStale = snapshotStale; }
+
+    public Instant getEndAt() { return endAt; }
+    public void setEndAt(Instant endAt) { this.endAt = endAt; }
+
+    public UUID getSuperscededBy() { return supersededBy; }
+    public void setSupersededBy(UUID supersededBy) { this.supersededBy = supersededBy; }
+
+    public String getReassignmentReason() { return reassignmentReason; }
+    public void setReassignmentReason(String reassignmentReason) { this.reassignmentReason = reassignmentReason; }
+
+    public String getReasonNotes() { return reasonNotes; }
+    public void setReasonNotes(String reasonNotes) { this.reasonNotes = reasonNotes; }
+
+    public String getAppointmentImpactReason() { return appointmentImpactReason; }
+    public void setAppointmentImpactReason(String appointmentImpactReason) { this.appointmentImpactReason = appointmentImpactReason; }
 }
