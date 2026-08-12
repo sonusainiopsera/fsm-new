@@ -483,3 +483,10 @@
 - **Files:** 25 (+1795/-0)
 - **Duration:** 1046ss
 - **Approach:** N/A
+
+## WO-131: User Story: WO-131 - Work order creation modal with live deadline countdown
+- **Status:** completed
+- **Commit:** `4d50bf2`
+- **Files:** 13 (+1454/-1)
+- **Duration:** 647ss
+- **Approach:** Added a focus-trapped CreateWorkOrderModal with dependent customer/site/asset selects, SLA policy lookup for deadline preview, idempotent submission via per-modal idempotency keys, and complete server 400/422 field-error mapping. Extracted a shared DeadlineCountdown component driven by a single shared serverClock tick driver with clock-skew correction from HTTP Date headers and immediate visibilitychange reconciliation. Added a backend GET /api/v1/sla-policies/by-priority/{priority} endpoint accessible to dispatchers. The 'New Work Order' button on the dispatch board opens the modal and invalidates the board query on success.

@@ -14,6 +14,7 @@
 
 import { tokenStore } from './tokenStore.js';
 import { ClientError, normalizeError, networkError } from './errors.js';
+import { updateSkew } from '../shared/time/serverClock.js';
 
 const BASE = '/api/v1';
 const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -68,6 +69,9 @@ export async function apiFetch(path, options = {}) {
   if (response.status === 304) {
     return { _304: true, etag: response.headers.get('ETag') };
   }
+
+  // Capture server Date header for clock-skew correction on every non-304 response.
+  updateSkew(response.headers.get('Date'));
 
   // Single-flight 401 silent refresh (not on auth paths to avoid refresh loops)
   if (response.status === 401 && !isAuthPath && !_isRetry) {

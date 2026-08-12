@@ -14,7 +14,7 @@
  * @module features/workorders/WorkOrderBoardPage
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import {
@@ -24,7 +24,9 @@ import {
   ErrorState,
   PermissionDeniedState,
   DegradedState,
+  Button,
 } from '../../components/index.js';
+import { CreateWorkOrderModal } from './components/CreateWorkOrderModal.jsx';
 import { useNetworkStatus } from '../../app/useNetworkStatus.js';
 
 import { useWorkOrderSearch } from './api/useWorkOrderSearch.js';
@@ -55,6 +57,8 @@ export default function WorkOrderBoardPage() {
     setFilter,
     refetch,
   } = useWorkOrderSearch();
+
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // Drawer ID stored in URL so deep-link works
   const drawerId = searchParams.get('drawerId') ?? null;
@@ -96,6 +100,11 @@ export default function WorkOrderBoardPage() {
           pageMeta.totalElements > 0
             ? `${pageMeta.totalElements} work order${pageMeta.totalElements !== 1 ? 's' : ''}`
             : undefined
+        }
+        primaryAction={
+          <Button onClick={() => setCreateModalOpen(true)} id="create-wo-btn">
+            + New Work Order
+          </Button>
         }
       />
 
@@ -188,6 +197,13 @@ export default function WorkOrderBoardPage() {
       <WorkOrderDetailDrawer
         workOrderId={drawerId}
         onClose={closeDrawer}
+      />
+
+      {/* Work order creation modal */}
+      <CreateWorkOrderModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onCreated={() => setCreateModalOpen(false)}
       />
     </div>
   );

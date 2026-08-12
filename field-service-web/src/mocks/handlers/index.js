@@ -346,6 +346,39 @@ const DEFAULT_ROUTES = {
     ],
   },
 
+  // Work order creation
+  'POST:/api/v1/work-orders': {
+    status: 201,
+    body: {
+      id: 'wo-new-001', reference: 'WO-2026-100', state: 'NEW', priority: 'HIGH',
+      customerId: 'cust-001', customerName: 'Acme Corp',
+      siteId: 'site-001', siteName: 'London HQ', assetId: null,
+      faultDescription: 'HVAC unit fault.', atRisk: false,
+      responseDeadline:   new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
+      resolutionDeadline: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+      legalNextEvents: ['ASSIGN', 'CANCEL'], appliedSlaPolicyId: 'sla-001', version: 1,
+      createdAt: new Date().toISOString(),
+    },
+  },
+
+  // SLA policy by priority
+  'GET:/api/v1/sla-policies/by-priority/URGENT': {
+    status: 200,
+    body: { priority: 'URGENT', responseMinutes: 60,   resolutionMinutes: 240,  atRiskFraction: 0.80 },
+  },
+  'GET:/api/v1/sla-policies/by-priority/HIGH': {
+    status: 200,
+    body: { priority: 'HIGH',   responseMinutes: 240,  resolutionMinutes: 480,  atRiskFraction: 0.80 },
+  },
+  'GET:/api/v1/sla-policies/by-priority/NORMAL': {
+    status: 200,
+    body: { priority: 'NORMAL', responseMinutes: 480,  resolutionMinutes: 1440, atRiskFraction: 0.80 },
+  },
+  'GET:/api/v1/sla-policies/by-priority/LOW': {
+    status: 200,
+    body: { priority: 'LOW',    responseMinutes: 1440, resolutionMinutes: 4320, atRiskFraction: 0.80 },
+  },
+
   // Privacy — Classification registry
   'GET:/api/v1/privacy/classifications': {
     status: 200,

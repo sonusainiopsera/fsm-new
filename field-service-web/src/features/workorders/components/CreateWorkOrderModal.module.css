@@ -1,0 +1,63 @@
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.errorSummary {
+  background: var(--color-danger-subtle, #fff0f0);
+  border: 1px solid var(--color-danger, #c9181f);
+  border-radius: var(--radius-sm, 4px);
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  margin-bottom: var(--space-3, 12px);
+}
+
+.errorSummary ul {
+  margin: 0;
+  padding-left: var(--space-3, 12px);
+}
+
+.deadlinePreview {
+  background: var(--color-surface-subtle, #f5f5f5);
+  border-radius: var(--radius-sm, 4px);
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  margin-bottom: var(--space-3, 12px);
+}
+
+.deadlineList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1, 4px) var(--space-2, 8px);
+  margin: 0;
+}
+
+.deadlineList dt {
+  font-weight: var(--font-weight-medium, 500);
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--color-text-secondary, #666);
+}
+
+.deadlineList dd {
+  margin: 0;
+  font-size: var(--text-sm, 0.875rem);
+}
+
+.policyMissing {
+  margin: 0;
+  color: var(--color-danger, #c9181f);
+  font-size: var(--text-sm, 0.875rem);
+}
+
+.policyLoading {
+  margin: 0;
+  color: var(--color-text-secondary, #666);
+  font-size: var(--text-sm, 0.875rem);
+}
+
+.charCount {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-secondary, #666);
+  text-align: right;
+  margin-top: var(--space-1, 4px);
+  margin-bottom: var(--space-2, 8px);
+}
