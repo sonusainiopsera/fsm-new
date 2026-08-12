@@ -661,6 +661,60 @@ const DEFAULT_ROUTES = {
     },
   },
 
+  // ── Dispatch recommendations ────────────────────────────────────────────────
+  // Work order detail for the recommendations test fixture
+  'GET:/api/v1/work-orders/wo-recs-001': {
+    status: 200,
+    body: {
+      id: 'wo-recs-001',
+      reference: 'WO-RECS-001',
+      state: 'NEW',
+      priority: 'HIGH',
+      customerName: 'Acme Corp',
+      siteName: 'London HQ',
+      assetId: null,
+      faultDescription: 'HVAC unit fault.',
+      responseDeadline: '2026-08-12T14:00:00Z',
+      resolutionDeadline: '2026-08-12T18:00:00Z',
+      atRisk: false,
+      legalNextEvents: ['ASSIGN', 'CANCEL'],
+      version: 1,
+      createdAt: '2026-08-12T08:00:00Z',
+    },
+  },
+
+  'GET:/api/v1/work-orders/wo-recs-001/recommendations': {
+    status: 200,
+    body: {
+      data: [
+        {
+          technicianId: 'tech-rec-001', technicianName: 'Technician 1', rank: 1, score: 0.95,
+          travelEstimateDegraded: false,
+          factors: [
+            { factorCode: 'TRAVEL_EFFICIENCY', rawValue: 30, normalisedValue: 0.92, weight: 0.35, weightedContribution: 0.322, explanation: '30 minutes estimated travel time.', degraded: false, stale: false },
+            { factorCode: 'PARTS_AVAILABILITY', rawValue: 1, normalisedValue: 1.0, weight: 0.30, weightedContribution: 0.30, explanation: 'All required parts available on vehicle.', degraded: false, stale: false },
+            { factorCode: 'CERTIFICATION_MATCH', rawValue: 1, normalisedValue: 1.0, weight: 0.25, weightedContribution: 0.25, explanation: 'All required certifications are current and valid.', degraded: false, stale: false },
+            { factorCode: 'WORKLOAD_BALANCE', rawValue: 1, normalisedValue: 0.85, weight: 0.10, weightedContribution: 0.085, explanation: '1 job scheduled today.', degraded: false, stale: false },
+          ],
+        },
+      ],
+      page: { size: 1, hasNext: false },
+      links: { next: null },
+      meta: {
+        snapshotId: '00000000-0000-7140-8000-000000000001',
+        generatedAt: '2026-08-12T10:00:00Z',
+        weightSetVersion: '2.1',
+        travelEstimateDegraded: false,
+        partsDataDegraded: false,
+        candidatePoolSize: 6,
+        truncated: false,
+        exclusionSummary: [],
+        partsWarnings: [],
+      },
+    },
+    headers: { 'ETag': '"recs-etag-v1"' },
+  },
+
   // ── Photo analysis ──────────────────────────────────────────────────────────
 
   'POST:/api/v1/work-orders/wo-001/photos/photo-001/analysis': {

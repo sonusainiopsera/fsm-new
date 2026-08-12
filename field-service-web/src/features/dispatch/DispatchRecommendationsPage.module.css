@@ -1,0 +1,149 @@
+.page {
+  padding: var(--space-4) var(--space-6);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.heading {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: var(--ls-tight);
+}
+
+.refreshBtn {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: background var(--duration-micro, 120ms);
+}
+
+.refreshBtn:hover {
+  background: var(--color-neutral-100);
+}
+
+.refreshBtn:focus-visible {
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: 2px;
+}
+
+.degradedBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-warning-subtle);
+  border: 1px solid var(--color-warning-muted);
+  color: var(--color-warning-text);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-control);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-3);
+}
+
+.poolMeta {
+  display: flex;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.excluded {
+  color: var(--color-text-disabled);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.loadMoreRow {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: center;
+}
+
+.loadMoreBtn {
+  padding: var(--space-2) var(--space-6);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: background var(--duration-micro, 120ms);
+}
+
+.loadMoreBtn:not(:disabled):hover {
+  background: var(--color-neutral-100);
+}
+
+.loadMoreBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loadMoreBtn:focus-visible {
+  outline: 2px solid var(--color-accent-base);
+  outline-offset: 2px;
+}
+
+.snapshotNote {
+  margin-top: var(--space-4);
+  font-size: var(--fs-xs);
+  color: var(--color-text-disabled);
+}
+
+/* Work order context banner */
+.contextBanner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  margin-bottom: var(--space-4);
+  margin-top: 0;
+}
+
+.contextItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.contextLabel {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.contextValue {
+  font-size: var(--fs-sm);
+  color: var(--color-text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

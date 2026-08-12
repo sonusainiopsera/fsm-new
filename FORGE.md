@@ -693,3 +693,10 @@
 - **Files:** 12 (+1167/-0)
 - **Duration:** 918ss
 - **Approach:** N/A
+
+## WO-140: User Story: WO-140 - Dispatcher recommendations page with factor explanations
+- **Status:** completed
+- **Commit:** `f75f34f`
+- **Files:** 11 (+1382/-3)
+- **Duration:** 1189ss
+- **Approach:** Built the dispatch recommendations React feature from scratch. useRecommendations hook uses TanStack Query with keyset cursor accumulation (useState-based, no useInfiniteQuery to match codebase pattern), 10-minute staleTime, abort on workOrderId change, and retry on 5xx. FactorBreakdownPanel renders factor label, progress bar (role=meter with aria-valuenow), weight, and verbatim server explanation. RecommendationCard shows rank, name, score, travelEstimateDegraded inline indicator, and aria-expanded disclosure for the factor panel. DispatchRecommendationsPage composes WorkOrderContextBanner (reference/customer/site/priority/deadlines from WO detail fetch), aggregate degraded banner (aria-live=polite), pool metadata, ranked candidate list, Load more cursor button, and all five explicit states. dispatch surface updated from single export to nested Routes layout. Sixteen tests cover all acceptance criteria scenarios.

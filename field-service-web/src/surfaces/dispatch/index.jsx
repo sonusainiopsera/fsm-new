@@ -4,8 +4,21 @@
  * Entry chunk for the dispatch surface.
  * Roles: DISPATCHER, ADMIN, MANAGER.
  *
- * The WorkOrderBoardPage is the primary screen: a 30-second conditional-poll
- * filterable table with a deep-linkable detail drawer.
+ * Routes:
+ *   /dispatch                                      → WorkOrderBoardPage (default)
+ *   /dispatch/:workOrderId/recommendations         → DispatchRecommendationsPage
  */
 
-export { default } from '../../features/workorders/WorkOrderBoardPage.jsx';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import WorkOrderBoardPage from '../../features/workorders/WorkOrderBoardPage.jsx';
+import DispatchRecommendationsPage from '../../features/dispatch/DispatchRecommendationsPage.jsx';
+
+export default function DispatchSurface() {
+  return (
+    <Routes>
+      <Route index element={<WorkOrderBoardPage />} />
+      <Route path=":workOrderId/recommendations" element={<DispatchRecommendationsPage />} />
+    </Routes>
+  );
+}

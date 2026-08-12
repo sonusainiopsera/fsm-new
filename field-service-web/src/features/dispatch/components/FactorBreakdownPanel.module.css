@@ -1,0 +1,67 @@
+.panel {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.factor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+}
+
+.degradedMark {
+  color: var(--color-warning-base);
+  margin-left: var(--space-1);
+  font-weight: var(--fw-bold);
+}
+
+.weight {
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.barTrack {
+  height: 0.5rem;
+  background: var(--color-neutral-200);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--color-accent-base);
+  border-radius: var(--radius-pill);
+  transition: width 200ms var(--easing-standard, ease);
+}
+
+.pct {
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+  text-align: right;
+}
+
+.explanation {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--lh-body);
+}
