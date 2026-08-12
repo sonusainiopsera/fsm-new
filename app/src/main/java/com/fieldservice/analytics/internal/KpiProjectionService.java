@@ -2,13 +2,17 @@ package com.fieldservice.analytics.internal;
 
 import com.fieldservice.analytics.KpiProjection;
 import com.fieldservice.analytics.KpiProjectionQuery;
+import com.fieldservice.analytics.TrendPointDto;
 import com.fieldservice.analytics.internal.workforce.WorkforceKpiRefreshHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -53,6 +57,8 @@ class KpiProjectionService implements KpiProjectionQuery {
     private final Clock clock;
     private final SlaKpiRefreshHandler slaKpiRefreshHandler;
     private final WorkforceKpiRefreshHandler workforceKpiRefreshHandler;
+    private final BaselineMetricStore baselineMetricStore;
+    private final JdbcTemplate primaryJdbcTemplate;
 
     @Nullable
     private final AnalyticsRedisCache redisCache;
@@ -69,6 +75,8 @@ class KpiProjectionService implements KpiProjectionQuery {
             Clock clock,
             SlaKpiRefreshHandler slaKpiRefreshHandler,
             WorkforceKpiRefreshHandler workforceKpiRefreshHandler,
+            BaselineMetricStore baselineMetricStore,
+            JdbcTemplate primaryJdbcTemplate,
             @Nullable @org.springframework.beans.factory.annotation.Autowired(required = false)
             AnalyticsRedisCache redisCache) {
         this.repository = repository;
@@ -82,6 +90,8 @@ class KpiProjectionService implements KpiProjectionQuery {
         this.clock = clock;
         this.slaKpiRefreshHandler = slaKpiRefreshHandler;
         this.workforceKpiRefreshHandler = workforceKpiRefreshHandler;
+        this.baselineMetricStore = baselineMetricStore;
+        this.primaryJdbcTemplate = primaryJdbcTemplate;
         this.redisCache = redisCache;
     }
 
@@ -298,5 +308,34 @@ class KpiProjectionService implements KpiProjectionQuery {
                 e.getSampleCount(), e.getMaturity(), e.getDataAsOf(),
                 e.getProjectionVersion(), e.isDegraded(), e.getDegradedReason(),
                 Math.max(0, staleness));
+    }
+
+    // -------------------------------------------------------------------------
+    // KpiProjectionQuery — trend points and baseline (WO-166)
+    // -------------------------------------------------------------------------
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TrendPointDto> findRecentTrendPoints(String metricKey, String segmentKey, int limit) {
+        try {
+            return primaryJdbcTemplate.query(
+                    "SELECT bucket_date, value FROM kpi_trend_point " +
+                    "WHERE metric_key = ? AND segment_key = ? " +
+                    "ORDER BY bucket_date DESC LIMIT ?",
+                    (rs, i) -> new TrendPointDto(
+                            rs.getDate("bucket_date").toLocalDate(),
+                            rs.getBigDecimal("value")),
+                    metricKey, segmentKey, limit);
+        } catch (Exception ex) {
+            log.warn("analytics.trend_points.read.error: metricKey={} segment={} — {}",
+                    metricKey, segmentKey, ex.getMessage());
+            return List.of();
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<BigDecimal> findBaseline(String metricKey, String segmentKey, String windowKey) {
+        return Optional.ofNullable(baselineMetricStore.findBaseline(metricKey, segmentKey, windowKey));
     }
 }

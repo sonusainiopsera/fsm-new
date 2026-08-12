@@ -119,3 +119,17 @@ operations:
       TECHNICIAN:  allow
       CUSTOMER:    allow
     rationale: "Each user may update their own preference; self-scope enforced via AccessScopeResolver (no IDOR)."
+
+  - id: analytics.dashboard.widgets
+    description: "Fetch KPI dashboard widgets (GET /api/v1/analytics/dashboard/widgets)"
+    serviceClass: "com.fieldservice.analytics.DashboardWidgetService"
+    serviceMethod: "getWidgets"
+    httpMethod: GET
+    endpoint: "/api/v1/analytics/dashboard/widgets"
+    roles:
+      ADMIN:       allow
+      DISPATCHER:  deny
+      MANAGER:     allow
+      TECHNICIAN:  deny
+      CUSTOMER:    deny
+    rationale: "KPI aggregates are Internal-class data; only MANAGER and ADMIN may view the dashboard."

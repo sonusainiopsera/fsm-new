@@ -1,5 +1,6 @@
 package com.fieldservice.analytics;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,4 +32,16 @@ public interface KpiProjectionQuery {
      * Returns all projections that are currently marked degraded, for operational dashboards.
      */
     List<KpiProjection> findDegraded();
+
+    /**
+     * Returns the most recent {@code limit} daily trend points for a (metric, segment) pair,
+     * ordered by bucket date descending. Returns an empty list when no trend data exists yet.
+     */
+    List<TrendPointDto> findRecentTrendPoints(String metricKey, String segmentKey, int limit);
+
+    /**
+     * Returns the captured baseline value for a (metric, segment, window) triple, or empty
+     * when no baseline row has been captured yet. Empty maps to {@code BASELINE_PENDING}.
+     */
+    Optional<BigDecimal> findBaseline(String metricKey, String segmentKey, String windowKey);
 }
