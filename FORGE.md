@@ -420,3 +420,10 @@
 - **Files:** 9 (+1120/-0)
 - **Duration:** 842ss
 - **Approach:** Split into four components following strict separation of concerns. SlaRiskEvaluator is a pure, Clock-injected decision function: it accepts an immutable WorkOrderRiskSnapshot plus an Instant and returns a RiskDecision (RAISE_FLAG / CLEAR_ALL / HEALTHY) with no I/O or repository access. DistributedSweepLock wraps pg_try_advisory_lock with a session-level key so crashed workers self-heal when the connection is closed. SlaEvaluationScheduler is @Profile('worker') only, runs on a 60-second fixedDelay, uses keyset pagination on id for bounded candidate loading, isolates per-row errors with try/catch, clears flags on recovery (healthy evaluation with open flags) and on terminal states, and registers 5 Micrometer meters. The partial unique index on (work_order_id, flag_type) WHERE cleared_at IS NULL enforces idempotency; concurrent inserts are handled by an optimistic check-then-insert pattern catching DataIntegrityViolationException. Flag creation and SlaRiskFlagged outbox event are written in a single txTemplate transaction.
+
+## WO-170: User Story: WO-170 - Portal service request submission creating governed work order
+- **Status:** completed
+- **Commit:** `c6bf4dc`
+- **Files:** 10 (+412/-0)
+- **Duration:** 846ss
+- **Approach:** N/A

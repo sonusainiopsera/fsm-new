@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Handles work order creation: validates referential integrity, resolves the active SLA
@@ -168,6 +169,94 @@ public class WorkOrderCreationService {
         log.info("work_order_created id={} reference={} priority={} site_id={} customer_id={} actor={}",
                 workOrder.getId(), workOrder.getReference(), workOrder.getPriority(),
                 site.getId(), request.customerId(), scope.userId());
+
+        return WorkOrderResponse.from(workOrder);
+    }
+
+    /**
+     * Portal-specific creation path. Site ownership is validated against {@code accountId}
+     * (resolved by the caller from {@link com.fieldservice.portal.access.CustomerAccessScope}).
+     * Origin is stamped as PORTAL and priority defaults to the configured portal ceiling.
+     *
+     * @param accountId       caller's customer account id (from portal scope)
+     * @param siteId          site to raise the request against
+     * @param assetId         optional asset at the site
+     * @param faultDescription description of the fault (PII — never logged at INFO+)
+     * @param actorUserId     authenticated user id for the outbox event
+     */
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @Transactional
+    public WorkOrderResponse createFromPortal(UUID accountId, UUID siteId, UUID assetId,
+                                               String faultDescription, UUID actorUserId) {
+        Instant now = Instant.now();
+
+        // Resolve site through a predicate combining id AND customer ownership.
+        // This follows the "query through scope predicate" pattern rather than fetch-then-compare.
+        Site site = siteRepository
+                .findOne((root, q, cb) -> cb.and(
+                        cb.equal(root.get("id"), siteId),
+                        cb.equal(root.get("customerId"), accountId)))
+                .orElseThrow(() -> new ScopedAccessDeniedException("site",
+                        "Site not found or not accessible"));
+
+        // Validate asset ownership via predicate combining id AND site id
+        if (assetId != null) {
+            assetRepository
+                    .findOne((root, q, cb) -> cb.and(
+                            cb.equal(root.get("id"), assetId),
+                            cb.equal(root.get("siteId"), siteId)))
+                    .orElseThrow(() -> new WorkOrderReferentialException(
+                            WorkOrderErrorCodes.ASSET_SITE_MISMATCH, "assetId",
+                            "Asset not found or not located at the supplied site"));
+        }
+
+        // Portal submissions use the NORMAL priority ceiling
+        WorkOrderPriority priority = PORTAL_PRIORITY_CEILING;
+
+        // SLA policy — throws SlaPolicyUnavailableException (→ 503) if none active
+        slaPolicyProvider.resolve(priority.toDbValue(), now)
+                .orElseThrow(() -> {
+                    log.error("sla_policy_unavailable priority={} origin=PORTAL", priority);
+                    return new com.fieldservice.sla.SlaPolicyUnavailableException(priority.toDbValue());
+                });
+
+        SlaDeadlineResult sla = slaDeadlineCalculator.calculate(priority.toDbValue(), now);
+
+        long   seq       = workOrderRepository.nextRefSequence();
+        String reference = String.format("WO-%06d", seq);
+
+        WorkOrder workOrder = new WorkOrder(reference, WorkOrderStatus.NEW,
+                priority.toDbValue(), site, null);
+        workOrder.setDescription(faultDescription);
+        workOrder.setOrigin("PORTAL");
+        workOrder.applyDeadlines(sla.responseDueAt(), sla.resolutionDueAt(), sla.atRiskAt());
+
+        if (assetId != null) {
+            workOrder.setAssetId(assetId);
+        }
+
+        workOrderRepository.save(workOrder);
+
+        eventPublisher.publish(new DomainEvent(
+                UuidV7.generate(),
+                "WORK_ORDER_CREATED",
+                "WORK_ORDER",
+                workOrder.getId(),
+                now,
+                MDC.get("traceId"),
+                actorUserId,
+                new WorkOrderCreatedPayload(
+                        workOrder.getId(),
+                        workOrder.getReference(),
+                        workOrder.getPriority(),
+                        site.getId(),
+                        "PORTAL",
+                        sla.responseDueAt(),
+                        sla.resolutionDueAt(),
+                        sla.atRiskAt())));
+
+        log.info("portal_work_order_created id={} reference={} site_id={} account_id={} actor={}",
+                workOrder.getId(), workOrder.getReference(), site.getId(), accountId, actorUserId);
 
         return WorkOrderResponse.from(workOrder);
     }

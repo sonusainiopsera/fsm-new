@@ -100,6 +100,10 @@ public class WorkOrder implements ScopedEntity {
     @Column(name = "fault_category", length = 100)
     private String faultCategory;
 
+    /** Attribution for how the work order was created. Defaults to DISPATCHER. */
+    @Column(name = "origin", nullable = false, length = 30)
+    private String origin = "DISPATCHER";
+
     @Version
     private Integer version;
 
@@ -144,6 +148,7 @@ public class WorkOrder implements ScopedEntity {
     public UUID            getAppliedSlaPolicyId()  { return appliedSlaPolicyId; }
     public String          getFaultCode()            { return faultCode; }
     public String          getFaultCategory()        { return faultCategory; }
+    public String          getOrigin()              { return origin; }
     public Integer         getVersion()             { return version; }
 
     public void markNoPartsRequired() { this.noPartsRequired = true; }
@@ -155,6 +160,8 @@ public class WorkOrder implements ScopedEntity {
     public void setFaultCode(String faultCode) { this.faultCode = faultCode; }
 
     public void setFaultCategory(String faultCategory) { this.faultCategory = faultCategory; }
+
+    public void setOrigin(String origin) { this.origin = origin; }
 
     /** Sets SLA deadlines and snapshots the policy id at creation time. */
     public void applyDeadlines(Instant responseDeadline, Instant resolutionDeadline,
