@@ -1,12 +1,15 @@
 package com.fieldservice.workorder.duplicates;
 
 import com.fieldservice.security.TestJwtFactory;
+import com.fieldservice.security.TestTokenMinter;
 import com.fieldservice.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,21 +19,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Integration tests for the duplicate detection and linking workflow.
- *
- * <p>Verifies:
- * <ul>
- *   <li>Creation response includes duplicateCandidates (empty on first WO).</li>
- *   <li>GET /duplicate-candidates returns correct shape with row-scope enforcement.</li>
- *   <li>POST /duplicate-of cancels source, sets exclusion flag, returns expected response.</li>
- *   <li>422 refusal codes: self-link, already-linked, target not open.</li>
- *   <li>403 for out-of-scope target (non-disclosure).</li>
- *   <li>Detection degrades gracefully to empty list on error.</li>
- * </ul>
  */
 class DuplicateDetectionIT extends AbstractIntegrationTest {
 
+    private static final TestTokenMinter MINTER = TestTokenMinter.primary();
+
     private static final String DISPATCHER_TOKEN =
-            TestJwtFactory.DISPATCHER;
+            MINTER.valid(TestJwtFactory.DISPATCHER_USER_ID, List.of("DISPATCHER"));
+    private static final String CUSTOMER_TOKEN =
+            MINTER.validWithClaims(TestJwtFactory.CUSTOMER_USER_ID, List.of("CUSTOMER"),
+                    Map.of("customerAccountIds", List.of(TestJwtFactory.ACCT_A.toString())));
+    private static final String TECHNICIAN_TOKEN =
+            MINTER.validWithClaims(TestJwtFactory.TECH_1_USER_ID, List.of("TECHNICIAN"),
+                    Map.of("technicianId", TestJwtFactory.TECH_1_ID.toString()));
+
     private static final String CUSTOMER_ID = "00000000-0000-0000-0000-000000000001";
     private static final String SITE_ID     = "10000000-0000-0000-0000-000000000001";
 
@@ -80,7 +82,7 @@ class DuplicateDetectionIT extends AbstractIntegrationTest {
     void getDuplicateCandidates_customerRole_returns403() throws Exception {
         mockMvc.perform(get("/api/v1/work-orders/{id}/duplicate-candidates",
                 UUID.randomUUID())
-                .header("Authorization", "Bearer " + TestJwtFactory.CUSTOMER))
+                .header("Authorization", "Bearer " + CUSTOMER_TOKEN))
                 .andExpect(status().isForbidden());
     }
 
@@ -123,7 +125,7 @@ class DuplicateDetectionIT extends AbstractIntegrationTest {
     @Test
     void linkDuplicate_customerRole_returns403() throws Exception {
         mockMvc.perform(post("/api/v1/work-orders/{id}/duplicate-of", UUID.randomUUID())
-                .header("Authorization", "Bearer " + TestJwtFactory.CUSTOMER)
+                .header("Authorization", "Bearer " + CUSTOMER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"targetWorkOrderId": "%s", "reason": "dup"}
@@ -134,7 +136,7 @@ class DuplicateDetectionIT extends AbstractIntegrationTest {
     @Test
     void linkDuplicate_technicianRole_returns403() throws Exception {
         mockMvc.perform(post("/api/v1/work-orders/{id}/duplicate-of", UUID.randomUUID())
-                .header("Authorization", "Bearer " + TestJwtFactory.TECHNICIAN)
+                .header("Authorization", "Bearer " + TECHNICIAN_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"targetWorkOrderId": "%s", "reason": "dup"}
@@ -146,7 +148,6 @@ class DuplicateDetectionIT extends AbstractIntegrationTest {
 
     @Test
     void exclusionFlag_defaultsToFalse_onNewWorkOrder() throws Exception {
-        // Verify the column default — a newly created WO should have excludedFromSlaCompliance=false
         mockMvc.perform(post("/api/v1/work-orders")
                 .header("Authorization", "Bearer " + DISPATCHER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
