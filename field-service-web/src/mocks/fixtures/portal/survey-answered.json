@@ -1,0 +1,12 @@
+{
+  "workOrderId": "srh-004",
+  "reference": "WO-P103",
+  "windowExpiresAt": "2026-07-10T23:59:00Z",
+  "alreadyAnswered": true,
+  "outcome": {
+    "score": 4,
+    "nps": 8,
+    "comment": null,
+    "submittedAt": "2026-07-04T10:15:00Z"
+  }
+}

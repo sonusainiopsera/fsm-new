@@ -1,0 +1,55 @@
+{
+  "data": [
+    {
+      "id": "srh-006",
+      "reference": "WO-P105",
+      "siteName": "Southside Warehouse",
+      "statusLabel": "Completed",
+      "statusGroup": "closed",
+      "priority": "Low",
+      "submittedAt": "2026-06-20T14:00:00Z",
+      "resolvedAt": "2026-06-21T11:00:00Z",
+      "closedAt": "2026-06-22T09:00:00Z",
+      "surveyEligible": false,
+      "version": 3
+    },
+    {
+      "id": "srh-007",
+      "reference": "WO-P106",
+      "siteName": "Northgate Office",
+      "statusLabel": "Completed",
+      "statusGroup": "closed",
+      "priority": "Normal",
+      "submittedAt": "2026-06-15T09:00:00Z",
+      "resolvedAt": "2026-06-15T16:30:00Z",
+      "closedAt": "2026-06-16T08:00:00Z",
+      "surveyEligible": false,
+      "version": 5
+    },
+    {
+      "id": "srh-008",
+      "reference": "WO-P107",
+      "siteName": "Southside Warehouse",
+      "statusLabel": "Completed",
+      "statusGroup": "closed",
+      "priority": "High",
+      "submittedAt": "2026-06-10T10:00:00Z",
+      "resolvedAt": "2026-06-11T14:00:00Z",
+      "closedAt": "2026-06-12T09:00:00Z",
+      "surveyEligible": false,
+      "version": 4
+    }
+  ],
+  "page": {
+    "number": 1,
+    "size": 5,
+    "totalElements": 8,
+    "totalPages": 2,
+    "estimated": false
+  },
+  "_links": {
+    "self": "/api/v1/portal/service-history?page=1&size=5",
+    "next": null,
+    "prev": "/api/v1/portal/service-history?page=0&size=5"
+  }
+}

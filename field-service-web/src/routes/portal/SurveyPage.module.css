@@ -1,0 +1,198 @@
+/* SurveyPage — token-only styles */
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--spacing-6) var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* ── Card ──────────────────────────────────────────────────────────────────── */
+
+.card {
+  padding: var(--spacing-6);
+}
+
+.cardHeading {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-3) 0;
+}
+
+.cardBody {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-4) 0;
+  line-height: var(--leading-relaxed);
+}
+
+/* ── Already-answered outcome DL ────────────────────────────────────────────── */
+
+.outcomeDl {
+  margin: 0 0 var(--spacing-4) 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.outcomeDlItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.outcomeDt {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.outcomeDd {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* ── Form ──────────────────────────────────────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.optionalLabel {
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.optionalHint {
+  font-size: var(--text-sm);
+  font-weight: var(--font-normal);
+  color: var(--color-text-secondary);
+}
+
+/* ── Comment textarea ──────────────────────────────────────────────────────── */
+
+.commentLabel {
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.commentTextarea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: var(--text-base);
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.commentTextarea:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-accent-500));
+  outline-offset: 2px;
+}
+
+.commentTextarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+[data-appearance='dark'] .commentTextarea {
+  border-color: var(--color-neutral-600);
+  background-color: var(--color-surface-raised);
+}
+
+.piiNotice {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--leading-relaxed);
+}
+
+.charCount {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  text-align: right;
+  margin: 0;
+}
+
+/* ── Errors ────────────────────────────────────────────────────────────────── */
+
+.fieldError {
+  font-size: var(--text-sm);
+  color: var(--color-danger-600, #dc2626);
+  margin: 0;
+}
+
+.serverError {
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-danger-50, #fef2f2);
+  border: 1px solid var(--color-danger-200, #fecaca);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--color-danger-700, #b91c1c);
+}
+
+[data-appearance='dark'] .serverError {
+  background-color: var(--color-danger-950, #450a0a);
+  border-color: var(--color-danger-800, #991b1b);
+  color: var(--color-danger-200, #fecaca);
+}
+
+/* ── Form actions ──────────────────────────────────────────────────────────── */
+
+.formActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+/* ── Links ─────────────────────────────────────────────────────────────────── */
+
+.cancelLink,
+.backLink {
+  font-size: var(--text-sm);
+  color: var(--color-accent-600);
+  text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cancelLink:hover,
+.backLink:hover {
+  text-decoration: underline;
+  color: var(--color-accent-700);
+}
+
+.cancelLink:focus-visible,
+.backLink:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-accent-500));
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

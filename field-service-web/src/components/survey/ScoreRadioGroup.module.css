@@ -1,0 +1,87 @@
+/* ScoreRadioGroup — accessible 1-to-N radio score control */
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.options {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--spacing-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+  position: relative;
+  background-color: var(--color-surface-raised);
+}
+
+.option:hover:not(.optionDisabled) {
+  border-color: var(--color-accent-500);
+  background-color: var(--color-surface-hover);
+}
+
+.optionSelected {
+  border-color: var(--color-accent-600, var(--color-accent-500));
+  background-color: var(--color-accent-50, var(--color-surface-hover));
+}
+
+.optionDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Visually hide the radio input but keep it accessible */
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Show focus ring on the label when radio has focus */
+.option:focus-within {
+  outline: 2px solid var(--color-focus-ring, var(--color-accent-500));
+  outline-offset: 2px;
+}
+
+.scoreNum {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.optionSelected .scoreNum {
+  color: var(--color-accent-700, var(--color-accent-600, var(--color-text-primary)));
+}
+
+.legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  padding: 0 var(--spacing-1);
+}
+
+.legendLow,
+.legendHigh {
+  max-width: 40%;
+}
+
+.legendHigh {
+  text-align: right;
+}

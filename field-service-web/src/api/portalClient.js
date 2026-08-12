@@ -2,10 +2,13 @@
  * Portal API client — typed wrappers for the customer portal endpoints.
  *
  * Endpoints:
- *   GET  /api/v1/portal/sites                         — sites scoped to caller's account
- *   GET  /api/v1/portal/sites/:siteId/assets          — assets at a site
- *   POST /api/v1/portal/service-requests              — submit a service request
- *   GET  /api/v1/portal/service-requests/:id/status   — conditional-GET status
+ *   GET  /api/v1/portal/sites                               — sites scoped to caller's account
+ *   GET  /api/v1/portal/sites/:siteId/assets                — assets at a site
+ *   POST /api/v1/portal/service-requests                    — submit a service request
+ *   GET  /api/v1/portal/service-requests/:id/status         — conditional-GET status
+ *   GET  /api/v1/portal/service-history                     — paginated closed history
+ *   GET  /api/v1/portal/service-requests/:id/survey         — survey eligibility + state
+ *   POST /api/v1/portal/service-requests/:id/survey         — submit satisfaction survey
  *
  * ETag / 304: apiFetch returns { _304: true, etag } on 304 — callers preserve
  * cached data and skip re-renders (forwarded to TanStack Query via usePortalQuery).
@@ -131,4 +134,102 @@ export async function fetchServiceRequestStatus(requestId, { signal, ifNoneMatch
     },
   );
   return result;
+}
+
+// ─── Service History ──────────────────────────────────────────────────────────
+
+/** Maximum page size the server accepts. */
+export const SERVICE_HISTORY_PAGE_SIZE = 50;
+
+/**
+ * @typedef {{
+ *   id: string,
+ *   reference: string,
+ *   siteName: string,
+ *   statusLabel: string,
+ *   statusGroup: 'open' | 'closed',
+ *   priority: string,
+ *   submittedAt: string,
+ *   resolvedAt: string | null,
+ *   closedAt: string | null,
+ *   surveyEligible: boolean,
+ *   version: number,
+ * }} ServiceHistoryItem
+ *
+ * @typedef {{
+ *   data: ServiceHistoryItem[],
+ *   page: { number: number, size: number, totalElements: number, totalPages: number, estimated: boolean },
+ *   _links: { self: string, next: string | null, prev: string | null },
+ * }} ServiceHistoryPage
+ */
+
+/**
+ * Fetches a page of the customer's closed service-request history.
+ *
+ * @param {{ url?: string | null, signal?: AbortSignal, ifNoneMatch?: string | null }} [opts]
+ *   `url` — full URL for the page to fetch (taken from _links.next / _links.prev).
+ *         When absent the server returns page 0 with default size.
+ * @returns {Promise<ServiceHistoryPage | { _304: true, etag?: string }>}
+ */
+export async function fetchServiceHistory({ url, signal, ifNoneMatch } = {}) {
+  const path = url
+    ? url.replace(/^\/api\/v1/, '')
+    : `/portal/service-history?size=${SERVICE_HISTORY_PAGE_SIZE}`;
+  return apiFetch(path, {
+    signal,
+    headers: ifNoneMatch ? { 'If-None-Match': ifNoneMatch } : undefined,
+  });
+}
+
+// ─── Survey ───────────────────────────────────────────────────────────────────
+
+/**
+ * @typedef {{
+ *   score: number,
+ *   nps: number | null,
+ *   comment: string | null,
+ *   submittedAt: string,
+ * }} SurveyOutcome
+ *
+ * @typedef {{
+ *   workOrderId: string,
+ *   reference: string,
+ *   windowExpiresAt: string,
+ *   alreadyAnswered: boolean,
+ *   outcome: SurveyOutcome | null,
+ * }} SurveyState
+ *
+ * @typedef {{ score: number, nps?: number | null, comment?: string | null }} SurveySubmission
+ */
+
+/**
+ * Fetches survey eligibility and current state for a service request.
+ *
+ * @param {string} requestId
+ * @param {{ signal?: AbortSignal }} [opts]
+ * @returns {Promise<SurveyState>}
+ */
+export async function fetchSurveyState(requestId, { signal } = {}) {
+  return apiFetch(`/portal/service-requests/${encodeURIComponent(requestId)}/survey`, { signal });
+}
+
+/**
+ * Submits a satisfaction survey for a closed service request.
+ *
+ * @param {string} requestId
+ * @param {SurveySubmission} body
+ * @param {string} idempotencyKey  UUID generated once per form instance
+ * @param {{ signal?: AbortSignal }} [opts]
+ * @returns {Promise<{ workOrderId: string, score: number, nps: number | null, submittedAt: string }>}
+ */
+export async function submitSurvey(requestId, body, idempotencyKey, { signal } = {}) {
+  return apiFetch(`/portal/service-requests/${encodeURIComponent(requestId)}/survey`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    signal,
+    headers: {
+      'Idempotency-Key': idempotencyKey,
+      'Content-Type': 'application/json',
+    },
+  });
 }

@@ -1,0 +1,15 @@
+{
+  "data": [],
+  "page": {
+    "number": 0,
+    "size": 20,
+    "totalElements": 0,
+    "totalPages": 0,
+    "estimated": false
+  },
+  "_links": {
+    "self": "/api/v1/portal/service-history?page=0&size=20",
+    "next": null,
+    "prev": null
+  }
+}

@@ -532,6 +532,49 @@ const DEFAULT_ROUTES = {
     body: { id: 'wo-tech-001', state: 'IN_PROGRESS', version: 2 },
   },
 
+  // ── Portal: service history ──────────────────────────────────────────────
+
+  // Service history — page 0 (happy path, 8 total records across 2 pages)
+  'GET:/api/v1/portal/service-history': {
+    status: 200,
+    body: {
+      data: [
+        { id: 'srh-001', reference: 'WO-P100', siteName: 'Northgate Office',  statusLabel: 'Completed', statusGroup: 'closed', priority: 'High',   submittedAt: '2026-07-10T09:00:00Z', resolvedAt: '2026-07-10T14:30:00Z', closedAt: '2026-07-11T09:00:00Z', surveyEligible: true,  version: 5 },
+        { id: 'srh-002', reference: 'WO-P101', siteName: 'Southside Warehouse', statusLabel: 'In progress', statusGroup: 'open', priority: 'Urgent', submittedAt: '2026-07-12T11:00:00Z', resolvedAt: null, closedAt: null, surveyEligible: false, version: 2 },
+        { id: 'srh-003', reference: 'WO-P102', siteName: 'Northgate Office',  statusLabel: 'Scheduled',   statusGroup: 'open', priority: 'Normal', submittedAt: '2026-07-14T08:00:00Z', resolvedAt: null, closedAt: null, surveyEligible: false, version: 1 },
+        { id: 'srh-004', reference: 'WO-P103', siteName: 'Southside Warehouse', statusLabel: 'Completed', statusGroup: 'closed', priority: 'Normal', submittedAt: '2026-07-01T10:00:00Z', resolvedAt: '2026-07-02T13:00:00Z', closedAt: '2026-07-03T10:00:00Z', surveyEligible: false, version: 6 },
+        { id: 'srh-005', reference: 'WO-P104', siteName: 'Northgate Office',  statusLabel: 'Completed', statusGroup: 'closed', priority: 'High',   submittedAt: '2026-06-28T09:30:00Z', resolvedAt: '2026-06-28T17:00:00Z', closedAt: '2026-06-29T09:00:00Z', surveyEligible: false, version: 4 },
+      ],
+      page: { number: 0, size: 5, totalElements: 8, totalPages: 2, estimated: false },
+      _links: { self: '/api/v1/portal/service-history?page=0&size=5', next: '/api/v1/portal/service-history?page=1&size=5', prev: null },
+    },
+    headers: { 'ETag': '"history-etag-p0-v1"' },
+  },
+
+  // Survey — answerable (srh-001)
+  'GET:/api/v1/portal/service-requests/srh-001/survey': {
+    status: 200,
+    body: { workOrderId: 'srh-001', reference: 'WO-P100', windowExpiresAt: '2026-09-15T23:59:00Z', alreadyAnswered: false, outcome: null },
+  },
+
+  // Survey submit — 201 Created
+  'POST:/api/v1/portal/service-requests/srh-001/survey': {
+    status: 201,
+    body: { workOrderId: 'srh-001', score: 4, nps: null, submittedAt: '2026-08-12T10:00:00Z' },
+  },
+
+  // Survey — already answered (srh-004)
+  'GET:/api/v1/portal/service-requests/srh-004/survey': {
+    status: 200,
+    body: { workOrderId: 'srh-004', reference: 'WO-P103', windowExpiresAt: '2026-07-10T23:59:00Z', alreadyAnswered: true, outcome: { score: 4, nps: 8, comment: null, submittedAt: '2026-07-04T10:15:00Z' } },
+  },
+
+  // Survey — expired window (srh-005)
+  'GET:/api/v1/portal/service-requests/srh-005/survey': {
+    status: 200,
+    body: { workOrderId: 'srh-005', reference: 'WO-P104', windowExpiresAt: '2026-07-06T23:59:00Z', alreadyAnswered: false, outcome: null },
+  },
+
   // ── Portal: customer self-service ────────────────────────────────────────
 
   // Customer's sites list

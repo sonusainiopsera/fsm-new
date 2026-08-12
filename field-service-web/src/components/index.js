@@ -1,4 +1,6 @@
 export { Button } from './Button/Button.jsx';
+export { LinkPager } from './pagination/LinkPager.jsx';
+export { ScoreRadioGroup } from './survey/ScoreRadioGroup.jsx';
 export { PageHeader } from './PageHeader/PageHeader.jsx';
 export { KpiCard } from './KpiCard/KpiCard.jsx';
 export { DataTable } from './DataTable/DataTable.jsx';

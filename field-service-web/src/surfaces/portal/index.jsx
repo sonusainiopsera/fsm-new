@@ -13,6 +13,8 @@ import { LoadingState } from '../../components/index.js';
 
 const LazyNewServiceRequestPage = lazy(() => import('../../routes/portal/NewServiceRequestPage.jsx'));
 const LazyServiceRequestStatusPage = lazy(() => import('../../routes/portal/ServiceRequestStatusPage.jsx'));
+const LazyServiceHistoryPage = lazy(() => import('../../routes/portal/ServiceHistoryPage.jsx'));
+const LazySurveyPage = lazy(() => import('../../routes/portal/SurveyPage.jsx'));
 
 function PortalSuspense({ children }) {
   return (
@@ -38,6 +40,22 @@ export default function PortalSurface() {
         element={
           <PortalSuspense>
             <LazyServiceRequestStatusPage />
+          </PortalSuspense>
+        }
+      />
+      <Route
+        path="history"
+        element={
+          <PortalSuspense>
+            <LazyServiceHistoryPage />
+          </PortalSuspense>
+        }
+      />
+      <Route
+        path="survey/:requestId"
+        element={
+          <PortalSuspense>
+            <LazySurveyPage />
           </PortalSuspense>
         }
       />
