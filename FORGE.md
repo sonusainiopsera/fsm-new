@@ -518,3 +518,10 @@
 - **Files:** 13 (+1693/-8)
 - **Duration:** 766ss
 - **Approach:** Implemented two customer portal screens: NewServiceRequestPage (guided submission form) and ServiceRequestStatusPage (live polling status view), connected via React Router sub-routing in the existing LazyPortal surface. The form uses useMutation with a stable per-instance Idempotency-Key (crypto.randomUUID in a useRef), scoped site/asset selects, live character counter, and inline server field error mapping. The status page uses usePortalQuery (60s conditional-GET polling) with FreshnessBanner for degraded/not-connected states and StatusTimeline rendering only API-provided plain-language labels. New shared components FreshnessBanner and StatusTimeline were added with aria-live regions and WCAG 2.1 AA touch targets. Portal API client wrappers, MSW mock handler entries, and RTL test suites (happy path, validation, server errors, 304 no-flash, forbidden-string assertions) were all committed.
+
+## WO-178: User Story: WO-178 - Copilot streaming endpoint with advisory basis and refusal
+- **Status:** completed
+- **Commit:** `c3ad7bb`
+- **Files:** 12 (+1295/-4)
+- **Duration:** 1397ss
+- **Approach:** Implemented the copilot streaming endpoint as a Spring SSE controller returning an SseEmitter. The controller validates the request and acquires a per-user concurrent stream slot before spawning a virtual thread to run the blocking pipeline. CopilotService orchestrates: (1) grounding context retrieval with row-level AccessScope predicates, (2) sufficiency evaluation — INSUFFICIENT grounding short-circuits to a no_grounded_basis terminal event with zero provider calls enforcing the safety invariant, (3) PII redaction and prompt assembly, (4) AiGatewayPort.completeStreaming() with AiStreamCallback emitting typed SSE events. All token events carry advisory=true and a basis array. The stream-ticket security filter chain was extended to cover the copilot path. A no-op AiInteractionLogService stub follows the @ConditionalOnMissingBean pattern.

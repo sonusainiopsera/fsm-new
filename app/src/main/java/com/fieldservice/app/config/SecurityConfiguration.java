@@ -68,7 +68,10 @@ public class SecurityConfiguration {
     }
 
     /**
-     * Filter chain for SSE stream connections at {@code /api/v1/streams/**}.
+     * Filter chain for SSE stream connections.
+     *
+     * <p>Covers {@code /api/v1/streams/**} (general SSE streams) and
+     * {@code /api/v1/work-orders/*/copilot/stream} (technician AI copilot).
      *
      * <p>Authenticated exclusively by single-use stream tickets (query parameter) — no bearer
      * header, no cookie. The filter is scoped to this chain only so query-parameter credentials
@@ -85,7 +88,7 @@ public class SecurityConfiguration {
         StreamTicketAuthFilter ticketFilter = new StreamTicketAuthFilter(streamTicketService);
 
         http
-            .securityMatcher("/api/v1/streams/**")
+            .securityMatcher("/api/v1/streams/**", "/api/v1/work-orders/*/copilot/stream")
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(ticketFilter, UsernamePasswordAuthenticationFilter.class)
