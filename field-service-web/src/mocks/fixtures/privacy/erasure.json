@@ -1,0 +1,11 @@
+{
+  "erasureId": "e1000000-0000-7000-8000-000000000001",
+  "subjectType": "CUSTOMER",
+  "subjectId": "cust-222",
+  "state": "KEY_DESTROYED",
+  "initiatedAt": "2026-08-12T10:00:00Z",
+  "completedAt": "2026-08-12T10:00:03Z",
+  "dsarRequestId": "d1000000-0000-7000-8000-000000000002",
+  "verificationScope": "LIVE_TABLES",
+  "tombstoneId": "t1000000-0000-7000-8000-000000000001"
+}

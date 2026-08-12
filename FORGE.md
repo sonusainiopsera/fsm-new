@@ -462,3 +462,10 @@
 - **Files:** 22 (+1954/-0)
 - **Duration:** 1114ss
 - **Approach:** Implemented cryptographic erasure and field-level rectification for GDPR subject rights. Rectification routes corrections through per-module SubjectDataRectifier SPIs (never via direct privacy-module table updates), enforcing the classification registry allow-list (CONFIDENTIAL/RESTRICTED only) and VERIFIED DSAR authorisation. Erasure destroys the AES-256-GCM envelope key via SubjectKeyManager.destroy(), leaving Envers *_AUD rows intact but permanently unreadable. An append-only subject_erasure tombstone records subject reference, key identifier, actor, section row counts and verification results with zero PII values. Post-erasure verification runs two pluggable ErasureVerificationScope beans: live_tables (JDBC plaintext probe) and envers_audit (asserts AUD row count > 0 to detect illegal deletion). Idempotency is handled via a unique partial index on (subject_type, subject_id) WHERE outcome='COMPLETED' and an early-return path before key destruction.
+
+## WO-194: User Story: WO-194 - Privacy administration console for classification retention DSAR
+- **Status:** completed
+- **Commit:** `9c6fd28`
+- **Files:** 25 (+2873/-1)
+- **Duration:** 821ss
+- **Approach:** Implemented the three privacy administration screens (Classification Registry, Retention Schedule, DSAR Queue) plus the DSAR Request Detail page and ErasureConfirmDialog as React components, each gated behind PRIVACY_ADMIN/ADMIN role checks via PermissionDeniedState. All API communication is via a new privacyClient.js and TanStack Query hooks (useClassifications, useRetentionPolicies, useDsarRequests, useSubjectRights). Visual values use exclusively var(--token-*) CSS custom properties. The destructive erasure flow requires typing 'CONFIRM_ERASURE' before the submit button is enabled. Export URLs are fetched fresh per click with gcTime:0. Unratified retention rows carry an 'Indicative placeholder' label. At-risk countdown treatment is driven solely by the server-supplied atRisk flag. Routes were lazy-loaded and wired into the admin surface; PRIVACY_ADMIN was added to KNOWN_ROLES and nav manifest.

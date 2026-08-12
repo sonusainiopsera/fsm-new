@@ -1,0 +1,11 @@
+{
+  "policyId": "r1000000-0000-7000-8000-000000000003",
+  "effectiveDate": "2026-08-12T00:00:00Z",
+  "rowsAffected": 142,
+  "breakdownByEntityType": [
+    { "entityType": "WorkOrder", "count": 98 },
+    { "entityType": "WorkOrderLine", "count": 44 }
+  ],
+  "estimatedDurationMs": 2800,
+  "warning": null
+}

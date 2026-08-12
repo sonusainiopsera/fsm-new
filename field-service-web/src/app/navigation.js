@@ -150,6 +150,31 @@ export const NAV_MANIFEST = [
     allowedRoles: ['ADMIN'],
     surface: SURFACES.DISPATCH,
   },
+  // Privacy administration — PRIVACY_ADMIN and ADMIN only
+  {
+    key: 'privacy-classifications',
+    path: '/admin/privacy/classifications',
+    label: 'Classification Registry',
+    icon: 'tag',
+    allowedRoles: ['PRIVACY_ADMIN', 'ADMIN'],
+    surface: SURFACES.ADMIN,
+  },
+  {
+    key: 'privacy-retention',
+    path: '/admin/privacy/retention',
+    label: 'Retention Schedule',
+    icon: 'clock',
+    allowedRoles: ['PRIVACY_ADMIN', 'ADMIN'],
+    surface: SURFACES.ADMIN,
+  },
+  {
+    key: 'privacy-dsar',
+    path: '/admin/privacy/dsar',
+    label: 'DSAR Queue',
+    icon: 'inbox',
+    allowedRoles: ['PRIVACY_ADMIN', 'ADMIN'],
+    surface: SURFACES.ADMIN,
+  },
 ]
 
 /**
@@ -175,7 +200,7 @@ export function filterNavForRoles(roles) {
 
   // Warn (but do not throw) for unrecognised role values so future roles don't
   // crash the shell while the frontend lags a deploy.
-  const KNOWN_ROLES = new Set(['DISPATCHER', 'TECHNICIAN', 'MANAGER', 'CUSTOMER', 'ADMIN'])
+  const KNOWN_ROLES = new Set(['DISPATCHER', 'TECHNICIAN', 'MANAGER', 'CUSTOMER', 'ADMIN', 'PRIVACY_ADMIN'])
   roles.forEach(r => {
     if (!KNOWN_ROLES.has(r) && typeof console !== 'undefined') {
       console.warn(`[navigation] Unrecognised role "${r}" — skipping.`)

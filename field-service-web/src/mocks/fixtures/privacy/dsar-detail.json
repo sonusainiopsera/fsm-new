@@ -1,0 +1,29 @@
+{
+  "id": "d1000000-0000-7000-8000-000000000001",
+  "requestType": "ACCESS",
+  "subjectType": "CUSTOMER",
+  "subjectId": "cust-111",
+  "state": "IN_PROGRESS",
+  "submittedAt": "2026-07-14T09:00:00Z",
+  "dueAt": "2026-08-13T09:00:00Z",
+  "atRisk": true,
+  "identityVerification": {
+    "verifiedAt": "2026-07-15T11:30:00Z",
+    "method": "DOCUMENT_CHECK"
+  },
+  "stateHistory": [
+    { "state": "RECEIVED", "at": "2026-07-14T09:00:00Z", "actor": "system" },
+    { "state": "IDENTITY_PENDING", "at": "2026-07-14T09:00:01Z", "actor": "system" },
+    { "state": "VERIFIED", "at": "2026-07-15T11:30:00Z", "actor": "privacy-admin@example.com" },
+    { "state": "IN_PROGRESS", "at": "2026-07-15T11:30:01Z", "actor": "system" }
+  ],
+  "exportManifest": {
+    "generatedAt": "2026-07-15T12:00:00Z",
+    "sections": [
+      { "name": "Customer Profile", "rowCount": 1 },
+      { "name": "Work Orders", "rowCount": 14 },
+      { "name": "Service Notes", "rowCount": 32 },
+      { "name": "Audit Log", "rowCount": 87 }
+    ]
+  }
+}

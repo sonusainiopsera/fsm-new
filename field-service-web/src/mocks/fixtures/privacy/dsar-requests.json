@@ -1,0 +1,54 @@
+{
+  "data": [
+    {
+      "id": "d1000000-0000-7000-8000-000000000001",
+      "requestType": "ACCESS",
+      "subjectType": "CUSTOMER",
+      "subjectId": "cust-111",
+      "state": "IN_PROGRESS",
+      "submittedAt": "2026-07-14T09:00:00Z",
+      "dueAt": "2026-08-13T09:00:00Z",
+      "atRisk": true
+    },
+    {
+      "id": "d1000000-0000-7000-8000-000000000002",
+      "requestType": "ERASURE",
+      "subjectType": "CUSTOMER",
+      "subjectId": "cust-222",
+      "state": "VERIFIED",
+      "submittedAt": "2026-07-01T14:30:00Z",
+      "dueAt": "2026-07-31T14:30:00Z",
+      "atRisk": false
+    },
+    {
+      "id": "d1000000-0000-7000-8000-000000000003",
+      "requestType": "PORTABILITY",
+      "subjectType": "CUSTOMER",
+      "subjectId": "cust-333",
+      "state": "RECEIVED",
+      "submittedAt": "2026-08-10T08:15:00Z",
+      "dueAt": "2026-09-09T08:15:00Z",
+      "atRisk": false
+    },
+    {
+      "id": "d1000000-0000-7000-8000-000000000004",
+      "requestType": "ACCESS",
+      "subjectType": "CUSTOMER",
+      "subjectId": "cust-444",
+      "state": "FULFILLED",
+      "submittedAt": "2026-06-01T10:00:00Z",
+      "dueAt": "2026-07-01T10:00:00Z",
+      "atRisk": false
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 50,
+    "totalElements": 4,
+    "totalPages": 1
+  },
+  "links": {
+    "next": null,
+    "prev": null
+  }
+}

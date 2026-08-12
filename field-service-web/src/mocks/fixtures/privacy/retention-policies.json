@@ -1,0 +1,54 @@
+{
+  "data": [
+    {
+      "id": "r1000000-0000-7000-8000-000000000001",
+      "module": "identity",
+      "entityName": "Customer",
+      "retentionPeriodDays": 2555,
+      "legalBasis": "CONTRACT",
+      "ratified": true,
+      "ratifiedAt": "2024-01-15T10:00:00Z",
+      "version": 0
+    },
+    {
+      "id": "r1000000-0000-7000-8000-000000000002",
+      "module": "identity",
+      "entityName": "Customer",
+      "retentionPeriodDays": 3650,
+      "legalBasis": "LEGAL_OBLIGATION",
+      "ratified": true,
+      "ratifiedAt": "2024-01-15T10:00:00Z",
+      "version": 0
+    },
+    {
+      "id": "r1000000-0000-7000-8000-000000000003",
+      "module": "workorder",
+      "entityName": "WorkOrder",
+      "retentionPeriodDays": 1825,
+      "legalBasis": "CONTRACT",
+      "ratified": false,
+      "ratifiedAt": null,
+      "version": 0
+    },
+    {
+      "id": "r1000000-0000-7000-8000-000000000004",
+      "module": "workorder",
+      "entityName": "WorkOrderNote",
+      "retentionPeriodDays": 730,
+      "legalBasis": "LEGITIMATE_INTERESTS",
+      "ratified": false,
+      "ratifiedAt": null,
+      "version": 0
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 50,
+    "totalElements": 4,
+    "totalPages": 1
+  },
+  "links": {
+    "next": null,
+    "prev": null
+  }
+}

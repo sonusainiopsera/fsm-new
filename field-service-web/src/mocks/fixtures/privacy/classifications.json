@@ -1,0 +1,59 @@
+{
+  "data": [
+    {
+      "id": "c1000000-0000-7000-8000-000000000001",
+      "module": "identity",
+      "entityName": "Customer",
+      "fieldName": "name",
+      "tier": "CONFIDENTIAL",
+      "handlingNotes": "Business name — rectifiable on verified request",
+      "version": 0
+    },
+    {
+      "id": "c1000000-0000-7000-8000-000000000002",
+      "module": "identity",
+      "entityName": "Customer",
+      "fieldName": "primaryContactEmail",
+      "tier": "RESTRICTED",
+      "handlingNotes": "Direct contact — encrypted at rest",
+      "version": 0
+    },
+    {
+      "id": "c1000000-0000-7000-8000-000000000003",
+      "module": "identity",
+      "entityName": "Customer",
+      "fieldName": "primaryContactPhone",
+      "tier": "RESTRICTED",
+      "handlingNotes": null,
+      "version": 0
+    },
+    {
+      "id": "c1000000-0000-7000-8000-000000000004",
+      "module": "identity",
+      "entityName": "Customer",
+      "fieldName": "billingAddress",
+      "tier": "CONFIDENTIAL",
+      "handlingNotes": "Postal address — do not disclose to third parties",
+      "version": 0
+    },
+    {
+      "id": "c1000000-0000-7000-8000-000000000005",
+      "module": "identity",
+      "entityName": "Customer",
+      "fieldName": "accountCode",
+      "tier": "INTERNAL",
+      "handlingNotes": "Internal reference — not personal data",
+      "version": 0
+    }
+  ],
+  "page": {
+    "number": 0,
+    "size": 50,
+    "totalElements": 5,
+    "totalPages": 1
+  },
+  "links": {
+    "next": null,
+    "prev": null
+  }
+}
