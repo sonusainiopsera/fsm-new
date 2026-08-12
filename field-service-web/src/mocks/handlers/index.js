@@ -361,6 +361,52 @@ const DEFAULT_ROUTES = {
     },
   },
 
+  // ── SLA alerts & breach attribution ─────────────────────────────────────
+
+  'GET:/api/v1/sla/open-alerts': {
+    status: 200,
+    body: {
+      data: [
+        {
+          workOrderId: 'wo-001',
+          reference:   'WO-001',
+          riskState:   'at-risk',
+          priority:    'HIGH',
+          minutesRemaining: 45,
+          triggerReason:    'Travel delay projection',
+          projectionBasis:  'Current traffic',
+        },
+        {
+          workOrderId: 'wo-sla-002',
+          reference:   'WO-SLA-002',
+          riskState:   'breached',
+          priority:    'URGENT',
+          minutesRemaining: -12,
+          triggerReason:    'Parts not on van',
+          projectionBasis:  'Parts availability',
+        },
+      ],
+    },
+  },
+
+  'GET:/api/v1/sla/breach-reason-codes': {
+    status: 200,
+    body: {
+      data: [
+        { code: 'TRAFFIC',          displayName: 'Traffic delay',           description: 'Unforeseeable traffic delay' },
+        { code: 'PARTS_UNAVAILABLE', displayName: 'Parts unavailable',      description: 'Required parts not in stock' },
+        { code: 'ACCESS_DENIED',    displayName: 'Site access denied',      description: 'Technician denied site access' },
+        { code: 'ESCALATION',       displayName: 'Scope escalation',        description: 'Job scope was larger than estimated' },
+        { code: 'OTHER',            displayName: 'Other',                   description: null },
+      ],
+    },
+  },
+
+  'POST:/api/v1/work-orders/wo-sla-002/breach-reason': {
+    status: 201,
+    body: { workOrderId: 'wo-sla-002', reasonCode: 'PARTS_UNAVAILABLE', attributedAt: new Date().toISOString() },
+  },
+
   // SLA policy by priority
   'GET:/api/v1/sla-policies/by-priority/URGENT': {
     status: 200,

@@ -1,0 +1,90 @@
+.indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full, 9999px);
+  font-size: var(--fs-xs, 0.75rem);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  border: 1px solid transparent;
+  min-height: 28px;
+}
+
+/* ── Status variants ──────────────────────────────────────────────────────── */
+
+.status-live {
+  background: var(--color-success-subtle);
+  color: var(--color-success-text);
+  border-color: var(--color-success-muted);
+}
+
+.status-live .dot {
+  animation: pulse-live 2s ease-in-out infinite;
+}
+
+.status-reconnecting {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border-subtle);
+}
+
+.status-reconnecting .dot {
+  animation: pulse-reconnecting 1s ease-in-out infinite;
+}
+
+.status-stale {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning-text);
+  border-color: var(--color-warning-muted);
+}
+
+/* ── Elements ────────────────────────────────────────────────────────────── */
+
+.dot {
+  flex-shrink: 0;
+  font-size: var(--fs-xs, 0.75rem);
+  line-height: 1;
+}
+
+.label {
+  flex-shrink: 0;
+}
+
+.refreshBtn {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-control);
+  color: inherit;
+  font-size: var(--fs-md);
+  min-width: 28px;  /* slightly larger for touch */
+  min-height: 28px;
+  margin-inline-start: var(--space-1);
+  transition: background var(--duration-micro) var(--easing-standard);
+}
+
+.refreshBtn:hover {
+  background: var(--color-warning-muted);
+}
+
+.refreshBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--elevation-focus-ring, 0 0 0 2px var(--color-accent-base));
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+@keyframes pulse-reconnecting {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1; }
+}

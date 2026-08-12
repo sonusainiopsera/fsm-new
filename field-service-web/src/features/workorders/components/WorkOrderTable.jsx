@@ -16,6 +16,7 @@
 import React from 'react';
 
 import { DataTable, Chip } from '../../../components/index.js';
+import { SlaRiskChip } from '../../sla/SlaRiskChip.jsx';
 
 import styles from './WorkOrderTable.module.css';
 
@@ -49,20 +50,6 @@ function DeadlineCell({ deadline, label }) {
   );
 }
 
-/**
- * At-risk badge — icon + text for non-colour-only encoding (WCAG 2.1 AA, BR-34).
- *
- * @param {{ atRisk: boolean }} props
- */
-function AtRiskBadge({ atRisk }) {
-  if (!atRisk) return <span className={styles.noRisk} aria-label="On track">—</span>;
-  return (
-    <span className={styles.atRisk} role="status" aria-label="At risk">
-      <span aria-hidden="true">⬥</span>
-      {' '}At risk
-    </span>
-  );
-}
 
 /** @type {import('../../../components/DataTable/DataTable.jsx').ColumnDef[]} */
 const COLUMNS = [
@@ -116,9 +103,15 @@ const COLUMNS = [
     render: (v) => <DeadlineCell deadline={v} label="resolution" />,
   },
   {
-    key: 'atRisk',
+    key: 'slaRiskState',
     header: 'Risk',
-    render: (v) => <AtRiskBadge atRisk={!!v} />,
+    render: (v, row) => (
+      <SlaRiskChip
+        riskState={v ?? (row.atRisk ? 'at-risk' : 'healthy')}
+        minutesRemaining={row.minutesRemaining ?? null}
+        stale={row._slaStale ?? false}
+      />
+    ),
   },
 ];
 
@@ -130,13 +123,21 @@ const COLUMNS = [
  *   onRowClick: (row: object) => void,
  *   onSort: (sort: import('../api/useWorkOrderSearch.js').SortState) => void,
  *   emptyState?: React.ReactNode,
+ *   streamStatus?: import('../../sla/useSlaAlertStream.js').StreamStatus,
  * }} props
  */
-export function WorkOrderTable({ data, sort, selectedId, onRowClick, onSort, emptyState }) {
+export function WorkOrderTable({ data, sort, selectedId, onRowClick, onSort, emptyState, streamStatus }) {
+  const slaStale = streamStatus === 'stale';
+
+  // Annotate each row with staleness flag for the risk chip
+  const annotatedData = slaStale
+    ? data.map((row) => ({ ...row, _slaStale: true }))
+    : data;
+
   return (
     <DataTable
       columns={COLUMNS}
-      data={data}
+      data={annotatedData}
       rowKey={(row) => row.id}
       selectedKey={selectedId}
       onRowClick={onRowClick}

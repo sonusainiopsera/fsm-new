@@ -2,6 +2,7 @@ import React from 'react';
 import { useAppearance } from '../../appearance/AppearanceContext.js';
 import { useAuth } from '../AuthContext.js';
 import { useNetworkStatus } from '../useNetworkStatus.js';
+import { LiveStreamIndicator } from './LiveStreamIndicator.jsx';
 
 import styles from './TopBar.module.css';
 
@@ -17,7 +18,15 @@ import styles from './TopBar.module.css';
  *   isDrawerMode?: boolean,
  * }} props
  */
-export function TopBar({ onMenuToggle, isDrawerMode = false }) {
+/**
+ * @param {{
+ *   onMenuToggle?: () => void,
+ *   isDrawerMode?: boolean,
+ *   streamStatus?: import('../../features/sla/useSlaAlertStream.js').StreamStatus,
+ *   onStreamRefresh?: () => void,
+ * }} props
+ */
+export function TopBar({ onMenuToggle, isDrawerMode = false, streamStatus, onStreamRefresh }) {
   const { appearance, toggleAppearance } = useAppearance();
   const { token, clearToken, isAuthenticated } = useAuth();
   const { isOffline } = useNetworkStatus();
@@ -45,6 +54,10 @@ export function TopBar({ onMenuToggle, isDrawerMode = false }) {
       </div>
 
       <div className={styles.end}>
+        {streamStatus && (
+          <LiveStreamIndicator status={streamStatus} onRefresh={onStreamRefresh} />
+        )}
+
         {isOffline && (
           <div
             className={styles.offlineBadge}

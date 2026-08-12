@@ -33,6 +33,9 @@ import { useWorkOrderSearch } from './api/useWorkOrderSearch.js';
 import { FilterBar } from './components/FilterBar.jsx';
 import { WorkOrderTable } from './components/WorkOrderTable.jsx';
 import { WorkOrderDetailDrawer } from './components/DetailDrawer.jsx';
+import { useSlaAlertStream } from '../sla/useSlaAlertStream.js';
+import { AlertCentre } from '../sla/AlertCentre.jsx';
+import { LiveStreamIndicator } from '../../app/TopBar/LiveStreamIndicator.jsx';
 
 import styles from './WorkOrderBoardPage.module.css';
 
@@ -43,6 +46,8 @@ import styles from './WorkOrderBoardPage.module.css';
 export default function WorkOrderBoardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isOnline } = useNetworkStatus();
+
+  const { status: streamStatus, refresh: refreshStream } = useSlaAlertStream();
 
   const {
     data,
@@ -108,6 +113,18 @@ export default function WorkOrderBoardPage() {
         }
       />
 
+      {/* Live-stream health indicator — always visible when stream is reconnecting or stale */}
+      {streamStatus !== 'live' && (
+        <div className={styles.streamStatus} role="status" aria-live="polite">
+          <LiveStreamIndicator status={streamStatus} onRefresh={refreshStream} />
+          {streamStatus === 'stale' && (
+            <span className={styles.staleNote}>
+              Risk values may be out of date.
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Non-blocking not-connected indicator */}
       {!isOnline && (
         <div className={styles.offlineBanner} role="status" aria-live="polite">
@@ -156,12 +173,18 @@ export default function WorkOrderBoardPage() {
 
       {!isLoading && !isError && data.length > 0 && (
         <>
+          <AlertCentre
+            streamStatus={streamStatus}
+            onNavigate={(id) => openDrawer({ id })}
+          />
+
           <WorkOrderTable
             data={data}
             sort={state.sort}
             selectedId={drawerId}
             onRowClick={openDrawer}
             onSort={setSort}
+            streamStatus={streamStatus}
           />
 
           {pageMeta.totalPages > 1 && (

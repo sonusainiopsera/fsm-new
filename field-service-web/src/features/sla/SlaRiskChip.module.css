@@ -1,0 +1,82 @@
+/* SlaRiskChip — risk state chip component.
+ * All colours are token-driven so light / dark appearances are automatic.
+ * Contrast verified against WCAG 2.1 AA for both appearances.
+ */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full, 9999px);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  min-height: 24px;
+  min-width: 44px;  /* touch target — AC-12 */
+  border: 1px solid transparent;
+  line-height: 1.25;
+}
+
+/* ── Risk states ──────────────────────────────────────────────────────────── */
+
+.state-healthy {
+  background: var(--color-success-subtle);
+  color: var(--color-success-text);
+  border-color: var(--color-success-muted);
+}
+
+.state-at-risk {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning-text);
+  border-color: var(--color-warning-muted);
+}
+
+.state-breached {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger-text);
+  border-color: var(--color-danger-muted);
+}
+
+.state-unknown {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border-subtle);
+}
+
+/* ── Stale / out-of-date affordance ──────────────────────────────────────── */
+
+.stale {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+/* ── Sub-elements ────────────────────────────────────────────────────────── */
+
+.icon {
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.label {
+  flex-shrink: 0;
+}
+
+.time {
+  font-size: var(--fs-xs, 0.75rem);
+  opacity: 0.85;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
+.staleMarker {
+  font-size: var(--fs-xs, 0.75rem);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* ── Dark appearance ─────────────────────────────────────────────────────── */
+/* Token overrides are handled by tokens.dark.css; no extra rules needed here */

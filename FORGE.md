@@ -602,3 +602,10 @@
 - **Files:** 15 (+1443/-0)
 - **Duration:** 1047ss
 - **Approach:** N/A
+
+## WO-147: User Story: WO-147 - Dispatcher SLA risk indicators and alert centre UI
+- **Status:** completed
+- **Commit:** `f3f71c1`
+- **Files:** 17 (+1882/-19)
+- **Duration:** 796ss
+- **Approach:** All SSE lifecycle state is encapsulated in useSlaAlertStream (a self-contained useEffect-based hook), which owns ticket-per-attempt, error-close, capped jittered backoff, Last-Event-ID tracking, heartbeat staleness detection, and TanStack Query debounced invalidation. SlaRiskChip is a single shared component used on board rows, cards, and the alert centre; it encodes state with icon + text + token colour (non-colour-only). AlertCentre fetches open alerts via TanStack Query and sorts by urgency (breached → priority → minutes remaining). BreachReasonDialog fetches server-provided vocabulary, submits with Idempotency-Key, and maps 400/403/409/429 to user-facing feedback. LiveStreamIndicator in the top bar reflects live/reconnecting/stale with accessible labels and a manual refresh action. WorkOrderTable replaces the inline AtRiskBadge with SlaRiskChip and propagates streamStatus for stale marking. WorkOrderBoardPage wires the hook, renders AlertCentre, and shows a banner when the stream is not live.
