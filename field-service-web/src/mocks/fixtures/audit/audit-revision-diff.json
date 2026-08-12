@@ -1,0 +1,14 @@
+{
+  "data": {
+    "revisionNumber": 42,
+    "revisionTimestamp": "2026-06-01T10:00:00Z",
+    "actor": "00000000-0000-0000-0000-000000000099",
+    "entityType": "WorkOrder",
+    "entityId": "cc000000-0000-0000-0000-000000000030",
+    "fields": [
+      { "name": "state",    "before": "NEW",    "after": "IN_PROGRESS", "changed": true,  "masked": false },
+      { "name": "priority", "before": "MEDIUM", "after": "HIGH",        "changed": true,  "masked": false },
+      { "name": "title",    "before": "Repair", "after": "Repair",      "changed": false, "masked": false }
+    ]
+  }
+}

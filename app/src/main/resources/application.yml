@@ -195,6 +195,12 @@ app:
       # Cron expression for the daily purge job (worker profile); default 03:00 UTC
       purge-cron: ${AI_AUDIT_PURGE_CRON:0 0 3 * * *}
 
+  audit:
+    # Retention days for audit records (indicative — minimum 365, target 730, pending ratification)
+    retention-days: ${APP_AUDIT_RETENTION_DAYS:365}
+    # Row ceiling for synchronous export; requests above this generate asynchronously
+    sync-export-row-ceiling: ${APP_AUDIT_SYNC_EXPORT_ROW_CEILING:5000}
+
   sla:
     sweep:
       # Interval between SLA risk sweep ticks in milliseconds (worker profile only)

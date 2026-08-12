@@ -12,6 +12,7 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { LoadingState } from '../../components/index.js'
 
+const AuditSearchPage           = lazy(() => import('../../features/admin/audit/AuditSearchPage.jsx'))
 const CustomersPage             = lazy(() => import('../../features/admin/customers/CustomersPage.jsx'))
 const SitesPage                 = lazy(() => import('../../features/admin/sites/SitesPage.jsx'))
 const AssetsPage                = lazy(() => import('../../features/admin/assets/AssetsPage.jsx'))
@@ -50,6 +51,8 @@ export default function AdminSurface() {
       <Route path="privacy/retention" element={<S><RetentionSchedulePage /></S>} />
       <Route path="privacy/dsar" element={<S><DsarQueuePage /></S>} />
       <Route path="privacy/dsar/:id" element={<S><DsarRequestDetailPage /></S>} />
+      {/* Audit trail — ADMIN and COMPLIANCE_REVIEWER only */}
+      <Route path="audit" element={<S><AuditSearchPage /></S>} />
       <Route path="*" element={<Navigate to="customers" replace />} />
     </Routes>
   )

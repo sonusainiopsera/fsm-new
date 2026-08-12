@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "revisionNumber": 42,
+      "revisionTimestamp": "2026-06-01T10:00:00Z",
+      "actor": "00000000-0000-0000-0000-000000000099",
+      "entityType": "WorkOrder",
+      "entityId": "cc000000-0000-0000-0000-000000000030",
+      "changeType": "MOD",
+      "changedFields": ["state", "priority"]
+    },
+    {
+      "revisionNumber": 41,
+      "revisionTimestamp": "2026-06-01T09:30:00Z",
+      "actor": "00000000-0000-0000-0000-000000000011",
+      "entityType": "WorkOrder",
+      "entityId": "cc000000-0000-0000-0000-000000000030",
+      "changeType": "ADD",
+      "changedFields": []
+    },
+    {
+      "revisionNumber": 40,
+      "revisionTimestamp": "2026-06-01T08:00:00Z",
+      "actor": "system",
+      "entityType": "SlaPolicy",
+      "entityId": "cc000000-0000-0000-0000-000000000001",
+      "changeType": "MOD",
+      "changedFields": ["responseHours"]
+    }
+  ],
+  "page": { "number": 0, "size": 20, "totalElements": 3 },
+  "hasNext": false
+}

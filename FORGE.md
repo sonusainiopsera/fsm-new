@@ -532,3 +532,10 @@
 - **Files:** 22 (+1661/-62)
 - **Duration:** 813ss
 - **Approach:** N/A
+
+## WO-199: User Story: WO-199 - Immutable audit trail search, diff view, and masked export
+- **Status:** completed
+- **Commit:** `902d1df`
+- **Files:** 25 (+2210/-0)
+- **Duration:** 1010ss
+- **Approach:** Implemented the audit trail search and export layer on top of existing Hibernate Envers infrastructure. Backend: V50 migration adds REVINFO/AUD search indexes and audit_export table with a revinfo_seq presence assertion. Allow-listed AuditEntityMetadata prevents SQL injection via entity type. AuditRevisionRepository uses parameterized native SQL keyset queries with stable (rev_tstmp DESC, rev DESC) ordering. PiiMaskingPolicy applies per-entity field masking before data leaves the service layer. RevisionDiffCalculator loads target and predecessor revisions via AuditReader and produces field-level FieldDiff entries. AuditExportServiceImpl routes small sets synchronously (< 5000 rows, configurable) and records every export in audit_export regardless of outcome. AuditRevisionController restricts to ADMIN/COMPLIANCE_REVIEWER with method security. GlobalExceptionHandler extended for IllegalArgumentException → 400. Frontend: AuditSearchPage with filter bar, dense DataTable, diff drawer, and export actions wired into the admin surface at /admin/audit. MSW handlers and RTL tests cover all named states and permission guard.

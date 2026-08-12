@@ -535,6 +535,22 @@ public class GlobalExceptionHandler {
         return dot >= 0 ? path.substring(dot + 1) : path;
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorEnvelope> handleIllegalArgument(
+            IllegalArgumentException ex,
+            jakarta.servlet.http.HttpServletRequest request) {
+        String tid = traceId();
+        log.debug("Bad request: {} path={}", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .header(TRACE_HEADER, tid)
+                .body(new ErrorEnvelope(
+                        ErrorEnvelope.Code.VALIDATION_ERROR,
+                        ex.getMessage(),
+                        List.of(),
+                        tid,
+                        Instant.now()));
+    }
+
     static String traceId() {
         String traceId = MDC.get("traceId");
         return traceId != null ? traceId : "none";
