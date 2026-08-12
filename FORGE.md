@@ -490,3 +490,10 @@
 - **Files:** 14 (+1676/-9)
 - **Duration:** 894ss
 - **Approach:** Built a complete work order creation flow: (1) serverClock.js module maintains a skew offset (captureSkew/serverNow) and drives all countdowns from one shared setInterval subscriber pool, with visibilitychange for immediate reconciliation on tab resume. (2) DeadlineCountdown.jsx implements normal→at_risk→breached state machine, announces only threshold crossings via aria-live polite, and encodes state in icon+text+colour. (3) useCreateWorkOrder.js exports useSlaPolicyByPriority, useCreateWorkOrder, and mapCreateError — mapCreateError handles 400 fieldErrors, 422 codes (SLA_POLICY_MISSING, SITE_CUSTOMER_MISMATCH, ASSET_SITE_MISMATCH), 429 with retryAfterSecs, 5xx and network variants. (4) CreateWorkOrderModal.jsx uses a local useReducer with SET_CUSTOMER (clears siteId+assetId) and SET_SITE (clears assetId) actions for dependent-select isolation; idempotencyKey is generated once per modal open in useState initialiser and reused on retry; SLA preview shows estimated deadlines; confirmation screen shows authoritative deadlines from 201 response. (5) All MSW handlers extended to serve POST /work-orders (with idempotency), GET /sla-policies/:priority, and customerId/siteId-filtered reference data queries.
+
+## WO-133: User Story: WO-133 - Technician eligibility filtering as hard dispatch gate
+- **Status:** completed
+- **Commit:** `a7fc0d6`
+- **Files:** 19 (+1688/-0)
+- **Duration:** 1445ss
+- **Approach:** Built a pure, clock-injected EligibilityFilter over value objects with no Spring/JPA/HTTP dependency. A CandidateReadRepository loads all candidate data in exactly 3 native SQL queries (candidates+certs, windows IN batch, absences IN batch) using PostgreSQL uuid[] array parameter binding — constant statement count regardless of pool size. EligibilityServiceImpl wires the repository, filter, and Micrometer metrics. EligibilityDataException maps to HTTP 503 via GlobalExceptionHandler (fail-closed). ArchUnit enforces that no external module accesses dispatch.eligibility.* or dispatch.internal.*.

@@ -2,6 +2,7 @@ package com.fieldservice.api;
 
 import com.fieldservice.aigateway.api.AiCapExceededException;
 import com.fieldservice.aigateway.api.AiUnavailableException;
+import com.fieldservice.dispatch.api.EligibilityDataException;
 import com.fieldservice.inventory.api.InsufficientStockException;
 import com.fieldservice.inventory.api.InvalidMovementException;
 import com.fieldservice.platform.api.ErrorEnvelope;
@@ -389,6 +390,21 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
                 ErrorEnvelope.Code.ASSET_SITE_MISMATCH,
                 "The referenced asset is not located at the referenced site.");
+    }
+
+    // -------------------------------------------------------------------------
+    // Dispatch Eligibility
+    // -------------------------------------------------------------------------
+
+    @ExceptionHandler(EligibilityDataException.class)
+    public ResponseEntity<ErrorEnvelope> handleEligibilityData(
+            EligibilityDataException ex,
+            HttpServletRequest request) {
+
+        log.error("dispatch.eligibility_data_error: traceId={}, path={}", traceId(), request.getRequestURI(), ex);
+        return errorResponse(HttpStatus.SERVICE_UNAVAILABLE,
+                ErrorEnvelope.Code.INTERNAL_ERROR,
+                "Dispatch eligibility data is temporarily unavailable. Please retry.");
     }
 
     // -------------------------------------------------------------------------
