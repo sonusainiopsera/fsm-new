@@ -4,6 +4,11 @@ spring:
       on-profile: worker
 
 app:
+  sla:
+    sweep:
+      tick-ms: 60000
+      batch-size: 500
+      enabled: true
   privacy:
     dsar:
       export-cron: "0 */5 * * * *"
