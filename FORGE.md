@@ -546,3 +546,10 @@
 - **Files:** 20 (+1194/-25)
 - **Duration:** 979ss
 - **Approach:** N/A
+
+## WO-134: User Story: WO-134 - Weighted multi-factor technician scoring engine
+- **Status:** completed
+- **Commit:** `b0d7176`
+- **Files:** 19 (+1366/-0)
+- **Duration:** 601ss
+- **Approach:** Created a framework-free dispatch scoring engine in the dispatch.scoring package. ScoringFactor is a pure strategy interface; CompetencyFitFactor, TravelEfficiencyFactor, WorkloadFairnessFactor, and PartsAvailabilityFactor are stateless implementations. ScoringEngine composes them with weights loaded from DB via ScoringWeightsLoader (TTL-cached). Weights and the workload exponent live in Flyway-migrated Envers-audited tables seeded with defaults. ScoringConfiguration wires all beans. Composite score = sum(weight_i * normalised_i) / sum(weight_i) to keep scores in [0,1] regardless of which factors are active. Ordering uses Comparator.comparingDouble(compositeScore).reversed().thenComparing(technicianId) for stable pagination. Degraded travel inputs contribute 0.5 neutral and set a per-candidate flag.
